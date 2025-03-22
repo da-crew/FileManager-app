@@ -10,7 +10,6 @@ import RecycleBin from './screens/RecycleBin';
 import SearchScreen from './screens/Search';
 import SettingsScreen from './screens/Settings';
 
-
 export type RootStackParamList = {
     Home: undefined,
     LargeFiles: undefined,
@@ -24,7 +23,7 @@ const Stack = createNativeStackNavigator();
 export default function App() {
     return <NavigationContainer>
         <Stack.Navigator
-            initialRouteName="FirebaseTest"
+            initialRouteName="Home"
             screenOptions={{
                 headerShown: false
             }}
@@ -36,8 +35,6 @@ export default function App() {
             <Stack.Screen name="RecycleBin" component={RecycleBin} />
             <Stack.Screen name="Search" component={SearchScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
-
         </Stack.Navigator>
     </NavigationContainer>;
 }
-
