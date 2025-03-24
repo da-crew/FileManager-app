@@ -172,12 +172,6 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
                         icon={<Feather name="trash" size={40} color="black" />}
                         onPress={() => navigation.navigate("RecycleBin")}
                     />
-                    <UtilityCard
-                        title='Google Drive'
-                        desc='Access files on your Google Drive'
-                        icon={<Entypo name="google-drive" size={40} color="black" />}
-                        onPress={() => gotoStorage("Google Drive")}
-                    />
                 </View >
             </ScrollView >
         </SafeAreaView >
