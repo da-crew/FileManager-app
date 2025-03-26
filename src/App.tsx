@@ -9,12 +9,14 @@ import DuplicateFiles from './screens/Duplicates';
 import RecycleBin from './screens/RecycleBin';
 import SearchScreen from './screens/Search';
 import SettingsScreen from './screens/Settings';
+import TestScreen from './screens/TestScreen';
 
 export type RootStackParamList = {
     Home: undefined,
     LargeFiles: undefined,
     Duplicates: undefined,
     RecycleBin: undefined,
+    Test: undefined,
     Container: ContentContainerRouteParams,
 };
 
@@ -35,6 +37,7 @@ export default function App() {
             <Stack.Screen name="RecycleBin" component={RecycleBin} />
             <Stack.Screen name="Search" component={SearchScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="Test" component={TestScreen}/>
         </Stack.Navigator>
     </NavigationContainer>;
 }

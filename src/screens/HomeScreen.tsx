@@ -12,7 +12,7 @@ class StorageDevice {
     size: number;
     maxSize: number;
     unit: string;
-    constructor(name: string, size: number, maxSize: number) { 
+    constructor(name: string, size: number, maxSize: number) {
         this.name = name;
         this.size = size;
         this.maxSize = maxSize;
@@ -50,11 +50,11 @@ const StorageCard = ({ device, icon }: {
                 <View style={styles.storageTextContainer}>
                     <Text style={styles.storageTitle}>{device.name}</Text>
                     <View style={styles.storageBarContainer}>
-                        <View 
+                        <View
                             style={[
-                                styles.storageBar, 
+                                styles.storageBar,
                                 { width: `${(device.size / device.maxSize) * 100}%` }
-                            ]} 
+                            ]}
                         />
                     </View>
                     <Text style={styles.storageText}>{device.getUsage()}</Text>
@@ -162,6 +162,12 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
                         desc="Find and remove duplicate files"
                         icon={<MaterialCommunityIcons name="content-copy" size={24} color="#666" />}
                         onPress={() => navigation.navigate("Duplicates")}
+                    />
+                    <UtilityButton
+                        title="Test Screen"
+                        desc="For testing purposes only"
+                        icon={<MaterialCommunityIcons name="content-copy" size={24} color="#666" />}
+                        onPress={() => navigation.navigate("Test")}
                     />
                 </View>
             </ScrollView>
