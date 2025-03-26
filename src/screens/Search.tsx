@@ -15,9 +15,7 @@ const SearchScreen = () => {
         setSearchQuery(text);
         
         const mockResults: SearchItem[] = [
-            { id: '1', title: 'ผลการค้นหา 1' },
-            { id: '2', title: 'ผลการค้นหา 2' },
-            { id: '3', title: 'ผลการค้นหา 3' },
+            { id: '1', title: 'Search Results 1' },
         ];
         setSearchResults(mockResults.filter(item => 
             item.title.toLowerCase().includes(text.toLowerCase())
@@ -30,7 +28,7 @@ const SearchScreen = () => {
             <View style={styles.searchContainer}>
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="ค้นหา..."
+                    placeholder="search..."
                     value={searchQuery}
                     onChangeText={handleSearch}
                 />
@@ -45,7 +43,7 @@ const SearchScreen = () => {
                 keyExtractor={item => item.id}
                 ListEmptyComponent={() => (
                     <View style={styles.emptyContainer}>
-                        <Text>ไม่พบผลการค้นหา</Text>
+                        <Text>No search results found.</Text>
                     </View>
                 )}
             />

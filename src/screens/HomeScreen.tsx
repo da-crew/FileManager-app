@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, ScrollView, GestureResponderEvent } from 'react-native';
 import HomeSearchBar from '../components/HomeSearchBar';
-import { Feather, MaterialIcons, Ionicons, Octicons, MaterialCommunityIcons, Entypo } from '@expo/vector-icons';
+import { Feather, MaterialIcons, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { ContainerType, ContentContainerRouteParams } from './ContentContainer';
 import { Path } from '../components/PathDisplayer';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -12,7 +12,7 @@ class StorageDevice {
     size: number;
     maxSize: number;
     unit: string;
-    constructor(name: string, size: number, maxSize: number) { // in bytes
+    constructor(name: string, size: number, maxSize: number) { 
         this.name = name;
         this.size = size;
         this.maxSize = maxSize;
@@ -24,65 +24,66 @@ class StorageDevice {
     }
 }
 
-
-
-const StorageDeviceCard = ({ device, icon, onPress }: {
-    device: StorageDevice, 
+const QuickAccessButton = ({ name, icon, onPress }: {
+    name: string,
     icon: ReactNode,
-    onPress?: (event: GestureResponderEvent) => void
+    onPress: (event: GestureResponderEvent) => void
 }) => {
-    return <TouchableOpacity style={{ margin: 10, marginLeft: 0 }} onPress={onPress}>
-        <View style={{flexDirection: 'row'}}>
-            {icon}
-            <View style={{ marginLeft: 10 }}>
-                <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{device.name}</Text>
-                <Text>{device.getUsage()}</Text>
+    return (
+        <TouchableOpacity style={styles.quickAccessButton} onPress={onPress}>
+            <View style={styles.iconContainer}>
+                {icon}
             </View>
-        </View>
-    </TouchableOpacity>;
+            <Text style={styles.quickAccessText}>{name}</Text>
+        </TouchableOpacity>
+    );
 };
 
-const UtilityCard = ({ title, desc, icon, onPress }: {
+const StorageCard = ({ device, icon }: {
+    device: StorageDevice,
+    icon: ReactNode,
+}) => {
+    return (
+        <View style={styles.storageCard}>
+            <View style={styles.storageInfo}>
+                {icon}
+                <View style={styles.storageTextContainer}>
+                    <Text style={styles.storageTitle}>{device.name}</Text>
+                    <View style={styles.storageBarContainer}>
+                        <View 
+                            style={[
+                                styles.storageBar, 
+                                { width: `${(device.size / device.maxSize) * 100}%` }
+                            ]} 
+                        />
+                    </View>
+                    <Text style={styles.storageText}>{device.getUsage()}</Text>
+                </View>
+            </View>
+        </View>
+    );
+};
+
+const UtilityButton = ({ title, desc, icon, onPress }: {
     title: string,
     desc: string,
     icon: ReactNode,
     onPress: (event: GestureResponderEvent) => void
 }) => {
     return (
-        <TouchableOpacity style={{ margin: 10, marginLeft: 0 }} onPress={onPress}>
-            <View style={{ flexDirection: 'row' }}>
+        <TouchableOpacity style={styles.utilityButton} onPress={onPress}>
+            <View style={styles.utilityContent}>
                 {icon}
-                <View style={{ marginLeft: 10 }}>
-                    <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{title}</Text>
-                    <Text>{desc}</Text>
+                <View style={styles.utilityTextContainer}>
+                    <Text style={styles.utilityTitle}>{title}</Text>
+                    <Text style={styles.utilityDesc}>{desc}</Text>
                 </View>
             </View>
         </TouchableOpacity>
     );
 };
 
-const CategoryCard = ({ name, icon, onPress }: {
-    name: string,
-    icon: ReactNode,
-    onPress: (event: GestureResponderEvent) => void
-}) => {
-    return (
-        <TouchableOpacity style={{ margin: 10, marginLeft: 0, justifyContent: 'center' }} onPress={onPress}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                {icon}
-                <View style={{ marginLeft: 10 }}>
-                    <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{name}</Text>
-                </View>
-            </View>
-        </TouchableOpacity>
-    );
-};
-
-
-
-//วาง "StatusBar" จาก "expo-status-bar" ถ้าไม่ได้ผล
 export default function HomeScreen({ navigation }: NativeStackScreenProps<RootStackParamList>) {
-
     function gotoCategory(name: string) {
         navigation.navigate("Container", new ContentContainerRouteParams(
             name,
@@ -100,84 +101,179 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
     }
 
     return (
-        <SafeAreaView>
+        <SafeAreaView style={styles.container}>
             <HomeSearchBar navigation={navigation} />
-            <ScrollView style={{ padding: 20 }}>
-                <View style={styles.sectionTitleContainer}>
-                    <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Categories</Text>
-                </View>
-                <View>
-                    <CategoryCard
-                        name='Images'
-                        icon={<Feather name="image" size={40} color="black" />}
+            <ScrollView style={styles.scrollView}>
+                <View style={styles.quickAccessGrid}>
+                    <QuickAccessButton
+                        name="Images"
+                        icon={<Feather name="image" size={28} color="black" />}
                         onPress={() => gotoCategory("Images")}
                     />
-                    <CategoryCard
-                        name='Videos'
-                        icon={<Octicons name="video" size={40} color="black" />}
+                    <QuickAccessButton
+                        name="Videos"
+                        icon={<Feather name="video" size={28} color="black" />}
                         onPress={() => gotoCategory("Videos")}
                     />
-                    <CategoryCard
-                        name='Audio'
-                        icon={<MaterialIcons name="multitrack-audio" size={40} color="black" />}
+                    <QuickAccessButton
+                        name="Audio"
+                        icon={<Feather name="music" size={28} color="black" />}
                         onPress={() => gotoCategory("Audio")}
                     />
-                    <CategoryCard
-                        name='Documents'
-                        icon={<Ionicons name="document-outline" size={40} color="black" />}
+                    <QuickAccessButton
+                        name="Documents"
+                        icon={<Ionicons name="document-outline" size={28} color="black" />}
                         onPress={() => gotoCategory("Documents")}
                     />
-                    <CategoryCard
-                        name='Downloads'
-                        icon={<Feather name="download" size={40} color="black" />}
+                    <QuickAccessButton
+                        name="Downloads"
+                        icon={<Feather name="download" size={28} color="black" />}
                         onPress={() => gotoStorage("Downloads")}
                     />
-                </View >
-
-                <View style={styles.sectionTitleContainer}>
-                    <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Storage Devices</Text>
-                </View>
-                <View>
-                    <StorageDeviceCard
-                        device={new StorageDevice('Internal Storage', 40.25, 256.0)}
-                        icon={<Feather name="smartphone" size={40} />}
-                        onPress={() => gotoStorage("Internal Storage")}
-                    />
-                    <StorageDeviceCard
-                        device={new StorageDevice('SD Card', 16.0, 32.0)}
-                        icon={<MaterialCommunityIcons name="sd" size={40} />}
-                        onPress={() => gotoStorage("SD Card")}
-                    />
-                </View>
-
-                <View style={styles.sectionTitleContainer}>
-                    <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Utilities</Text>
-                </View>
-                <View>
-                    <UtilityCard
-                        title='Scan for Large Files'
-                        desc='Find large files on your device'
-                        icon={<MaterialCommunityIcons name='data-matrix-scan' size={40} />}
-                        onPress={() => navigation.navigate("LargeFiles")}
-                    />
-                    <UtilityCard
-                        title='Scan for Duplicate Files'
-                        desc='Find duplicate files on your device'
-                        icon={<MaterialCommunityIcons name='content-duplicate' size={40} />}
-                        onPress={() => navigation.navigate("Duplicates")}
-                    />
-                    <UtilityCard
-                        title='Recycle Bin'
-                        desc='Manage and restore deleted files'
-                        icon={<Feather name="trash" size={40} color="black" />}
+                    <QuickAccessButton
+                        name="Recycle Bin"
+                        icon={<Feather name="trash" size={28} color="black" />}
                         onPress={() => navigation.navigate("RecycleBin")}
                     />
-                </View >
-            </ScrollView >
-        </SafeAreaView >
+                </View>
+
+                <Text style={styles.sectionTitle}>All storage</Text>
+                <View style={styles.storageSection}>
+                    <StorageCard
+                        device={new StorageDevice('Internal storage', 40.25, 256.0)}
+                        icon={<Feather name="smartphone" size={24} color="#666" />}
+                    />
+                    <StorageCard
+                        device={new StorageDevice('SD card', 16.0, 32.0)}
+                        icon={<MaterialCommunityIcons name="sd" size={24} color="#666" />}
+                    />
+                </View>
+
+                <Text style={styles.sectionTitle}>Utilities</Text>
+                <View style={styles.utilitiesSection}>
+                    <UtilityButton
+                        title="Large File"
+                        desc="Files larger than 200MB"
+                        icon={<MaterialCommunityIcons name="file-document-outline" size={24} color="#666" />}
+                        onPress={() => navigation.navigate("LargeFiles")}
+                    />
+                    <UtilityButton
+                        title="Duplicate Files"
+                        desc="Find and remove duplicate files"
+                        icon={<MaterialCommunityIcons name="content-copy" size={24} color="#666" />}
+                        onPress={() => navigation.navigate("Duplicates")}
+                    />
+                </View>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    sectionTitleContainer: { alignItems: 'center' },
+    container: {
+        flex: 1,
+        backgroundColor: '#f5f5f5',
+    },
+    scrollView: {
+        flex: 1,
+        padding: 16,
+    },
+    quickAccessGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 16,
+    },
+    quickAccessButton: {
+        width: '30%',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    iconContainer: {
+        width: 50,
+        height: 50,
+        backgroundColor: '#f0f0f0',
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    quickAccessText: {
+        fontSize: 12,
+        color: '#333',
+        textAlign: 'center',
+    },
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: 12,
+    },
+    storageSection: {
+        marginBottom: 24,
+    },
+    storageCard: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 8,
+    },
+    storageInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    storageTextContainer: {
+        flex: 1,
+        marginLeft: 12,
+    },
+    storageTitle: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#333',
+        marginBottom: 4,
+    },
+    storageBarContainer: {
+        height: 4,
+        backgroundColor: '#f0f0f0',
+        borderRadius: 2,
+        marginVertical: 4,
+    },
+    storageBar: {
+        height: '100%',
+        backgroundColor: '#007AFF',
+        borderRadius: 2,
+    },
+    storageText: {
+        fontSize: 12,
+        color: '#666',
+    },
+    utilitiesSection: {
+        marginBottom: 24,
+    },
+    utilityButton: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 8,
+    },
+    utilityContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    utilityTextContainer: {
+        marginLeft: 12,
+    },
+    utilityTitle: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#333',
+    },
+    utilityDesc: {
+        fontSize: 12,
+        color: '#666',
+        marginTop: 2,
+    },
 });
