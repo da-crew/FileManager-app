@@ -1,28 +1,16 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, ScrollView, GestureResponderEvent } from 'react-native';
 import HomeSearchBar from '../components/HomeSearchBar';
-import { Feather, MaterialIcons, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Feather, MaterialIcons, Ionicons, MaterialCommunityIcons, createIconSet } from '@expo/vector-icons';
 import { ContainerType, ContentContainerRouteParams } from './ContentContainer';
-import { Path } from '../components/PathDisplayer';
+import { Path } from '../FileSystem';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
+import { checkManagePermission } from 'manage-external-storage';
+import RNFS, { writeFile } from 'react-native-fs';
+import { openAppSettings, StorageCapacity, StorageDevice } from '../FileSystem';
 
-class StorageDevice {
-    name: string;
-    size: number;
-    maxSize: number;
-    unit: string;
-    constructor(name: string, size: number, maxSize: number) {
-        this.name = name;
-        this.size = size;
-        this.maxSize = maxSize;
-        this.unit = 'GB';
-    }
 
-    getUsage() {
-        return `${this.size} ${this.unit} / ${this.maxSize} ${this.unit}`;
-    }
-}
 
 const QuickAccessButton = ({ name, icon, onPress }: {
     name: string,
@@ -39,28 +27,46 @@ const QuickAccessButton = ({ name, icon, onPress }: {
     );
 };
 
-const StorageCard = ({ device, icon }: {
+const StorageCard = ({ device, icon, onPress }: {
     device: StorageDevice,
     icon: ReactNode,
+    onPress: (event: GestureResponderEvent) => void,
 }) => {
+    const [storageSize, setStorageSize] = useState<StorageCapacity | null>(null);
+
+    useEffect(() => {
+        device.getCapacity().then((result) => {
+            setStorageSize(result);
+        })
+    }, []);
+
     return (
-        <View style={styles.storageCard}>
+        <TouchableOpacity style={styles.storageCard} onPress={onPress}>
             <View style={styles.storageInfo}>
                 {icon}
                 <View style={styles.storageTextContainer}>
-                    <Text style={styles.storageTitle}>{device.name}</Text>
-                    <View style={styles.storageBarContainer}>
-                        <View
-                            style={[
-                                styles.storageBar,
-                                { width: `${(device.size / device.maxSize) * 100}%` }
-                            ]}
-                        />
-                    </View>
-                    <Text style={styles.storageText}>{device.getUsage()}</Text>
+                    <Text style={styles.storageTitle}>{device.displayName}</Text>
+                    {
+                        storageSize
+                            ?
+                            <View style={styles.storageBarContainer}>
+                                <View
+                                    style={[
+                                        styles.storageBar,
+                                        { width: `${((storageSize.totalSpace - storageSize.freeSpace) / storageSize.totalSpace) * 100}%` }
+                                    ]}
+                                />
+                            </View>
+                            : <></>
+                    }
+                    <Text style={styles.storageText}>{
+                        storageSize
+                            ? `${(storageSize.totalSpace - storageSize.freeSpace).toPrecision(3)} / ${storageSize.totalSpace.toPrecision(3)} ${device.unit}`
+                            : "Calculating..."
+                    }</Text>
                 </View>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 };
 
@@ -84,6 +90,15 @@ const UtilityButton = ({ title, desc, icon, onPress }: {
 };
 
 export default function HomeScreen({ navigation }: NativeStackScreenProps<RootStackParamList>) {
+
+    useEffect(() => {
+        checkManagePermission().then((allowed) => {
+            if (!allowed) {
+                openAppSettings();
+            }
+        });
+    }, []);
+
     function gotoCategory(name: string) {
         navigation.navigate("Container", new ContentContainerRouteParams(
             name,
@@ -92,13 +107,15 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
         ));
     }
 
-    function gotoStorage(name: string) {
+    function gotoStorageDevice(device: StorageDevice) {
         navigation.navigate("Container", new ContentContainerRouteParams(
-            name,
-            new Path(name, []),
+            device.displayName,
+            new Path(device.devicePath, []),
             ContainerType.DEFAULT,
         ));
     }
+
+    const internalStorage = new StorageDevice('Internal Storage', RNFS.ExternalStorageDirectoryPath);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -128,7 +145,7 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
                     <QuickAccessButton
                         name="Downloads"
                         icon={<Feather name="download" size={28} color="black" />}
-                        onPress={() => gotoStorage("Downloads")}
+                        onPress={() => gotoCategory("Downloads")}
                     />
                     <QuickAccessButton
                         name="Recycle Bin"
@@ -140,13 +157,16 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
                 <Text style={styles.sectionTitle}>All storage</Text>
                 <View style={styles.storageSection}>
                     <StorageCard
-                        device={new StorageDevice('Internal storage', 40.25, 256.0)}
+                        device={internalStorage}
                         icon={<Feather name="smartphone" size={24} color="#666" />}
+                        onPress={() => {
+                            gotoStorageDevice(internalStorage);
+                        }}
                     />
-                    <StorageCard
+                    {/* <StorageCard
                         device={new StorageDevice('SD card', 16.0, 32.0)}
                         icon={<MaterialCommunityIcons name="sd" size={24} color="#666" />}
-                    />
+                    /> */}
                 </View>
 
                 <Text style={styles.sectionTitle}>Utilities</Text>

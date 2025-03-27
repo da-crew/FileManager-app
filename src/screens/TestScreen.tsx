@@ -31,13 +31,13 @@ async function openAppSettings() {
         "Permission Needed",
         "To use this feature, please enable storage permissions in the app settings.",
         [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Go to Settings",
-            onPress: () => Linking.openSettings(),
-          },
+            { text: "Cancel", style: "cancel" },
+            {
+                text: "Go to Settings",
+                onPress: () => Linking.openSettings(),
+            },
         ]
-      );
+    );
 }
 
 async function readTest() {
@@ -54,21 +54,21 @@ async function readTest() {
             // stat the first file
             return Promise.all([RNFS.stat(result[0].path), result[0].path]);
         })
-    // .then((statResult) => {
-    //     if (statResult[0].isFile()) {
-    //         // if we have a file, read it
-    //         return RNFS.readFile(statResult[1], 'utf8');
-    //     }
+        // .then((statResult) => {
+        //     if (statResult[0].isFile()) {
+        //         // if we have a file, read it
+        //         return RNFS.readFile(statResult[1], 'utf8');
+        //     }
 
-    //     return 'no file found';
-    // })
-    // .then((contents) => {
-    //     // log the file contents
-    //     console.log("Content: ", contents);
-    // })
-    .catch((err) => {
-        console.log("Error: ", err.message, err.code);
-    });
+        //     return 'no file found';
+        // })
+        // .then((contents) => {
+        //     // log the file contents
+        //     console.log("Content: ", contents);
+        // })
+        .catch((err) => {
+            console.log("Error: ", err.message, err.code);
+        });
 }
 
 async function testWrite() {

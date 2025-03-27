@@ -1,11 +1,13 @@
 import { SafeAreaView, View, StatusBar, Text, ScrollView, TouchableOpacity, Modal, GestureResponderEvent } from "react-native";
-import { Path, PathDisplayer } from '../components/PathDisplayer';
+import { PathDisplayer } from '../components/PathDisplayer';
+import { Path } from "../FileSystem";
 import Toolbar from "../components/Toolbar";
 import ItemCard, { BaseItem, FileItem, FolderItem } from "../components/ItemCard";
 import SelectionToolBar from "../components/SelectionToolbar";
 import { AntDesign, Feather, FontAwesome, Foundation, MaterialIcons } from '@expo/vector-icons';
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useRoute } from '@react-navigation/native';
+import * as RNFS from 'react-native-fs';
 
 
 let entry = {
@@ -32,16 +34,6 @@ export enum ViewMode {
     FOLDERS,
 }
 
-// export const ContainerType = Object.freeze({
-//     CATEGORIZED: 'CATEGORIZED',
-//     GOOGLE_DRIVE: 'GDRIVE',
-//     DEFAULT: 'DEFAULT',
-// });
-
-// export const ViewMode = Object.freeze({
-//     FILES: 'FILES',
-//     FOLDERS: 'FOLDERS',
-// });
 
 export class ContentContainerRouteParams {
 
@@ -63,122 +55,134 @@ export class ContentContainerRouteParams {
         this.containerType = containerType;
     }
 
+
     /**
      * Retrieves the content of the container based on the container name.
      * @param {ViewMode} viewMode - The view mode to filter the content. Only use this when container type is CATEGORIZED.
      * @returns {Array<FolderItem|FileItem>} An array of FolderItem and FileItem objects representing the content of the container.
      */
-    getContent(viewMode: ViewMode) {
-        if (this.containerType == ContainerType.DEFAULT) {
-            switch (this.containerName) {
-                case "Internal Storage":
-                    return [
-                        new FolderItem("guguaiywbd"),
-                        new FolderItem("homework"),
-                        new FileItem("report.docx", "docx"),
-                        new FolderItem("projects"),
-                        new FileItem("presentation.pptx", "pptx"),
-                        new FolderItem("downloads"),
-                        new FileItem("awa.mp4", "mp4"),
-                        new FileItem("spreadsheet.xlsx", "xlsx"),
-                        new FileItem("notes.txt", "txt"),
-                    ];
+    async getContent(viewMode: ViewMode) {
+        // function mockupContent() {
+        //     if (this.containerType == ContainerType.DEFAULT) {
+        //         switch (this.containerName) {
+        //             case "Internal Storage":
+        //                 return [
+        //                     new FolderItem("guguaiywbd"),
+        //                     new FolderItem("homework"),
+        //                     new FileItem("report.docx", "docx"),
+        //                     new FolderItem("projects"),
+        //                     new FileItem("presentation.pptx", "pptx"),
+        //                     new FolderItem("downloads"),
+        //                     new FileItem("awa.mp4", "mp4"),
+        //                     new FileItem("spreadsheet.xlsx", "xlsx"),
+        //                     new FileItem("notes.txt", "txt"),
+        //                 ];
 
-                case "SD Card":
-                    return [
-                        new FolderItem("backup"),
-                        new FolderItem("media"),
-                        new FileItem("photo.jpg", "jpg"),
-                        new FileItem("music.mp3", "mp3"),
-                        new FolderItem("apps"),
-                        new FileItem("document.pdf", "pdf"),
-                        new FileItem("video.mp4", "mp4"),
-                        new FileItem("archive.zip", "zip"),
-                    ];
-                case "Downloads":
-                    return [
-                        new FileItem("User_Manual.pdf", "pdf"),
-                        new FileItem(".pdf", "pdf"),
-                        new FileItem("totally-not-a-1024TB-zip-bomb.zip", "zip"),
-                        new FileItem("Roblox hack infinite gem/money.apk", "apk"),
-                        new FileItem("Cat_512x512.png", "png"),
-                        new FileItem("Dog_512x512.png", "png"),
-                    ];
-                default:
-                    return [];
-            }
-        }
+        //             case "SD Card":
+        //                 return [
+        //                     new FolderItem("backup"),
+        //                     new FolderItem("media"),
+        //                     new FileItem("photo.jpg", "jpg"),
+        //                     new FileItem("music.mp3", "mp3"),
+        //                     new FolderItem("apps"),
+        //                     new FileItem("document.pdf", "pdf"),
+        //                     new FileItem("video.mp4", "mp4"),
+        //                     new FileItem("archive.zip", "zip"),
+        //                 ];
+        //             case "Downloads":
+        //                 return [
+        //                     new FileItem("User_Manual.pdf", "pdf"),
+        //                     new FileItem(".pdf", "pdf"),
+        //                     new FileItem("totally-not-a-1024TB-zip-bomb.zip", "zip"),
+        //                     new FileItem("Roblox hack infinite gem/money.apk", "apk"),
+        //                     new FileItem("Cat_512x512.png", "png"),
+        //                     new FileItem("Dog_512x512.png", "png"),
+        //                 ];
+        //             default:
+        //                 return [];
+        //         }
+        //     }
 
-        if (this.containerType == ContainerType.CATEGORIZED) {
-            switch (this.containerName) {
-                case "Images":
-                    if (viewMode == ViewMode.FILES) {
-                        return [
-                            new FileItem("Vacation.jpg", "jpg"),
-                            new FileItem("Profile.png", "png"),
-                            new FileItem("Screenshot.bmp", "bmp"),
-                            new FileItem("Wallpaper.gif", "gif"),
-                        ];
-                    } else if (viewMode == ViewMode.FOLDERS) {
-                        return [
-                            new FolderItem("Screenshots"),
-                            new FolderItem("Wallpapers"),
-                            new FolderItem("Camera"),
-                            new FolderItem("Edited")
-                        ];
-                    } else { return []; }
-                case "Videos":
-                    if (viewMode == ViewMode.FILES) {
-                        return [
-                            new FileItem("Movie.mp4", "mp4"),
-                            new FileItem("Clip.avi", "avi"),
-                            new FileItem("Trailer.mkv", "mkv"),
-                            new FileItem("Recording.mov", "mov"),
-                        ];
-                    } else if (viewMode == ViewMode.FOLDERS) {
-                        return [
-                            new FolderItem("Movies"),
-                            new FolderItem("Clips"),
-                            new FolderItem("Trailers"),
-                            new FolderItem("Recordings"),
-                        ];
-                    } else { return []; }
-                case "Audio":
-                    if (viewMode == ViewMode.FILES) {
-                        return [
-                            new FileItem("Song.mp3", "mp3"),
-                            new FileItem("Podcast.aac", "aac"),
-                            new FileItem("Audiobook.m4b", "m4b"),
-                            new FileItem("Recording.wav", "wav"),
-                        ];
-                    } else if (viewMode == ViewMode.FOLDERS) {
-                        return [
-                            new FolderItem("Music"),
-                            new FolderItem("Podcasts"),
-                            new FolderItem("Audiobooks"),
-                            new FolderItem("Recordings"),
-                        ];
-                    } else { return []; }
-                case "Documents":
-                    if (viewMode == ViewMode.FILES) {
-                        return [
-                            new FileItem("Resume.pdf", "pdf"),
-                            new FileItem("Report.docx", "docx"),
-                            new FileItem("Presentation.pptx", "pptx"),
-                            new FileItem("Spreadsheet.xlsx", "xlsx"),
-                        ];
-                    } else if (viewMode == ViewMode.FOLDERS) {
-                        return [
-                            new FolderItem("Work"),
-                            new FolderItem("School"),
-                            new FolderItem("Personal"),
-                            new FolderItem("Projects"),
-                        ];
-                    } else { return []; }
-                default:
-            }
-        }
+        //     if (this.containerType == ContainerType.CATEGORIZED) {
+        //         switch (this.containerName) {
+        //             case "Images":
+        //                 if (viewMode == ViewMode.FILES) {
+        //                     return [
+        //                         new FileItem("Vacation.jpg", "jpg"),
+        //                         new FileItem("Profile.png", "png"),
+        //                         new FileItem("Screenshot.bmp", "bmp"),
+        //                         new FileItem("Wallpaper.gif", "gif"),
+        //                     ];
+        //                 } else if (viewMode == ViewMode.FOLDERS) {
+        //                     return [
+        //                         new FolderItem("Screenshots"),
+        //                         new FolderItem("Wallpapers"),
+        //                         new FolderItem("Camera"),
+        //                         new FolderItem("Edited")
+        //                     ];
+        //                 } else { return []; }
+        //             case "Videos":
+        //                 if (viewMode == ViewMode.FILES) {
+        //                     return [
+        //                         new FileItem("Movie.mp4", "mp4"),
+        //                         new FileItem("Clip.avi", "avi"),
+        //                         new FileItem("Trailer.mkv", "mkv"),
+        //                         new FileItem("Recording.mov", "mov"),
+        //                     ];
+        //                 } else if (viewMode == ViewMode.FOLDERS) {
+        //                     return [
+        //                         new FolderItem("Movies"),
+        //                         new FolderItem("Clips"),
+        //                         new FolderItem("Trailers"),
+        //                         new FolderItem("Recordings"),
+        //                     ];
+        //                 } else { return []; }
+        //             case "Audio":
+        //                 if (viewMode == ViewMode.FILES) {
+        //                     return [
+        //                         new FileItem("Song.mp3", "mp3"),
+        //                         new FileItem("Podcast.aac", "aac"),
+        //                         new FileItem("Audiobook.m4b", "m4b"),
+        //                         new FileItem("Recording.wav", "wav"),
+        //                     ];
+        //                 } else if (viewMode == ViewMode.FOLDERS) {
+        //                     return [
+        //                         new FolderItem("Music"),
+        //                         new FolderItem("Podcasts"),
+        //                         new FolderItem("Audiobooks"),
+        //                         new FolderItem("Recordings"),
+        //                     ];
+        //                 } else { return []; }
+        //             case "Documents":
+        //                 if (viewMode == ViewMode.FILES) {
+        //                     return [
+        //                         new FileItem("Resume.pdf", "pdf"),
+        //                         new FileItem("Report.docx", "docx"),
+        //                         new FileItem("Presentation.pptx", "pptx"),
+        //                         new FileItem("Spreadsheet.xlsx", "xlsx"),
+        //                     ];
+        //                 } else if (viewMode == ViewMode.FOLDERS) {
+        //                     return [
+        //                         new FolderItem("Work"),
+        //                         new FolderItem("School"),
+        //                         new FolderItem("Personal"),
+        //                         new FolderItem("Projects"),
+        //                     ];
+        //                 } else { return []; }
+        //             default:
+        //         }
+        //     }
+
+        //     return [
+        //         new FileItem("ERROR.bin", ".bin"),
+        //         new FolderItem("This is not good at all"),
+        //     ];
+        // }
         
+        let content = await RNFS.readDir(this.path.build());
+        let helpe = content.map((item, idx) => {
+            //TODO
+        });
         return [
             new FileItem("ERROR.bin", ".bin"),
             new FolderItem("This is not good at all"),
@@ -232,7 +236,7 @@ const BottomBarOptions = ({ name, icon, onPress }: {
     </TouchableOpacity>;
 }
 
-export function ContentContainer({ navigation }: { navigation: any}) {
+export function ContentContainer({ navigation }: { navigation: any }) {
     const route = useRoute();
     const routeParams = route.params as ContentContainerRouteParams;
     const [{ selectionSet, isSelecting }, updateSelectionState] = useState({ selectionSet: new Set(), isSelecting: false });
@@ -240,8 +244,20 @@ export function ContentContainer({ navigation }: { navigation: any}) {
     const [sortByOptionVisible, setSortByOptionVisible] = useState(false);
     const [newItemOptionVisible, setNewItemOptionVisible] = useState(false);
 
+    const [content, setContent] = useState<(FolderItem | FileItem)[] | null>(null);
 
-    const [content, setContent] = useState(routeParams.getContent(currentViewMode));
+    function fetchContent() {
+        routeParams.getContent(currentViewMode)
+            .then((items) => setContent(items))
+            .catch((reason) => {
+                console.log("An error occured");
+            });
+    }
+
+    useEffect(() => {
+        fetchContent();
+    }, []);
+
     const storageName = routeParams.containerName ?? "ERROR!! I LOVE FIXING ERRORS!";
     const containerType = routeParams.containerType;
     let navpath = routeParams.path;
@@ -259,46 +275,64 @@ export function ContentContainer({ navigation }: { navigation: any}) {
         updateSelectionState({ selectionSet: new Set(), isSelecting: false })
     }
 
-    const contentComponents = content.map((item: BaseItem, i: number) => (<ItemCard item={item} key={i} onSelect={handleSelect} isSelected={selectionSet.has(item.name)} />));
-
     return <SafeAreaView style={{ flex: 1 }}>
         <View style={{ flex: 1 }}>
             <StatusBar />
-            {
+
+            {//Toolbar 1
                 !isSelecting
+                    //Default Mode
                     ? <Toolbar navigation={navigation} containerName={storageName}
                         sortByHandler={() => { setSortByOptionVisible(true); }}
-                        createHandler={containerType == ContainerType.DEFAULT ? () => { setNewItemOptionVisible(true);} : undefined}
+                        createHandler={containerType == ContainerType.DEFAULT ? () => { setNewItemOptionVisible(true); } : undefined}
                     />
+                    //Selection Mode
                     : <SelectionToolBar
                         onCancel={unselectAll}
                         onSelectAll={() => {
-                            if (selectionSet.size == content.length) {
-                                unselectAll();
-                            } else {
-                                for (const item of content) {
-                                    selectionSet.add(item.name);
+                            if (content) {
+                                if (selectionSet.size == content.length) {
+                                    unselectAll();
+                                } else {
+                                    for (const item of content) {
+                                        selectionSet.add(item.name);
+                                    }
+                                    updateSelectionState({ selectionSet, isSelecting: selectionSet.size > 0 });
                                 }
-                                updateSelectionState({ selectionSet, isSelecting: selectionSet.size > 0 });
                             }
                         }}
                         count={selectionSet.size}
-                        maxCount={content.length}
+                        maxCount={(content ?? []).length}
                     />
             }
-            {
+            {//Toolbar 2
                 containerType == ContainerType.DEFAULT
-                    ? <PathDisplayer navpath={navpath} />
-                    : <ItemViewModeSelection onChange={(mode) => {
+                    ? <PathDisplayer navpath={navpath} />//Display path
+                    : <ItemViewModeSelection onChange={(mode) => {//Display Viewing Options
                         setCurrentViewMode(mode);
-                        setContent(routeParams.getContent(mode));
+                        //setContent(routeParams.getContent(mode));
+                        fetchContent();
                         unselectAll();
                     }} />
             }
 
+            {/* Content is displayed here */}
             <ScrollView style={{ margin: 10, flex: 1 }}>
-                {contentComponents}
+                {
+                    content
+                        ? content.map(
+                            (item: BaseItem, i: number) => (
+                                <ItemCard item={item} key={i}
+                                    onSelect={handleSelect}
+                                    isSelected={selectionSet.has(item.name)}
+                                />
+                            ))
+                        : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                            <Text style={{ fontSize: 15 }}>Loading</Text>
+                        </View>
+                }
             </ScrollView>
+
         </View>
         {
             isSelecting
@@ -330,7 +364,7 @@ export function ContentContainer({ navigation }: { navigation: any}) {
                         setNewItemOptionVisible(false);
                     }} />
                     <BottomBarOptions name='New File' icon={<AntDesign name="addfile" size={30} style={{ padding: 15 }} />} onPress={() => {
-                        setNewItemOptionVisible(false); 
+                        setNewItemOptionVisible(false);
                     }} />
                 </View>
             </View>

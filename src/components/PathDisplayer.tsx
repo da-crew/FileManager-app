@@ -1,21 +1,6 @@
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { View, Text, ScrollView } from "react-native";
-
-
-type PathType = {
-    root: string;
-    nodes: string[];
-}
-
-class Path implements PathType {
-    root: string;
-    nodes: string[];
-
-    constructor(root: string, nodes: string[]) {
-        this.root = root;
-        this.nodes = nodes;
-    }
-}
+import { Path } from '../FileSystem';
 
 interface PathDisplayerProps {
     navpath: Path
@@ -41,4 +26,4 @@ const PathDisplayer = ({navpath}: PathDisplayerProps) => {
     </View>;
 };
 
-export { Path, PathDisplayer };
+export { PathDisplayer };
