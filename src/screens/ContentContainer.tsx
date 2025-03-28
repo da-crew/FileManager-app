@@ -1,4 +1,4 @@
-import { SafeAreaView, View, StatusBar, Text, ScrollView, TouchableOpacity, Modal, GestureResponderEvent, Alert, BackHandler } from "react-native";
+import { SafeAreaView, View, StatusBar, Text, ScrollView, TouchableOpacity, Modal, GestureResponderEvent, Alert, BackHandler, FlatList } from "react-native";
 import { PathDisplayer } from '../components/PathDisplayer';
 import { Path } from "../FileSystem";
 import Toolbar from "../components/Toolbar";
@@ -11,6 +11,9 @@ import * as RNFS from 'react-native-fs';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 
+import BottomBarItem from "../components/ContentContainer/BottomBarItem";
+import BottomBarOptions from "../components/ContentContainer/BottomBarOptions";
+import ContentList from "../components/ContentContainer/ContentList";
 
 let entry = {
     root: { displayname: "Internal Storage", path: "/storage/emulated/0" },
@@ -43,19 +46,6 @@ export type ContentContainerRouteParams = {
 };
 
 
-const BottomBarItem = ({ name, icon, onPress }: {
-    name: string,
-    icon: ReactNode,
-    onPress: (event: GestureResponderEvent) => void,
-}) => {
-    return <TouchableOpacity style={{ padding: 10 }} onPress={onPress}>
-        <View style={{ alignItems: 'center' }}>
-            {icon}
-        </View>
-        <Text style={{ fontSize: 16 }}>{name}</Text>
-    </TouchableOpacity>;
-};
-
 const ItemViewModeSelection = ({ onChange }: { onChange: (mode: ViewMode) => void }) => {
 
     const highlightColor = '#B6B6B6';
@@ -77,22 +67,11 @@ const ItemViewModeSelection = ({ onChange }: { onChange: (mode: ViewMode) => voi
     </View>;
 };
 
-const BottomBarOptions = ({ name, icon, onPress }: {
-    name: string,
-    icon: ReactNode,
-    onPress: (event: GestureResponderEvent) => void,
-}) => {
-    return <TouchableOpacity style={{ flexDirection: 'row' }} onPress={onPress}>
-        {icon}
-        <Text style={{ textAlignVertical: 'center', fontSize: 15 }}>{name}</Text>
-    </TouchableOpacity>;
-}
-
 export function ContentContainer({ navigation }: NativeStackScreenProps<RootStackParamList>) {
 
     const route = useRoute();
     const routeParams = route.params as ContentContainerRouteParams;
-    const [{ selectionSet, isSelecting }, updateSelectionState] = useState({ selectionSet: new Set(), isSelecting: false });
+    const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{selectionSet: Set<string>, isSelecting: boolean}>({ selectionSet: new Set(), isSelecting: false });
     const [currentViewMode, setCurrentViewMode] = useState(ViewMode.FILES);
     const [sortByOptionVisible, setSortByOptionVisible] = useState(false);
     const [newItemOptionVisible, setNewItemOptionVisible] = useState(false);
@@ -124,7 +103,10 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     function fetchContent() {
         setContent(null);
         RNFS.readDir(navpath.build())
-            .then((items) => setContent(items))
+            .then((items) => {
+                console.log("Got items");
+                setContent(items);
+            })
             .catch(() => {
                 console.log("An error occured");
             });
@@ -201,22 +183,10 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             }
 
             {/* Content is displayed here */}
-            <ScrollView style={{ margin: 10, flex: 1 }}>
-                {
-                    content
-                        ? content.map(
-                            (item: RNFS.ReadDirItem, i: number) => (
-                                <ItemCard item={item} key={i}
-                                    onSelect={handleSelect}
-                                    onOpen={handleOpen}
-                                    isSelected={selectionSet.has(item.name)}
-                                />
-                            ))
-                        : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                            <Text style={{ fontSize: 15 }}>Loading</Text>
-                        </View>
-                }
-            </ScrollView>
+
+            <View style={{ margin: 10, flex: 1 }}>
+                <ContentList content={content} handleOpen={handleOpen} handleSelect={handleSelect} selectionSet={selectionSet}/>
+            </View>
 
         </View>
         {
