@@ -1,29 +1,11 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import { AntDesign, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
-
-export interface BaseItem {
-    name: string
-}
-
-export class FolderItem implements BaseItem {
-    name: string;
-    constructor(name: string) {
-        this.name = name;
-    }
-}
-
-export class FileItem implements BaseItem {
-    name: string;
-    extension: string;
-    constructor(name: string, extension: string) {
-        this.name = name;
-        this.extension = extension;
-    }
-}
+import * as RNFS from "react-native-fs"
 
 export interface ItemCardProps {
-    item: FileItem | FolderItem,
-    onSelect: (selected: boolean, item: BaseItem) => void,
+    item: RNFS.ReadDirItem,
+    onSelect: (selected: boolean, item: RNFS.ReadDirItem) => void,
+    onOpen: (item: RNFS.ReadDirItem) => void,
     isSelected: boolean
 }
 
@@ -37,13 +19,13 @@ export interface ItemCardProps {
  * @returns {JSX.Element} The rendered component.
  */
 
-const ItemCard = ({ item, onSelect, isSelected }: ItemCardProps) => {
+const ItemCard = ({ item, onSelect, onOpen, isSelected }: ItemCardProps) => {
     return <View style={{ marginVertical: 5, flexDirection: 'row', alignItems: 'center' }}>
-        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }}>{/* Icon and Name */}
+        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }} onPress={() => onOpen(item)}>{/* Icon and Name */}
             {
-                item instanceof FolderItem
+                item.isDirectory()
                     ? <AntDesign name="folder1" size={40} />
-                    : item instanceof FileItem
+                    : item.isFile()
                         ? <AntDesign name="file1" size={40} />
                         : <FontAwesome name="question" size={40} />
             }

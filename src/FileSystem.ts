@@ -7,21 +7,28 @@ export type StorageCapacity = {
 };
 
 export type PathType = {
-    root: string;
+    root: { displayName: string, path: string };
     nodes: string[];
 }
 
 export class Path implements PathType {
-    root: string;
+    root: { displayName: string, path: string };
     nodes: string[];
 
-    constructor(root: string, nodes: string[]) {
-        this.root = root;
+    constructor(displayName: string, path: string, nodes: string[]) {
+        this.root = {
+            displayName,
+            path
+        };
         this.nodes = nodes;
     }
 
+    clone() {
+        return new Path(this.root.displayName, this.root.path, [...this.nodes]);
+    }
+
     build() {
-        let fullPath = this.root;
+        let fullPath = this.root.path;
         for (const p of this.nodes) {
             fullPath += "/" + p;
         }
@@ -54,11 +61,11 @@ export async function openAppSettings() {
         "Permission Needed",
         "To use this feature, please enable storage permissions in the app settings.",
         [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Go to Settings",
-            onPress: () => Linking.openSettings(),
-          },
+            { text: "Cancel", style: "cancel" },
+            {
+                text: "Go to Settings",
+                onPress: () => Linking.openSettings(),
+            },
         ]
-      );
+    );
 }

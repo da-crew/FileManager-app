@@ -9,7 +9,7 @@ interface PathDisplayerProps {
 const PathDisplayer = ({navpath}: PathDisplayerProps) => {
     let separator = <MaterialIcons name="arrow-forward-ios" size={18} color="black" style={{marginHorizontal: 10}}/>;
     let comps = [];
-    comps.push(<Text key={1}>{navpath.root}</Text>);
+    comps.push(<Text key={1}>{navpath.root.displayName}</Text>);
     for (let name of navpath.nodes) { 
         comps.push(<Text key={`separator-${name}`}>{separator}</Text>);
         comps.push(<Text key={`node-${name}`} style={{marginHorizontal: 5}}>{name}</Text>);

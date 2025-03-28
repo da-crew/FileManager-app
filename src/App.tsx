@@ -37,7 +37,7 @@ export default function App() {
             <Stack.Screen name="RecycleBin" component={RecycleBin} />
             <Stack.Screen name="Search" component={SearchScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
-            <Stack.Screen name="Test" component={TestScreen}/>
+            <Stack.Screen name="Test" component={TestScreen} />
         </Stack.Navigator>
     </NavigationContainer>;
 }

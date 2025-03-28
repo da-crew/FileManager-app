@@ -1,13 +1,15 @@
-import { SafeAreaView, View, StatusBar, Text, ScrollView, TouchableOpacity, Modal, GestureResponderEvent } from "react-native";
+import { SafeAreaView, View, StatusBar, Text, ScrollView, TouchableOpacity, Modal, GestureResponderEvent, Alert, BackHandler } from "react-native";
 import { PathDisplayer } from '../components/PathDisplayer';
 import { Path } from "../FileSystem";
 import Toolbar from "../components/Toolbar";
-import ItemCard, { BaseItem, FileItem, FolderItem } from "../components/ItemCard";
+import ItemCard from "../components/ItemCard";
 import SelectionToolBar from "../components/SelectionToolbar";
 import { AntDesign, Feather, FontAwesome, Foundation, MaterialIcons } from '@expo/vector-icons';
 import { ReactNode, useEffect, useState } from "react";
 import { useRoute } from '@react-navigation/native';
 import * as RNFS from 'react-native-fs';
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../App";
 
 
 let entry = {
@@ -34,162 +36,11 @@ export enum ViewMode {
     FOLDERS,
 }
 
-
-export class ContentContainerRouteParams {
-
-    containerName: string;
-    path: Path;
-    containerType: ContainerType;
-
-    /**
-     * Creates an instance of ContentContainer.
-     * 
-     * @constructor
-     * @param {string} containerName - The name of the container.
-     * @param {Path} path - The path associated with the container.
-     * @param {ContainerType} containerType - Container type
-     */
-    constructor(containerName: string, path: Path, containerType: ContainerType) {
-        this.containerName = containerName;
-        this.path = path;
-        this.containerType = containerType;
-    }
-
-
-    /**
-     * Retrieves the content of the container based on the container name.
-     * @param {ViewMode} viewMode - The view mode to filter the content. Only use this when container type is CATEGORIZED.
-     * @returns {Array<FolderItem|FileItem>} An array of FolderItem and FileItem objects representing the content of the container.
-     */
-    async getContent(viewMode: ViewMode) {
-        // function mockupContent() {
-        //     if (this.containerType == ContainerType.DEFAULT) {
-        //         switch (this.containerName) {
-        //             case "Internal Storage":
-        //                 return [
-        //                     new FolderItem("guguaiywbd"),
-        //                     new FolderItem("homework"),
-        //                     new FileItem("report.docx", "docx"),
-        //                     new FolderItem("projects"),
-        //                     new FileItem("presentation.pptx", "pptx"),
-        //                     new FolderItem("downloads"),
-        //                     new FileItem("awa.mp4", "mp4"),
-        //                     new FileItem("spreadsheet.xlsx", "xlsx"),
-        //                     new FileItem("notes.txt", "txt"),
-        //                 ];
-
-        //             case "SD Card":
-        //                 return [
-        //                     new FolderItem("backup"),
-        //                     new FolderItem("media"),
-        //                     new FileItem("photo.jpg", "jpg"),
-        //                     new FileItem("music.mp3", "mp3"),
-        //                     new FolderItem("apps"),
-        //                     new FileItem("document.pdf", "pdf"),
-        //                     new FileItem("video.mp4", "mp4"),
-        //                     new FileItem("archive.zip", "zip"),
-        //                 ];
-        //             case "Downloads":
-        //                 return [
-        //                     new FileItem("User_Manual.pdf", "pdf"),
-        //                     new FileItem(".pdf", "pdf"),
-        //                     new FileItem("totally-not-a-1024TB-zip-bomb.zip", "zip"),
-        //                     new FileItem("Roblox hack infinite gem/money.apk", "apk"),
-        //                     new FileItem("Cat_512x512.png", "png"),
-        //                     new FileItem("Dog_512x512.png", "png"),
-        //                 ];
-        //             default:
-        //                 return [];
-        //         }
-        //     }
-
-        //     if (this.containerType == ContainerType.CATEGORIZED) {
-        //         switch (this.containerName) {
-        //             case "Images":
-        //                 if (viewMode == ViewMode.FILES) {
-        //                     return [
-        //                         new FileItem("Vacation.jpg", "jpg"),
-        //                         new FileItem("Profile.png", "png"),
-        //                         new FileItem("Screenshot.bmp", "bmp"),
-        //                         new FileItem("Wallpaper.gif", "gif"),
-        //                     ];
-        //                 } else if (viewMode == ViewMode.FOLDERS) {
-        //                     return [
-        //                         new FolderItem("Screenshots"),
-        //                         new FolderItem("Wallpapers"),
-        //                         new FolderItem("Camera"),
-        //                         new FolderItem("Edited")
-        //                     ];
-        //                 } else { return []; }
-        //             case "Videos":
-        //                 if (viewMode == ViewMode.FILES) {
-        //                     return [
-        //                         new FileItem("Movie.mp4", "mp4"),
-        //                         new FileItem("Clip.avi", "avi"),
-        //                         new FileItem("Trailer.mkv", "mkv"),
-        //                         new FileItem("Recording.mov", "mov"),
-        //                     ];
-        //                 } else if (viewMode == ViewMode.FOLDERS) {
-        //                     return [
-        //                         new FolderItem("Movies"),
-        //                         new FolderItem("Clips"),
-        //                         new FolderItem("Trailers"),
-        //                         new FolderItem("Recordings"),
-        //                     ];
-        //                 } else { return []; }
-        //             case "Audio":
-        //                 if (viewMode == ViewMode.FILES) {
-        //                     return [
-        //                         new FileItem("Song.mp3", "mp3"),
-        //                         new FileItem("Podcast.aac", "aac"),
-        //                         new FileItem("Audiobook.m4b", "m4b"),
-        //                         new FileItem("Recording.wav", "wav"),
-        //                     ];
-        //                 } else if (viewMode == ViewMode.FOLDERS) {
-        //                     return [
-        //                         new FolderItem("Music"),
-        //                         new FolderItem("Podcasts"),
-        //                         new FolderItem("Audiobooks"),
-        //                         new FolderItem("Recordings"),
-        //                     ];
-        //                 } else { return []; }
-        //             case "Documents":
-        //                 if (viewMode == ViewMode.FILES) {
-        //                     return [
-        //                         new FileItem("Resume.pdf", "pdf"),
-        //                         new FileItem("Report.docx", "docx"),
-        //                         new FileItem("Presentation.pptx", "pptx"),
-        //                         new FileItem("Spreadsheet.xlsx", "xlsx"),
-        //                     ];
-        //                 } else if (viewMode == ViewMode.FOLDERS) {
-        //                     return [
-        //                         new FolderItem("Work"),
-        //                         new FolderItem("School"),
-        //                         new FolderItem("Personal"),
-        //                         new FolderItem("Projects"),
-        //                     ];
-        //                 } else { return []; }
-        //             default:
-        //         }
-        //     }
-
-        //     return [
-        //         new FileItem("ERROR.bin", ".bin"),
-        //         new FolderItem("This is not good at all"),
-        //     ];
-        // }
-        
-        let content = await RNFS.readDir(this.path.build());
-        let helpe = content.map((item, idx) => {
-            if (item.isDirectory()) {
-                return new FolderItem(item.name);
-            }
-            
-            return new FileItem(item.name, "");
-        });
-        return helpe;
-    }
-}
+export type ContentContainerRouteParams = {
+    containerName: string,
+    path: Path,
+    containerType: ContainerType,
+};
 
 
 const BottomBarItem = ({ name, icon, onPress }: {
@@ -237,33 +88,55 @@ const BottomBarOptions = ({ name, icon, onPress }: {
     </TouchableOpacity>;
 }
 
-export function ContentContainer({ navigation }: { navigation: any }) {
+export function ContentContainer({ navigation }: NativeStackScreenProps<RootStackParamList>) {
+
     const route = useRoute();
     const routeParams = route.params as ContentContainerRouteParams;
     const [{ selectionSet, isSelecting }, updateSelectionState] = useState({ selectionSet: new Set(), isSelecting: false });
     const [currentViewMode, setCurrentViewMode] = useState(ViewMode.FILES);
     const [sortByOptionVisible, setSortByOptionVisible] = useState(false);
     const [newItemOptionVisible, setNewItemOptionVisible] = useState(false);
+    const [navpath, setNavPath] = useState(routeParams.path);
 
-    const [content, setContent] = useState<(FolderItem | FileItem)[] | null>(null);
+    const storageName = routeParams.containerName ?? "ERROR!! I LOVE FIXING ERRORS!";
+    const containerType = routeParams.containerType;
+
+    const [content, setContent] = useState<RNFS.ReadDirItem[] | null>(null);
+
+    useEffect(() => {
+        const backAction = () => {
+            if (navpath.nodes.length == 0) {
+                navigation.goBack();
+                return true;
+            }
+            navpath.nodes.pop();
+            console.log("new path: ", navpath.build());
+            setNavPath(navpath);
+            fetchContent();
+            return true; // Prevent default behavior
+        };
+
+        const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
+
+        return () => backHandler.remove();
+    }, []);
 
     function fetchContent() {
-        routeParams.getContent(currentViewMode)
+        setContent(null);
+        RNFS.readDir(navpath.build())
             .then((items) => setContent(items))
-            .catch((reason) => {
+            .catch(() => {
                 console.log("An error occured");
             });
     }
 
     useEffect(() => {
         fetchContent();
+        console.log("Fetch Content");
     }, []);
 
-    const storageName = routeParams.containerName ?? "ERROR!! I LOVE FIXING ERRORS!";
-    const containerType = routeParams.containerType;
-    let navpath = routeParams.path;
 
-    function handleSelect(select: boolean, item: FileItem | FolderItem) {
+    function handleSelect(select: boolean, item: RNFS.ReadDirItem) {
         if (select) {
             selectionSet.add(item.name);
         } else {
@@ -274,6 +147,17 @@ export function ContentContainer({ navigation }: { navigation: any }) {
 
     function unselectAll() {
         updateSelectionState({ selectionSet: new Set(), isSelecting: false })
+    }
+
+    function handleOpen(item: RNFS.ReadDirItem): void {
+        if (item.isFile()) {
+            console.log("Open file", item.name);
+        } else if (item.isDirectory()) {
+            navpath.nodes.push(item.name);
+            console.log("Open directory", navpath.build());
+            setNavPath(navpath);
+            fetchContent();
+        }
     }
 
     return <SafeAreaView style={{ flex: 1 }}>
@@ -311,7 +195,6 @@ export function ContentContainer({ navigation }: { navigation: any }) {
                     ? <PathDisplayer navpath={navpath} />//Display path
                     : <ItemViewModeSelection onChange={(mode) => {//Display Viewing Options
                         setCurrentViewMode(mode);
-                        //setContent(routeParams.getContent(mode));
                         fetchContent();
                         unselectAll();
                     }} />
@@ -322,9 +205,10 @@ export function ContentContainer({ navigation }: { navigation: any }) {
                 {
                     content
                         ? content.map(
-                            (item: BaseItem, i: number) => (
+                            (item: RNFS.ReadDirItem, i: number) => (
                                 <ItemCard item={item} key={i}
                                     onSelect={handleSelect}
+                                    onOpen={handleOpen}
                                     isSelected={selectionSet.has(item.name)}
                                 />
                             ))

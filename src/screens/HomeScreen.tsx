@@ -100,19 +100,19 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
     }, []);
 
     function gotoCategory(name: string) {
-        navigation.navigate("Container", new ContentContainerRouteParams(
-            name,
-            new Path(name, []),
-            ContainerType.CATEGORIZED,
-        ));
+        navigation.navigate("Container", {
+            containerName: name,
+            path: new Path(name, name, []),
+            containerType: ContainerType.CATEGORIZED
+        });
     }
 
     function gotoStorageDevice(device: StorageDevice) {
-        navigation.navigate("Container", new ContentContainerRouteParams(
-            device.displayName,
-            new Path(device.devicePath, []),
-            ContainerType.DEFAULT,
-        ));
+        navigation.navigate("Container", {
+            containerName: device.displayName,
+            path: new Path(device.displayName, device.devicePath, []),
+            containerType: ContainerType.DEFAULT
+        });
     }
 
     const internalStorage = new StorageDevice('Internal Storage', RNFS.ExternalStorageDirectoryPath);
