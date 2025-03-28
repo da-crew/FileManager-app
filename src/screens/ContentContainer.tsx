@@ -67,20 +67,51 @@ const ItemViewModeSelection = ({ onChange }: { onChange: (mode: ViewMode) => voi
     </View>;
 };
 
+enum SortType {
+    ALPHABETICAL,
+    DATE,
+}
+
 export function ContentContainer({ navigation }: NativeStackScreenProps<RootStackParamList>) {
 
     const route = useRoute();
     const routeParams = route.params as ContentContainerRouteParams;
     const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{selectionSet: Set<string>, isSelecting: boolean}>({ selectionSet: new Set(), isSelecting: false });
     const [currentViewMode, setCurrentViewMode] = useState(ViewMode.FILES);
-    const [sortByOptionVisible, setSortByOptionVisible] = useState(false);
-    const [newItemOptionVisible, setNewItemOptionVisible] = useState(false);
+    const [sortByOptionVisible, setSortByOptionVisible] = useState(false);//modal
+    const [newItemOptionVisible, setNewItemOptionVisible] = useState(false);//modal
+    const [sortType, setSortType] = useState<SortType>(SortType.ALPHABETICAL);
     const [navpath, setNavPath] = useState(routeParams.path);
 
     const storageName = routeParams.containerName ?? "ERROR!! I LOVE FIXING ERRORS!";
     const containerType = routeParams.containerType;
 
     const [content, setContent] = useState<RNFS.ReadDirItem[] | null>(null);
+
+    function fetchContent() {
+        setContent(null);
+        RNFS.readDir(navpath.build())
+            .then((items) => {
+                const sortHandler = (a: RNFS.ReadDirItem, b: RNFS.ReadDirItem) => {
+                    switch (sortType) {
+                        case SortType.ALPHABETICAL:
+                            return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+                        case SortType.DATE:
+                            return (b.mtime?.getTime() ?? 0) - (a.mtime?.getTime() ?? 0);
+                        default:
+                            return 0;
+                    }
+                };
+                let hiddenFolders = items.filter((item) => item.isDirectory() && item.name.startsWith("."));
+                let folders = items.filter((item) => item.isDirectory() && !item.name.startsWith(".")).sort(sortHandler);
+                let files = items.filter((item) => item.isFile()).sort(sortHandler);
+                console.log("Got items");
+                setContent(hiddenFolders.concat(folders).concat(files));
+            })
+            .catch(() => {
+                console.log("An error occured");
+            });
+    }
 
     useEffect(() => {
         const backAction = () => {
@@ -96,27 +127,18 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         };
 
         const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
+        
+        fetchContent();
+        console.log("Fetch Content");
 
         return () => backHandler.remove();
     }, []);
 
-    function fetchContent() {
-        setContent(null);
-        RNFS.readDir(navpath.build())
-            .then((items) => {
-                console.log("Got items");
-                setContent(items);
-            })
-            .catch(() => {
-                console.log("An error occured");
-            });
+    function updateSortType(type: SortType) {
+        if (sortType != type) {
+            setSortType(type);
+        }
     }
-
-    useEffect(() => {
-        fetchContent();
-        console.log("Fetch Content");
-    }, []);
-
 
     function handleSelect(select: boolean, item: RNFS.ReadDirItem) {
         if (select) {
@@ -183,7 +205,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             }
 
             {/* Content is displayed here */}
-
             <View style={{ margin: 10, flex: 1 }}>
                 <ContentList content={content} handleOpen={handleOpen} handleSelect={handleSelect} selectionSet={selectionSet}/>
             </View>
@@ -204,9 +225,11 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                 <View style={{ backgroundColor: 'white', justifyContent: 'space-between', paddingBottom: 5 }}>
                     <BottomBarOptions name='Alphabetical' icon={<FontAwesome name="sort-alpha-asc" size={30} style={{ padding: 15 }} />} onPress={() => {
+                        updateSortType(SortType.ALPHABETICAL);
                         setSortByOptionVisible(false);
                     }} />
                     <BottomBarOptions name='Date' icon={<FontAwesome name="sort-numeric-asc" size={30} style={{ padding: 15 }} />} onPress={() => {
+                        updateSortType(SortType.DATE);
                         setSortByOptionVisible(false);
                     }} />
                 </View>
