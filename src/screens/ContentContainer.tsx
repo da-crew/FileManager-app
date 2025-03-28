@@ -181,12 +181,13 @@ export class ContentContainerRouteParams {
         
         let content = await RNFS.readDir(this.path.build());
         let helpe = content.map((item, idx) => {
-            //TODO
+            if (item.isDirectory()) {
+                return new FolderItem(item.name);
+            }
+            
+            return new FileItem(item.name, "");
         });
-        return [
-            new FileItem("ERROR.bin", ".bin"),
-            new FolderItem("This is not good at all"),
-        ];
+        return helpe;
     }
 }
 
