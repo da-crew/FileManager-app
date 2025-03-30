@@ -1,4 +1,4 @@
-import { SafeAreaView, View, StatusBar, Text, ScrollView, TouchableOpacity, Modal, GestureResponderEvent, Alert, BackHandler, FlatList } from "react-native";
+import { SafeAreaView, View, StatusBar, Text, ScrollView, TouchableOpacity, Modal, GestureResponderEvent, Alert, BackHandler, FlatList, TextInput } from "react-native";
 import { PathDisplayer } from '../components/PathDisplayer';
 import { Path } from "../FileSystem";
 import Toolbar from "../components/Toolbar";
@@ -14,20 +14,6 @@ import { RootStackParamList } from "../App";
 import BottomBarItem from "../components/ContentContainer/BottomBarItem";
 import BottomBarOptions from "../components/ContentContainer/BottomBarOptions";
 import ContentList from "../components/ContentContainer/ContentList";
-
-let entry = {
-    root: { displayname: "Internal Storage", path: "/storage/emulated/0" },
-    items: [
-        { type: "Folder", name: "Documents" },
-        { type: "Folder", name: "Pictures" },
-        { type: "Folder", name: "Music" },
-        { type: "Folder", name: "Videos" },
-        { type: "File", name: "Resume", extension: "pdf" },
-        { type: "File", name: "Vacation", extension: "jpg" },
-        { type: "File", name: "Song", extension: "mp3" },
-        { type: "File", name: "Movie", extension: "mp4" },
-    ],
-};
 
 export enum ContainerType {
     CATEGORIZED,
@@ -72,14 +58,22 @@ enum SortType {
     DATE,
 }
 
+enum CreationType {
+    FOLDER,
+    FILE,
+}
+
 export function ContentContainer({ navigation }: NativeStackScreenProps<RootStackParamList>) {
 
     const route = useRoute();
     const routeParams = route.params as ContentContainerRouteParams;
-    const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{selectionSet: Set<string>, isSelecting: boolean}>({ selectionSet: new Set(), isSelecting: false });
+    const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{ selectionSet: Set<string>, isSelecting: boolean }>({ selectionSet: new Set(), isSelecting: false });
     const [currentViewMode, setCurrentViewMode] = useState(ViewMode.FILES);
     const [sortByOptionVisible, setSortByOptionVisible] = useState(false);//modal
     const [newItemOptionVisible, setNewItemOptionVisible] = useState(false);//modal
+
+    const [creationType, setCreationType] = useState<CreationType | null>(null);
+
     const [sortType, setSortType] = useState<SortType>(SortType.ALPHABETICAL);
     const [navpath, setNavPath] = useState(routeParams.path);
 
@@ -92,6 +86,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         setContent(null);
         RNFS.readDir(navpath.build())
             .then((items) => {
+                console.log("Sorting by: ", sortType);
                 const sortHandler = (a: RNFS.ReadDirItem, b: RNFS.ReadDirItem) => {
                     switch (sortType) {
                         case SortType.ALPHABETICAL:
@@ -113,6 +108,8 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             });
     }
 
+    useEffect(() => fetchContent(), [sortType]);
+
     useEffect(() => {
         const backAction = () => {
             if (navpath.nodes.length == 0) {
@@ -122,12 +119,13 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             navpath.nodes.pop();
             console.log("new path: ", navpath.build());
             setNavPath(navpath);
+            unselectAll();
             fetchContent();
             return true; // Prevent default behavior
         };
 
         const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
-        
+
         fetchContent();
         console.log("Fetch Content");
 
@@ -167,7 +165,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     return <SafeAreaView style={{ flex: 1 }}>
         <View style={{ flex: 1 }}>
             <StatusBar />
-
             {//Toolbar 1
                 !isSelecting
                     //Default Mode
@@ -206,7 +203,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
             {/* Content is displayed here */}
             <View style={{ margin: 10, flex: 1 }}>
-                <ContentList content={content} handleOpen={handleOpen} handleSelect={handleSelect} selectionSet={selectionSet}/>
+                <ContentList content={content} handleOpen={handleOpen} handleSelect={handleSelect} selectionSet={selectionSet} />
             </View>
 
         </View>
@@ -235,16 +232,55 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 </View>
             </View>
         </Modal>
-        <Modal visible={newItemOptionVisible} transparent={true} onRequestClose={() => setNewItemOptionVisible(false)} >
+
+        <Modal visible={newItemOptionVisible} transparent={true} onRequestClose={() => setNewItemOptionVisible(false)}>
             <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                 <View style={{ backgroundColor: 'white', justifyContent: 'space-between', paddingBottom: 5 }}>
                     <BottomBarOptions name='New Folder' icon={<MaterialIcons name="create-new-folder" size={30} style={{ padding: 15 }} />} onPress={() => {
                         setNewItemOptionVisible(false);
+                        setCreationType(CreationType.FOLDER);
                     }} />
                     <BottomBarOptions name='New File' icon={<AntDesign name="addfile" size={30} style={{ padding: 15 }} />} onPress={() => {
                         setNewItemOptionVisible(false);
+                        setCreationType(CreationType.FILE);
                     }} />
                 </View>
+            </View>
+        </Modal>
+
+        <Modal visible={creationType != null} transparent={true} onRequestClose={() => setCreationType(null)}>
+            <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: 30 }}>
+                <View style={{ padding: 15, backgroundColor: 'white', borderRadius: 5 }}>
+                    <Text style={{ fontSize: 20, paddingBottom: 10 }}>Enter a name</Text>
+                    <TextInput
+                        style={{
+                            height: 40,
+                            borderWidth: 1,
+                            borderColor: '#ddd',
+                            paddingHorizontal: 12,
+                            borderRadius: 5,
+                            fontSize: 17,
+                            backgroundColor: '#fff',
+                        }}
+                    />
+                    
+                    {/* Buttons */}
+                    <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'space-between' }}>
+                        <TouchableOpacity
+                            style={{ flex: 1, backgroundColor: '#007BFF', marginRight: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
+
+                        >
+                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Ok</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{ flex: 1, backgroundColor: '#6C757D', marginLeft: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
+                            onPress={() => setCreationType(null)}
+                        >
+                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
             </View>
         </Modal>
     </SafeAreaView>;
