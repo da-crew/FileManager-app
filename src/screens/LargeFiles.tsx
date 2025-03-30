@@ -5,7 +5,11 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
 import { FontAwesome5 } from '@expo/vector-icons';
 
-// กำหนด type สำหรับไฟล์ใหญ่
+// ตัว Toolbar และ SelectionToolBar (ถ้ายังไม่มีให้สร้าง)
+import Toolbar from "../components/Toolbar"; 
+import SelectionToolBar from "../components/SelectionToolbar";
+
+// กำหนด type สำหรับไฟล์
 interface LargeFile {
     id: string;
     fileName: string;
@@ -14,23 +18,13 @@ interface LargeFile {
 
 export default function LargeFiles() {
     const navigation = useNavigation();
-
-    // กำหนด type ให้ state ของ largeFiles
     const [largeFiles, setLargeFiles] = useState<LargeFile[]>([
-        {
-            id: "1",
-            fileName: "20241117_11154.mp4",
-            size: "279 MB"
-        },
-        {
-            id: "2",
-            fileName: "20241117_11140.mp4",
-            size: "279 MB"
-        }
+        { id: "1", fileName: "20241117_11154.mp4", size: "279 MB" },
+        { id: "2", fileName: "20241117_11140.mp4", size: "279 MB" }
     ]);
-
-    // กำหนด type ให้ selectedItems
+    
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
+    const [isSelecting, setIsSelecting] = useState(false);
 
     const toggleSelect = (id: string) => {
         setSelectedItems((prev) =>
@@ -38,67 +32,67 @@ export default function LargeFiles() {
         );
     };
 
-    const renderItem = ({ item }: { item: LargeFile }) => {
-        const isSelected = selectedItems.includes(item.id);
-
-        return (
-            <TouchableOpacity style={styles.itemRow} onPress={() => toggleSelect(item.id)}>
-                <MaterialCommunityIcons
-                    name={isSelected ? "checkbox-marked" : "checkbox-blank-outline"}
-                    size={24}
-                    color="black"
-                    style={{ marginRight: 10 }}
-                />
-
-                <MaterialCommunityIcons
-                    name="file-pdf-box"
-                    size={40}
-                    color="red"
-                    style={{ marginRight: 10 }}
-                />
-
-                <View style={{ flex: 1 }}>
-                    <Text style={styles.fileName}>{item.fileName}</Text>
-                    <Text style={styles.fileSize}>{item.size}</Text>
-                </View>
-            </TouchableOpacity>
-        );
-    };
-
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <AntDesign name="left" size={24} color="black" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Find Large Files</Text>
-                <View style={styles.headerRightIcons}>
-                    <AntDesign name="search1" size={24} color="black" style={{ marginRight: 15 }} />
-                    <AntDesign name="appstore-o" size={24} color="black" style={{ marginRight: 15 }} />
-                    <FontAwesome5 name="sort" size={24} color="black" />
-                </View>
-            </View>
-
-            <View style={styles.infoContainer}>
-                <MaterialCommunityIcons
-                    name="file-document-outline"
-                    size={60}
-                    color="black"
-                    style={{ marginBottom: 10 }}
+            { !isSelecting ? (
+                <Toolbar
+                    navigation={navigation}
+                    containerName="Find Large Files"
+                    sortByHandler={() => console.log("Sort files")}
                 />
-                <Text style={styles.largeText}>2 Large Files(0.92 GB)</Text>
-                <Text style={styles.subText}>
-                    Quickly free up space by deleting large files or moving them to another storage location.
-                </Text>
-            </View>
+            ) : (
+                <SelectionToolBar
+                    onCancel={() => {
+                        setIsSelecting(false);
+                        setSelectedItems([]);
+                    }}
+                    onSelectAll={() => {
+                        if (largeFiles.length === selectedItems.length) {
+                            setSelectedItems([]);
+                        } else {
+                            setSelectedItems(largeFiles.map(file => file.id));
+                        }
+                    }}
+                    count={selectedItems.length}
+                    maxCount={largeFiles.length}
+                />
+            )}
 
-            <FlatList<LargeFile>
+            <FlatList
                 data={largeFiles}
                 keyExtractor={(item) => item.id}
-                renderItem={renderItem}
-                contentContainerStyle={styles.listContainer}
+                renderItem={({ item }) => {
+                    const isSelected = selectedItems.includes(item.id);
+
+                    return (
+                        <TouchableOpacity 
+                            style={styles.itemRow} 
+                            onPress={() => {
+                                toggleSelect(item.id);
+                                setIsSelecting(true);
+                            }}
+                        >
+                            <MaterialCommunityIcons
+                                name={isSelected ? "checkbox-marked" : "checkbox-blank-outline"}
+                                size={24}
+                                color="black"
+                                style={{ marginRight: 10 }}
+                            />
+                            <MaterialCommunityIcons
+                                name="file-video"
+                                size={40}
+                                color="red"
+                                style={{ marginRight: 10 }}
+                            />
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.fileName}>{item.fileName}</Text>
+                                <Text style={styles.fileSize}>{item.size}</Text>
+                            </View>
+                        </TouchableOpacity>
+                    );
+                }}
             />
         </SafeAreaView>
     );

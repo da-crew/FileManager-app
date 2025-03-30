@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { SafeAreaView, View, Text, FlatList, TouchableOpacity, StyleSheet, StatusBar } from "react-native";
-import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { FontAwesome5 } from '@expo/vector-icons';
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import Toolbar from "../components/Toolbar";
+import SelectionToolBar from "../components/SelectionToolbar";
 
 // กำหนด type สำหรับไฟล์ซ้ำ
 interface DuplicateFile {
@@ -11,25 +12,16 @@ interface DuplicateFile {
     size: string;
 }
 
-export default function DuplicateFiles() {
+export default function Duplicates() {
     const navigation = useNavigation();
-
-    // กำหนด type ให้ state ของ duplicateFiles
     const [duplicateFiles, setDuplicateFiles] = useState<DuplicateFile[]>([
-        {
-            id: "1",
-            fileName: "20241117_11154.mp4",
-            size: "279 MB"
-        },
-        {
-            id: "2",
-            fileName: "20241117_11154.mp4",
-            size: "279 MB"
-        }
+        { id: "1", fileName: "Report_2024.pdf", size: "5.2 MB" },
+        { id: "2", fileName: "Invoice_001.pdf", size: "3.1 MB" },
+        { id: "3", fileName: "Backup_2023.zip", size: "1.8 GB" },
     ]);
 
-    // กำหนด type ให้ selectedItems
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
+    const [isSelecting, setIsSelecting] = useState(false);
 
     const toggleSelect = (id: string) => {
         setSelectedItems((prev) =>
@@ -37,65 +29,67 @@ export default function DuplicateFiles() {
         );
     };
 
-    const renderItem = ({ item }: { item: DuplicateFile }) => {
-        const isSelected = selectedItems.includes(item.id);
-
-        return (
-            <TouchableOpacity style={styles.itemRow} onPress={() => toggleSelect(item.id)}>
-                <MaterialCommunityIcons
-                    name={isSelected ? "checkbox-marked" : "checkbox-blank-outline"}
-                    size={24}
-                    color="black"
-                    style={{ marginRight: 10 }}
-                />
-                <MaterialCommunityIcons
-                    name="file-video-outline"
-                    size={40}
-                    color="black"
-                    style={{ marginRight: 10 }}
-                />
-                <View style={{ flex: 1 }}>
-                    <Text style={styles.fileName}>{item.fileName}</Text>
-                    <Text style={styles.fileSize}>{item.size}</Text>
-                </View>
-            </TouchableOpacity>
-        );
-    };
-
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <AntDesign name="left" size={24} color="black" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Find Duplicate Files</Text>
-                <View style={styles.headerRightIcons}>
-                    <AntDesign name="search1" size={24} color="black" style={{ marginRight: 15 }} />
-                    <AntDesign name="appstore-o" size={24} color="black" style={{ marginRight: 15 }} />
-                    <FontAwesome5 name="sort" size={24} color="black" />
-                </View>
-            </View>
-
-            <View style={styles.infoContainer}>
-                <MaterialCommunityIcons
-                    name="file-document-outline"
-                    size={60}
-                    color="black"
-                    style={{ marginBottom: 10 }}
+            {!isSelecting ? (
+                <Toolbar
+                    navigation={navigation}
+                    containerName="Duplicate Files"
+                    sortByHandler={() => console.log("Sort Duplicates")}
                 />
-                <Text style={styles.largeText}>2 Duplicate Files(0.92 GB)</Text>
-                <Text style={styles.subText}>
-                    Free up space by deleting redundant files and keeping original files.
-                </Text>
-            </View>
+            ) : (
+                <SelectionToolBar
+                    onCancel={() => {
+                        setIsSelecting(false);
+                        setSelectedItems([]);
+                    }}
+                    onSelectAll={() => {
+                        if (duplicateFiles.length === selectedItems.length) {
+                            setSelectedItems([]);
+                        } else {
+                            setSelectedItems(duplicateFiles.map(file => file.id));
+                        }
+                    }}
+                    count={selectedItems.length}
+                    maxCount={duplicateFiles.length}
+                />
+            )}
 
-            <FlatList<DuplicateFile>
+            <FlatList
                 data={duplicateFiles}
                 keyExtractor={(item) => item.id}
-                renderItem={renderItem}
-                contentContainerStyle={styles.listContainer}
+                renderItem={({ item }) => {
+                    const isSelected = selectedItems.includes(item.id);
+
+                    return (
+                        <TouchableOpacity
+                            style={styles.itemRow}
+                            onPress={() => {
+                                toggleSelect(item.id);
+                                setIsSelecting(true);
+                            }}
+                        >
+                            <MaterialCommunityIcons
+                                name={isSelected ? "checkbox-marked" : "checkbox-blank-outline"}
+                                size={24}
+                                color="black"
+                                style={{ marginRight: 10 }}
+                            />
+                            <MaterialCommunityIcons
+                                name="file-document"
+                                size={40}
+                                color="blue"
+                                style={{ marginRight: 10 }}
+                            />
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.fileName}>{item.fileName}</Text>
+                                <Text style={styles.fileSize}>{item.size}</Text>
+                            </View>
+                        </TouchableOpacity>
+                    );
+                }}
             />
         </SafeAreaView>
     );
