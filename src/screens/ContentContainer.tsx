@@ -71,9 +71,8 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{ selectionSet: Set<string>, isSelecting: boolean }>({ selectionSet: new Set(), isSelecting: false });
     const [currentViewMode, setCurrentViewMode] = useState(ViewMode.FILES);
     const [sortByOptionVisible, setSortByOptionVisible] = useState(false);//modal
-    const [newItemOptionVisible, setNewItemOptionVisible] = useState(false);//modal
 
-    const [creationState, setCreationState] = useState<{ itemName: string, creationType: CreationType } | null>(null);
+    const [itemCreatorVisible, setItemCreatorVisible] = useState(false);
 
     const [sortType, setSortType] = useState<SortType>(SortType.ALPHABETICAL);
     const [navpath, setNavPath] = useState(routeParams.path);
@@ -163,10 +162,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         }
     }
 
-    function cancelCreation() {
-        setCreationState(null);
-    }
-
     return <SafeAreaView style={{ flex: 1 }}>
         <View style={{ flex: 1 }}>
             <StatusBar />
@@ -175,7 +170,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     //Default Mode
                     ? <Toolbar navigation={navigation} containerName={storageName}
                         sortByHandler={() => { setSortByOptionVisible(true); }}
-                        createHandler={containerType == ContainerType.DEFAULT ? () => { setNewItemOptionVisible(true); } : undefined}
+                        createHandler={containerType == ContainerType.DEFAULT ? () => { setItemCreatorVisible(true); console.log("Create Action") } : undefined}
                     />
                     //Selection Mode
                     : <SelectionToolBar
@@ -223,6 +218,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 </View>
                 : <></>
         }
+        
         <Modal visible={sortByOptionVisible} transparent={true} onRequestClose={() => setSortByOptionVisible(false)} >
             <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                 <View style={{ backgroundColor: 'white', justifyContent: 'space-between', paddingBottom: 5 }}>
@@ -238,7 +234,35 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             </View>
         </Modal>
 
-        <Modal visible={newItemOptionVisible} transparent={true} onRequestClose={() => setNewItemOptionVisible(false)}>
+        <ItemCreator enabled={itemCreatorVisible} currentPath={navpath}
+            onCreationCanceled={() => {
+                setItemCreatorVisible(false);
+            }}
+            onCreationDone={() => {
+                setItemCreatorVisible(false);
+                fetchContent();
+            }}
+        />
+    </SafeAreaView>;
+}
+
+function ItemCreator(props: {
+    enabled: boolean,
+    currentPath: Path,
+    onCreationDone: () => void,
+    onCreationCanceled: () => void
+}) {
+
+    const [creationState, setCreationState] = useState<{ itemName: string, creationType: CreationType } | null>(null);
+    const [newItemOptionVisible, setNewItemOptionVisible] = useState(false);
+
+    useEffect(() => {
+        setNewItemOptionVisible(props.enabled);
+        setCreationState(null);
+    }, [props.enabled]);
+
+    return (<>
+        <Modal visible={newItemOptionVisible} transparent={true} onRequestClose={() => props.onCreationCanceled()}>
             <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                 <View style={{ backgroundColor: 'white', justifyContent: 'space-between', paddingBottom: 5 }}>
                     <BottomBarOptions name='New Folder' icon={<MaterialIcons name="create-new-folder" size={30} style={{ padding: 15 }} />} onPress={() => {
@@ -259,7 +283,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             </View>
         </Modal>
 
-        <Modal visible={creationState != null} transparent={true} onRequestClose={() => cancelCreation()}>
+        <Modal visible={creationState != null && props.enabled} transparent={true} onRequestClose={() => props.onCreationCanceled()}>
             <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: 30 }}>
                 <View style={{ padding: 15, backgroundColor: 'white', borderRadius: 5 }}>
                     <Text style={{ fontSize: 20, paddingBottom: 10 }}>Enter a name</Text>
@@ -300,7 +324,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                     return;
                                 }
 
-                                let fullPath = navpath.build() + "/" + creationState.itemName;
+                                let fullPath = props.currentPath.build() + "/" + creationState.itemName;
                                 console.log("Create: ", fullPath);
                                 RNFS.exists(fullPath)
                                     .then((itemExists) => {
@@ -311,23 +335,24 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                         } else {
                                             console.log("Can create: ");
                                             try {
-                                            let promise;
-                                            switch (creationState.creationType) {
-                                                case CreationType.FOLDER:
-                                                    promise = RNFS.mkdir(fullPath);
-                                                    break;
-                                                case CreationType.FILE:
-                                                    promise = RNFS.writeFile(fullPath, "");
-                                                    break;
-                                            }
-                                            promise
-                                                .then(() => {
-                                                    console.log("Created ", fullPath);
-                                                    fetchContent();
-                                                })
-                                                .catch((reason) => {
-                                                    Alert.alert("Error Creating Item", reason, [{ text: "Dismiss" }]);
-                                                });
+                                                let promise;
+                                                switch (creationState.creationType) {
+                                                    case CreationType.FOLDER:
+                                                        promise = RNFS.mkdir(fullPath);
+                                                        break;
+                                                    case CreationType.FILE:
+                                                        promise = RNFS.writeFile(fullPath, "");
+                                                        break;
+                                                }
+                                                promise
+                                                    .then(() => {
+                                                        console.log("Created ", fullPath);
+                                                        props.onCreationDone();
+                                                        //fetchContent();
+                                                    })
+                                                    .catch((reason) => {
+                                                        Alert.alert("Error Creating Item", reason, [{ text: "Dismiss" }]);
+                                                    });
                                             } catch (err) {
                                                 console.log("Error while creating item. ", err);
                                             }
@@ -336,14 +361,15 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                     .catch((reason) => {
                                         console.log("Error checking for item's existence. Reason: ", reason);
                                     });
-                                cancelCreation();
+                                setCreationState(null);
+                                props.onCreationCanceled();
                             }}
                         >
                             <Text style={{ color: 'white', fontWeight: 'bold' }}>Ok</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={{ flex: 1, backgroundColor: '#6C757D', marginLeft: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
-                            onPress={() => cancelCreation()}
+                            onPress={() => props.onCreationCanceled()}
                         >
                             <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
                         </TouchableOpacity>
@@ -352,11 +378,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
             </View>
         </Modal>
-    </SafeAreaView>;
-}
-
-function CreationPromptModal(props : { enabled: boolean, onCreationDone: () => void, }) {
-    
+    </>);
 }
 
 export default ContentContainer;
