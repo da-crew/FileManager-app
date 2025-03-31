@@ -12,6 +12,7 @@ interface ToolbarProps {
     layoutChangeHandler?: (event: GestureResponderEvent) => void,
     sortByHandler?: (event: GestureResponderEvent) => void,
     createHandler?: (event: GestureResponderEvent) => void,
+    menuHandler?: (event: GestureResponderEvent) => void,
 }
 
 /**
@@ -25,10 +26,11 @@ interface ToolbarProps {
  * @param {Function} [props.layoutChangeHandler] - Optional handler function for layout change.
  * @param {Function} [props.sortByHandler] - Optional handler function for sorting items.
  * @param {Function} [props.createHandler] - Optional handler function for creating a new item.
+ * @param {Function} [props.menuHandler] - Optional handler function for the three-dot menu.
  * @returns {JSX.Element} The rendered Toolbar component.
  */
 
-export default function Toolbar({ navigation, containerName, layoutChangeHandler, sortByHandler, createHandler }: ToolbarProps) {
+export default function Toolbar({ navigation, containerName, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
 
     let a = useNavigation()
     return (
@@ -68,6 +70,14 @@ export default function Toolbar({ navigation, containerName, layoutChangeHandler
                     <AntDesign name="plus" size={24} color="black" />
                 </TouchableOpacity>
                     : <></>}
+                    
+            {//Three-dot menu
+                menuHandler ? <TouchableOpacity
+                    style={{ marginRight: 15 }}
+                    onPress={menuHandler}
+                >
+                    <MaterialIcons name="more-vert" size={24} color="black" />
+                </TouchableOpacity> : <></>}
         </View>
     );
 };
@@ -81,4 +91,5 @@ Toolbar.propTypes = {
     layoutChangeHandler: PropTypes.func,
     sortByHandler: PropTypes.func,
     createHandler: PropTypes.func,
+    menuHandler: PropTypes.func,
 };

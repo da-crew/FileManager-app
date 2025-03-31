@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { SafeAreaView, View, Text, FlatList, TouchableOpacity, StyleSheet, StatusBar } from "react-native";
+import { SafeAreaView, View, Text, FlatList, TouchableOpacity, StyleSheet, StatusBar, ScrollView, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import Toolbar from "../components/Toolbar";
-import SelectionToolBar from "../components/SelectionToolbar";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 // กำหนด type สำหรับไฟล์ซ้ำ
 interface DuplicateFile {
@@ -21,7 +20,6 @@ export default function Duplicates() {
     ]);
 
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
-    const [isSelecting, setIsSelecting] = useState(false);
 
     const toggleSelect = (id: string) => {
         setSelectedItems((prev) =>
@@ -32,65 +30,75 @@ export default function Duplicates() {
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+            <View style={styles.header}>
+                <TouchableOpacity 
+                    onPress={() => navigation.goBack()}
+                    style={styles.backButton}
+                >
+                    <AntDesign name="left" size={24} color="#333" />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Duplicate Files</Text>
+                <View style={{ width: 40 }} />
+            </View>
 
-            {!isSelecting ? (
-                <Toolbar
-                    navigation={navigation}
-                    containerName="Duplicate Files"
-                    sortByHandler={() => console.log("Sort Duplicates")}
-                />
-            ) : (
-                <SelectionToolBar
-                    onCancel={() => {
-                        setIsSelecting(false);
-                        setSelectedItems([]);
-                    }}
-                    onSelectAll={() => {
-                        if (duplicateFiles.length === selectedItems.length) {
-                            setSelectedItems([]);
-                        } else {
-                            setSelectedItems(duplicateFiles.map(file => file.id));
-                        }
-                    }}
-                    count={selectedItems.length}
-                    maxCount={duplicateFiles.length}
-                />
-            )}
+            <ScrollView contentContainerStyle={styles.content}>
+                <Text style={styles.sectionHeader}>Duplicate Files Found</Text>
+                <View style={styles.sectionContainer}>
+                    {duplicateFiles.map((item) => {
+                        const isSelected = selectedItems.includes(item.id);
+                        
+                        return (
+                            <TouchableOpacity
+                                key={item.id}
+                                style={styles.row}
+                                onPress={() => toggleSelect(item.id)}
+                            >
+                                <View style={styles.rowContent}>
+                                    <MaterialCommunityIcons
+                                        name="file-document"
+                                        size={24}
+                                        color="#666"
+                                        style={styles.rowIcon}
+                                    />
+                                    <View>
+                                        <Text style={styles.label}>{item.fileName}</Text>
+                                        <Text style={styles.subLabel}>{item.size}</Text>
+                                    </View>
+                                </View>
+                                <MaterialCommunityIcons
+                                    name={isSelected ? "checkbox-marked" : "checkbox-blank-outline"}
+                                    size={24}
+                                    color="#007AFF"
+                                />
+                            </TouchableOpacity>
+                        );
+                    })}
+                </View>
 
-            <FlatList
-                data={duplicateFiles}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => {
-                    const isSelected = selectedItems.includes(item.id);
-
-                    return (
-                        <TouchableOpacity
-                            style={styles.itemRow}
-                            onPress={() => {
-                                toggleSelect(item.id);
-                                setIsSelecting(true);
-                            }}
-                        >
-                            <MaterialCommunityIcons
-                                name={isSelected ? "checkbox-marked" : "checkbox-blank-outline"}
-                                size={24}
-                                color="black"
-                                style={{ marginRight: 10 }}
-                            />
-                            <MaterialCommunityIcons
-                                name="file-document"
-                                size={40}
-                                color="blue"
-                                style={{ marginRight: 10 }}
-                            />
-                            <View style={{ flex: 1 }}>
-                                <Text style={styles.fileName}>{item.fileName}</Text>
-                                <Text style={styles.fileSize}>{item.size}</Text>
-                            </View>
-                        </TouchableOpacity>
-                    );
-                }}
-            />
+                <Text style={styles.sectionHeader}>Actions</Text>
+                <View style={styles.sectionContainer}>
+                    <TouchableOpacity
+                        style={styles.row}
+                        onPress={() => console.log("Delete selected files")}
+                    >
+                        <View style={styles.rowContent}>
+                            <MaterialCommunityIcons name="delete" size={24} color="#666" style={styles.rowIcon} />
+                            <Text style={styles.label}>Delete Selected Files</Text>
+                        </View>
+                        <AntDesign name="right" size={18} color="#C7C7CC" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.row}
+                        onPress={() => console.log("Select All")}
+                    >
+                        <View style={styles.rowContent}>
+                            <MaterialCommunityIcons name="select-all" size={24} color="#666" style={styles.rowIcon} />
+                            <Text style={styles.label}>Select All Files</Text>
+                        </View>
+                        <AntDesign name="right" size={18} color="#C7C7CC" />
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
         </SafeAreaView>
     );
 }
@@ -98,77 +106,70 @@ export default function Duplicates() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff"
+        backgroundColor: "#F2F2F7"
     },
     header: {
         flexDirection: "row",
         alignItems: "center",
+        justifyContent: "space-between",
         paddingHorizontal: 16,
         paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: "#000",
         backgroundColor: "#fff",
-        justifyContent: "space-between"
+        borderBottomWidth: 1,
+        borderBottomColor: "#E5E5EA",
+        marginTop: Platform.OS === 'ios' ? 0 : 20
+    },
+    backButton: {
+        padding: 8
     },
     headerTitle: {
-        fontSize: 18,
-        fontWeight: "bold",
-        color: "black",
+        fontSize: 17,
+        fontWeight: "600",
+        color: "#000",
         flex: 1,
-        marginHorizontal: 10,
+        textAlign: 'center'
     },
-    headerRightIcons: {
-        flexDirection: "row",
-        alignItems: "center"
+    content: {
+        padding: 16
     },
-    infoContainer: {
-        alignItems: "center",
-        padding: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: "#ccc"
-    },
-    largeText: {
-        fontSize: 18,
-        fontWeight: "bold",
-        marginBottom: 5,
-        color: "black"
-    },
-    subText: {
-        fontSize: 14,
-        color: "#555",
-        textAlign: "center",
-        marginHorizontal: 20
-    },
-    storageButtonContainer: {
-        flexDirection: "row",
-        marginTop: 10
-    },
-    storageButton: {
-        backgroundColor: "gray",
-        paddingHorizontal: 10,
-        paddingVertical: 5,
-        borderRadius: 5,
-        marginHorizontal: 5
-    },
-    listContainer: {
-        paddingHorizontal: 16,
-        paddingVertical: 10
-    },
-    itemRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        borderBottomWidth: 1,
-        borderBottomColor: "#ccc",
-        paddingVertical: 12
-    },
-    fileName: {
-        fontSize: 16,
-        fontWeight: "bold",
-        color: "black"
-    },
-    fileSize: {
+    sectionHeader: {
         fontSize: 13,
-        color: "#888",
-        marginTop: 4
+        fontWeight: "600",
+        marginTop: 20,
+        marginBottom: 8,
+        color: "#8E8E93",
+        textTransform: 'uppercase',
+        letterSpacing: 0.5
+    },
+    sectionContainer: {
+        backgroundColor: "#fff",
+        borderRadius: 10,
+        overflow: 'hidden'
+    },
+    row: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#E5E5EA"
+    },
+    rowContent: {
+        flexDirection: "row",
+        alignItems: "center",
+        flex: 1
+    },
+    rowIcon: {
+        marginRight: 12
+    },
+    label: {
+        fontSize: 17,
+        color: "#000"
+    },
+    subLabel: {
+        fontSize: 13,
+        color: "#8E8E93",
+        marginTop: 2
     }
 });
