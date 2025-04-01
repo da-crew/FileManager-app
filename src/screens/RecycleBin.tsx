@@ -34,7 +34,18 @@ export default function RecycleBin() {
     
     const toggleSelect = (id: string) => {
         if (!isSelecting) setIsSelecting(true);
-        setSelectedItems(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
+        setSelectedItems(prev => {
+            const newSelection = prev.includes(id) 
+                ? prev.filter(item => item !== id) 
+                : [...prev, id];
+            
+            // ถ้าไม่มีไฟล์ที่เลือกแล้ว ให้ปิดโหมดการเลือก
+            if (newSelection.length === 0) {
+                setIsSelecting(false);
+            }
+            
+            return newSelection;
+        });
     };
 
     const renderItem = ({ item }: { item: FileItem }) => {
