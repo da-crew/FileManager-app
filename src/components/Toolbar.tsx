@@ -9,6 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 interface ToolbarProps {
     navigation: any,
     containerName: string,
+    goBackHandler: (event: GestureResponderEvent) => void,
     layoutChangeHandler?: (event: GestureResponderEvent) => void,
     sortByHandler?: (event: GestureResponderEvent) => void,
     createHandler?: (event: GestureResponderEvent) => void,
@@ -28,12 +29,11 @@ interface ToolbarProps {
  * @returns {JSX.Element} The rendered Toolbar component.
  */
 
-export default function Toolbar({ navigation, containerName, layoutChangeHandler, sortByHandler, createHandler }: ToolbarProps) {
+export default function Toolbar({ navigation, containerName, goBackHandler, layoutChangeHandler, sortByHandler, createHandler }: ToolbarProps) {
 
-    let a = useNavigation()
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#d9d9d9' }}>
-            <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={() => navigation.goBack()}>
+            <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={goBackHandler}>
                 <MaterialIcons name="arrow-back-ios-new" size={20} />
             </TouchableOpacity>
             <Text style={{ fontSize: 20 }}>{containerName}</Text>

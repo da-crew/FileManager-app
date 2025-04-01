@@ -110,17 +110,21 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
     useEffect(() => fetchContent(), [sortType]);
 
+    function handleGoBack() {
+        if (navpath.nodes.length == 0) {
+            navigation.goBack();
+            return;
+        }
+        navpath.nodes.pop();
+        console.log("new path: ", navpath.build());
+        setNavPath(navpath);
+        unselectAll();
+        fetchContent();
+    }
+
     useEffect(() => {
         const backAction = () => {
-            if (navpath.nodes.length == 0) {
-                navigation.goBack();
-                return true;
-            }
-            navpath.nodes.pop();
-            console.log("new path: ", navpath.build());
-            setNavPath(navpath);
-            unselectAll();
-            fetchContent();
+            handleGoBack();
             return true; // Prevent default behavior
         };
 
@@ -170,6 +174,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 !isSelecting
                     //Default Mode
                     ? <Toolbar navigation={navigation} containerName={storageName}
+                        goBackHandler={() => { handleGoBack() }}
                         sortByHandler={() => { setSortByOptionVisible(true); }}
                         createHandler={containerType == ContainerType.DEFAULT ? () => { setItemCreatorVisible(true); console.log("Create Action") } : undefined}
                     />
@@ -208,18 +213,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             </View>
 
         </View>
-        {
-            isSelecting
-                ? <View style={{ backgroundColor: '#d9d9d9', borderTopWidth: 1, borderColor: '#e7e7e7', flexDirection: 'row', justifyContent: 'space-around', paddingHorizontal: 20 }}>
-                    <BottomBarItem name='Copy' icon={<Feather name='copy' size={30} />} onPress={() => { }} />
-                    <BottomBarItem name='Move' icon={<Feather name='scissors' size={30} />} onPress={() => { }} />
-                    <BottomBarItem name='Rename' icon={<Foundation name='pencil' size={30} />} onPress={() => { }} />
-                    <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} />} onPress={() => { }} />
-                    <BottomBarItem name='More' icon={<MaterialIcons name='more-vert' size={30} />} onPress={() => { }} />
-                </View>
-                : <></>
-        }
-        
+
+        <SelectionBottomBar enabled={isSelecting} />
+
         <Modal visible={sortByOptionVisible} transparent={true} onRequestClose={() => setSortByOptionVisible(false)} >
             <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                 <View style={{ backgroundColor: 'white', justifyContent: 'space-between', paddingBottom: 5 }}>
@@ -245,6 +241,24 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             }}
         />
     </SafeAreaView>;
+}
+
+
+function SelectionBottomBar(props: {
+    enabled: boolean
+}) {
+    if (props.enabled) {
+        return (
+            <View style={{ backgroundColor: '#d9d9d9', borderTopWidth: 1, borderColor: '#e7e7e7', flexDirection: 'row', justifyContent: 'space-around', paddingHorizontal: 20 }}>
+                <BottomBarItem name='Copy' icon={<Feather name='copy' size={30} />} onPress={() => { }} />
+                <BottomBarItem name='Move' icon={<Feather name='scissors' size={30} />} onPress={() => { }} />
+                <BottomBarItem name='Rename' icon={<Foundation name='pencil' size={30} />} onPress={() => { }} />
+                <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} />} onPress={() => { }} />
+                <BottomBarItem name='More' icon={<MaterialIcons name='more-vert' size={30} />} onPress={() => { }} />
+            </View>
+        );
+    }
+    return <></>;
 }
 
 function ItemCreator(props: {
