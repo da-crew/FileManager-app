@@ -1,18 +1,20 @@
-import { SafeAreaView, View, StatusBar, Text, TouchableOpacity, Modal, Alert, BackHandler, TextInput } from "react-native";
-import { PathDisplayer } from '../components/PathDisplayer';
-import { Path } from "../FileSystem";
-import Toolbar from "../components/Toolbar";
-import SelectionToolBar from "../components/SelectionToolbar";
 import { AntDesign, Feather, FontAwesome, Foundation, MaterialIcons } from '@expo/vector-icons';
-import { useEffect, useState } from "react";
 import { useRoute } from '@react-navigation/native';
-import * as RNFS from 'react-native-fs';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useEffect, useState} from "react";
+import { Alert, BackHandler, Modal, SafeAreaView, StatusBar, Text, TextInput, TouchableOpacity, View } from "react-native";
+import * as RNFS from 'react-native-fs';
 import { RootStackParamList } from "../App";
+import { PathDisplayer } from '../components/PathDisplayer';
+import SelectionToolBar from "../components/SelectionToolbar";
+import Toolbar from "../components/Toolbar";
+import { Path } from "../FileSystem";
+import React from 'react';
 
 import BottomBarItem from "../components/ContentContainer/BottomBarItem";
 import BottomBarOptions from "../components/ContentContainer/BottomBarOptions";
 import ContentList from "../components/ContentContainer/ContentList";
+import { getFileType, openWith } from "../utils/openWith";
 
 export enum ContainerType {
     CATEGORIZED,
@@ -154,6 +156,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     function handleOpen(item: RNFS.ReadDirItem): void {
         if (item.isFile()) {
             console.log("Open file", item.name);
+            openWith(item.path, getFileType(item));
         } else if (item.isDirectory()) {
             navpath.nodes.push(item.name);
             console.log("Open directory", navpath.build());
