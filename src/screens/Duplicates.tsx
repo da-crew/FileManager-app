@@ -1,31 +1,85 @@
 import React, { useState } from "react";
-import { SafeAreaView, View, Text, FlatList, TouchableOpacity, StyleSheet, StatusBar, Platform } from "react-native";
+import { SafeAreaView, View, Text, FlatList, StyleSheet, StatusBar } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Toolbar from "../components/Toolbar";
 import SelectionToolBar from '../components/SelectionToolbar';
+import ItemCard from '../components/ItemCard';
+import * as RNFS from "react-native-fs";
 
-interface DuplicateFile {
-    id: string;
-    fileName: string;
-    size: string;
+interface FileItem {
+    name: string;
+    path: string;
+    size: number;
+    mtime: Date;
+    ctime: Date;
+    isFile: () => boolean;
+    isDirectory: () => boolean;
+    isSymbolicLink: () => boolean;
+    type: string;
 }
 
 export default function Duplicates() {
     const navigation = useNavigation();
-    const [duplicateFiles, setDuplicateFiles] = useState<DuplicateFile[]>([
-        { id: "1", fileName: "Report_2024.pdf", size: "5.2 MB" },
-        { id: "2", fileName: "Invoice_001.pdf", size: "3.1 MB" },
-        { id: "3", fileName: "Backup_2023.zip", size: "1.8 GB" },
+    const [duplicateFiles, setDuplicateFiles] = useState<FileItem[]>([
+        // ตัวอย่างข้อมูล
+        {
+            name: "Report_2024.pdf",
+            path: "/path/to/file1",
+            size: 5.2 * 1024 * 1024, // 5.2 MB in bytes
+            mtime: new Date(),
+            ctime: new Date(),
+            isFile: () => true,
+            isDirectory: () => false,
+            isSymbolicLink: () => false,
+            type: "file"
+        },
+        {
+            name: "Invoice_001.pdf",
+            path: "/path/to/file2",
+            size: 3.1 * 1024 * 1024, // 3.1 MB in bytes
+            mtime: new Date(),
+            ctime: new Date(),
+            isFile: () => true,
+            isDirectory: () => false,
+            isSymbolicLink: () => false,
+            type: "file"
+        },
+        {
+            name: "Backup_2023.zip",
+            path: "/path/to/file3",
+            size: 1.8 * 1024 * 1024 * 1024, // 1.8 GB in bytes
+            mtime: new Date(),
+            ctime: new Date(),
+            isFile: () => true,
+            isDirectory: () => false,
+            isSymbolicLink: () => false,
+            type: "file"
+        }
     ]);
 
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
     const [isSelecting, setIsSelecting] = useState(false);
 
-    const toggleSelect = (id: string) => {
-        setSelectedItems((prev) =>
-            prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    const handleSelect = (selected: boolean, item: FileItem) => {
+        if (!isSelecting) setIsSelecting(true);
+        setSelectedItems(prev => 
+            selected 
+                ? [...prev, item.path]
+                : prev.filter(path => path !== item.path)
         );
+    };
+
+    const handleOpen = (item: FileItem) => {
+        // Handle file opening
+        console.log("Opening file:", item.name);
+    };
+
+    const handleItemSelect = (selected: boolean, item: RNFS.ReadDirItem) => {
+        handleSelect(selected, item as unknown as FileItem);
+    };
+
+    const handleItemOpen = (item: RNFS.ReadDirItem) => {
+        handleOpen(item as unknown as FileItem);
     };
 
     return (
@@ -48,7 +102,7 @@ export default function Duplicates() {
                         if (duplicateFiles.length === selectedItems.length) {
                             setSelectedItems([]);
                         } else {
-                            setSelectedItems(duplicateFiles.map(file => file.id));
+                            setSelectedItems(duplicateFiles.map(file => file.path));
                         }
                     }}
                     count={selectedItems.length}
@@ -58,37 +112,15 @@ export default function Duplicates() {
 
             <FlatList
                 data={duplicateFiles}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => {
-                    const isSelected = selectedItems.includes(item.id);
-
-                    return (
-                        <TouchableOpacity
-                            style={styles.row}
-                            onPress={() => {
-                                toggleSelect(item.id);
-                                setIsSelecting(true);
-                            }}
-                        >
-                            <MaterialCommunityIcons
-                                name={isSelected ? "checkbox-marked" : "checkbox-blank-outline"}
-                                size={24}
-                                color="black"
-                                style={{ marginRight: 10 }}
-                            />
-                            <MaterialCommunityIcons
-                                name="file-document"
-                                size={40}
-                                color="blue"
-                                style={{ marginRight: 10 }}
-                            />
-                            <View style={{ flex: 1 }}>
-                                <Text style={styles.fileName}>{item.fileName}</Text>
-                                <Text style={styles.fileSize}>{item.size}</Text>
-                            </View>
-                        </TouchableOpacity>
-                    );
-                }}
+                keyExtractor={(item) => item.path}
+                renderItem={({ item }) => (
+                    <ItemCard
+                        item={item as unknown as RNFS.ReadDirItem}
+                        onSelect={handleItemSelect}
+                        onOpen={handleItemOpen}
+                        isSelected={selectedItems.includes(item.path)}
+                    />
+                )}
             />
         </SafeAreaView>
     );
@@ -98,78 +130,5 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#F2F2F7"
-    },
-    header: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        backgroundColor: "#fff",
-        borderBottomWidth: 1,
-        borderBottomColor: "#E5E5EA",
-        marginTop: Platform.OS === 'ios' ? 0 : 20
-    },
-    backButton: {
-        padding: 8
-    },
-    headerTitle: {
-        fontSize: 17,
-        fontWeight: "600",
-        color: "#000",
-        flex: 1,
-        textAlign: 'center'
-    },
-    content: {
-        padding: 16
-    },
-    sectionHeader: {
-        fontSize: 13,
-        fontWeight: "600",
-        marginTop: 20,
-        marginBottom: 8,
-        color: "#8E8E93",
-        textTransform: 'uppercase',
-        letterSpacing: 0.5
-    },
-    sectionContainer: {
-        backgroundColor: "#fff",
-        borderRadius: 10,
-        overflow: 'hidden'
-    },
-    row: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: "#E5E5EA"
-    },
-    rowContent: {
-        flexDirection: "row",
-        alignItems: "center",
-        flex: 1
-    },
-    rowIcon: {
-        marginRight: 12
-    },
-    label: {
-        fontSize: 17,
-        color: "#000"
-    },
-    subLabel: {
-        fontSize: 13,
-        color: "#8E8E93",
-        marginTop: 2
-    },
-    fileName: {
-        fontSize: 16,
-        color: "#000",
-        marginBottom: 4
-    },
-    fileSize: {
-        fontSize: 14,
-        color: "#8E8E93"
     }
 });

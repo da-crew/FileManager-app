@@ -1,31 +1,74 @@
 import React, { useState } from "react";
-import { SafeAreaView, View, Text, FlatList, TouchableOpacity, StyleSheet, StatusBar, Platform } from "react-native";
+import { SafeAreaView, View, Text, FlatList, StyleSheet, StatusBar } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Toolbar from "../components/Toolbar";
 import SelectionToolBar from '../components/SelectionToolbar';
+import ItemCard from '../components/ItemCard';
+import * as RNFS from "react-native-fs";
 
-interface LargeFile {
-    id: string;
-    fileName: string;
-    size: string;
+interface FileItem {
+    name: string;
+    path: string;
+    size: number;
+    mtime: Date;
+    ctime: Date;
+    isFile: () => boolean;
+    isDirectory: () => boolean;
+    isSymbolicLink: () => boolean;
+    type: string;
 }
 
 export default function LargeFiles() {
     const navigation = useNavigation();
-    const [largeFiles, setLargeFiles] = useState<LargeFile[]>([
-        { id: "1", fileName: "20241117_11154.mp4", size: "279 MB" },
-        { id: "2", fileName: "20241117_11140.mp4", size: "279 MB" }
+    const [largeFiles, setLargeFiles] = useState<FileItem[]>([
+        // ตัวอย่างข้อมูล
+        {
+            name: "20241117_11154.mp4",
+            path: "/path/to/file1",
+            size: 279 * 1024 * 1024, // 279 MB in bytes
+            mtime: new Date(),
+            ctime: new Date(),
+            isFile: () => true,
+            isDirectory: () => false,
+            isSymbolicLink: () => false,
+            type: "file"
+        },
+        {
+            name: "20241117_11140.mp4",
+            path: "/path/to/file2",
+            size: 279 * 1024 * 1024, // 279 MB in bytes
+            mtime: new Date(),
+            ctime: new Date(),
+            isFile: () => true,
+            isDirectory: () => false,
+            isSymbolicLink: () => false,
+            type: "file"
+        }
     ]);
     
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
     const [isSelecting, setIsSelecting] = useState(false);
 
-    const toggleSelect = (id: string) => {
+    const handleSelect = (selected: boolean, item: FileItem) => {
         if (!isSelecting) setIsSelecting(true);
-        setSelectedItems((prev) =>
-            prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+        setSelectedItems(prev => 
+            selected 
+                ? [...prev, item.path]
+                : prev.filter(path => path !== item.path)
         );
+    };
+
+    const handleOpen = (item: FileItem) => {
+        // Handle file opening
+        console.log("Opening file:", item.name);
+    };
+
+    const handleItemSelect = (selected: boolean, item: RNFS.ReadDirItem) => {
+        handleSelect(selected, item as unknown as FileItem);
+    };
+
+    const handleItemOpen = (item: RNFS.ReadDirItem) => {
+        handleOpen(item as unknown as FileItem);
     };
 
     return (
@@ -48,7 +91,7 @@ export default function LargeFiles() {
                         if (largeFiles.length === selectedItems.length) {
                             setSelectedItems([]);
                         } else {
-                            setSelectedItems(largeFiles.map(file => file.id));
+                            setSelectedItems(largeFiles.map(file => file.path));
                         }
                     }}
                     count={selectedItems.length}
@@ -58,34 +101,15 @@ export default function LargeFiles() {
 
             <FlatList
                 data={largeFiles}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => {
-                    const isSelected = selectedItems.includes(item.id);
-                    
-                    return (
-                        <TouchableOpacity
-                            style={styles.row}
-                            onPress={() => toggleSelect(item.id)}
-                        >
-                            <MaterialCommunityIcons
-                                name={isSelected ? "checkbox-marked" : "checkbox-blank-outline"}
-                                size={24}
-                                color="black"
-                                style={{ marginRight: 10 }}
-                            />
-                            <MaterialCommunityIcons
-                                name="file-video"
-                                size={40}
-                                color="blue"
-                                style={{ marginRight: 10 }}
-                            />
-                            <View style={{ flex: 1 }}>
-                                <Text style={styles.fileName}>{item.fileName}</Text>
-                                <Text style={styles.fileSize}>{item.size}</Text>
-                            </View>
-                        </TouchableOpacity>
-                    );
-                }}
+                keyExtractor={(item) => item.path}
+                renderItem={({ item }) => (
+                    <ItemCard
+                        item={item as unknown as RNFS.ReadDirItem}
+                        onSelect={handleItemSelect}
+                        onOpen={handleItemOpen}
+                        isSelected={selectedItems.includes(item.path)}
+                    />
+                )}
             />
         </SafeAreaView>
     );
@@ -95,23 +119,5 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#F2F2F7"
-    },
-    row: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: "#E5E5EA"
-    },
-    fileName: {
-        fontSize: 16,
-        color: "#000",
-        marginBottom: 4
-    },
-    fileSize: {
-        fontSize: 14,
-        color: "#8E8E93"
     }
 });
