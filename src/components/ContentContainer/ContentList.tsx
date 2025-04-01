@@ -4,7 +4,7 @@ import * as RNFS from "react-native-fs"
 
 interface ContentListProps {
     content: RNFS.ReadDirItem[] | null;
-    selectionSet: Set<string>;
+    selectionSet: Set<RNFS.ReadDirItem>;
     handleSelect: (select: boolean, item: RNFS.ReadDirItem) => void;
     handleOpen: (item: RNFS.ReadDirItem) => void;
 }
@@ -34,7 +34,7 @@ export default function ContentList({content, selectionSet, handleSelect, handle
                     <ItemCard item={item}
                         onSelect={handleSelect}
                         onOpen={handleOpen}
-                        isSelected={selectionSet.has(item.name)}
+                        isSelected={selectionSet.has(item)}
                     />
                 }
             />

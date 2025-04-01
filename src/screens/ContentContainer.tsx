@@ -68,13 +68,13 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
     const route = useRoute();
     const routeParams = route.params as ContentContainerRouteParams;
-    const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{ selectionSet: Set<string>, isSelecting: boolean }>({ selectionSet: new Set(), isSelecting: false });
+    const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{ selectionSet: Set<RNFS.ReadDirItem>, isSelecting: boolean }>({ selectionSet: new Set(), isSelecting: false });
     const [currentViewMode, setCurrentViewMode] = useState(ViewMode.FILES);
     const [sortByOptionVisible, setSortByOptionVisible] = useState(false);//modal
 
     const [itemCreatorVisible, setItemCreatorVisible] = useState(false);
 
-    const [sortType, setSortType] = useState<SortType>(SortType.ALPHABETICAL);
+    const [sortType, setSortType] = useState(SortType.ALPHABETICAL);
     const [navpath, setNavPath] = useState(routeParams.path);
 
     const storageName = routeParams.containerName ?? "ERROR!! I LOVE FIXING ERRORS!";
@@ -140,9 +140,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
     function handleSelect(select: boolean, item: RNFS.ReadDirItem) {
         if (select) {
-            selectionSet.add(item.name);
+            selectionSet.add(item);
         } else {
-            selectionSet.delete(item.name);
+            selectionSet.delete(item);
         }
         updateSelectionState({ selectionSet, isSelecting: selectionSet.size > 0 });
     }
@@ -158,6 +158,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             navpath.nodes.push(item.name);
             console.log("Open directory", navpath.build());
             setNavPath(navpath);
+            unselectAll();
             fetchContent();
         }
     }
@@ -181,7 +182,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                     unselectAll();
                                 } else {
                                     for (const item of content) {
-                                        selectionSet.add(item.name);
+                                        selectionSet.add(item);
                                     }
                                     updateSelectionState({ selectionSet, isSelecting: selectionSet.size > 0 });
                                 }
@@ -209,7 +210,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         </View>
         {
             isSelecting
-                ? <View style={{ backgroundColor: '#d9d9d9', borderTopWidth: 1, borderColor: '#e7e7e7', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20 }}>
+                ? <View style={{ backgroundColor: '#d9d9d9', borderTopWidth: 1, borderColor: '#e7e7e7', flexDirection: 'row', justifyContent: 'space-around', paddingHorizontal: 20 }}>
                     <BottomBarItem name='Copy' icon={<Feather name='copy' size={30} />} onPress={() => { }} />
                     <BottomBarItem name='Move' icon={<Feather name='scissors' size={30} />} onPress={() => { }} />
                     <BottomBarItem name='Rename' icon={<Foundation name='pencil' size={30} />} onPress={() => { }} />
@@ -348,7 +349,6 @@ function ItemCreator(props: {
                                                     .then(() => {
                                                         console.log("Created ", fullPath);
                                                         props.onCreationDone();
-                                                        //fetchContent();
                                                     })
                                                     .catch((reason) => {
                                                         Alert.alert("Error Creating Item", reason, [{ text: "Dismiss" }]);
