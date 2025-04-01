@@ -21,9 +21,7 @@ export async function openWith(fileUri: string, fileType?: string) {
     };
 
     await Share.open(options); // Show "Open With" dialog
-    console.log("Success?")
   } catch (err) {
     console.error("Error opening file:", err);
-    Alert.alert("Error", "Could not open file");
   }
 }
