@@ -62,13 +62,25 @@ enum CreationType {
     FILE,
 }
 
+enum MoveType {
+    COPY,
+    CUT,
+}
 
+interface MovingState {
+    sourceDir: Path,
+    moveType: MoveType,
+    items: Array<RNFS.ReadDirItem>,
+}
 
 export function ContentContainer({ navigation }: NativeStackScreenProps<RootStackParamList>) {
 
     const route = useRoute();
     const routeParams = route.params as ContentContainerRouteParams;
+
     const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{ selectionSet: Set<RNFS.ReadDirItem>, isSelecting: boolean }>({ selectionSet: new Set(), isSelecting: false });
+    const [movingState, setMovingState] = useState<MovingState | null>(null);
+
     const [currentViewMode, setCurrentViewMode] = useState(ViewMode.FILES);
     const [sortByOptionVisible, setSortByOptionVisible] = useState(false);//modal
 
@@ -143,6 +155,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     }
 
     function handleSelect(select: boolean, item: RNFS.ReadDirItem) {
+        
         if (select) {
             selectionSet.add(item);
         } else {
@@ -168,8 +181,8 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     }
 
     return <SafeAreaView style={{ flex: 1 }}>
+        <StatusBar />
         <View style={{ flex: 1 }}>
-            <StatusBar />
             {//Toolbar 1
                 !isSelecting
                     //Default Mode
@@ -214,7 +227,26 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
         </View>
 
-        <SelectionBottomBar enabled={isSelecting} />
+        <SelectionBottomBar isSelecting={selectionSet.size > 0} isMoving={movingState != null}
+            copyActionHandler={function (): void {
+                setMovingState({
+                    sourceDir: navpath.clone(),
+                    moveType: MoveType.COPY,
+                    items: Array.from(selectionSet),
+                })
+                unselectAll();
+            }} moveActionHandler={function (): void {
+                throw new Error("Function not implemented.");
+            }} renameActionHandler={function (): void {
+                throw new Error("Function not implemented.");
+            }} deleteActionHandler={function (): void {
+                throw new Error("Function not implemented.");
+            }} pasteCancelActionHandler={function (): void {
+                setMovingState(null);
+            }} pasteActionHandler={function (): void {
+                throw new Error("Function not implemented.");
+            }}
+        />
 
         <Modal visible={sortByOptionVisible} transparent={true} onRequestClose={() => setSortByOptionVisible(false)} >
             <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
@@ -245,21 +277,38 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
 
 function SelectionBottomBar(props: {
-    enabled: boolean
+    isSelecting: boolean,
+    isMoving: boolean,
+    copyActionHandler: () => void,
+    moveActionHandler: () => void,
+    renameActionHandler: () => void,
+    deleteActionHandler: () => void,
+
+    pasteCancelActionHandler: () => void,
+    pasteActionHandler: () => void,
 }) {
-    if (props.enabled) {
+    if (props.isSelecting) {
         return (
             <View style={{ backgroundColor: '#d9d9d9', borderTopWidth: 1, borderColor: '#e7e7e7', flexDirection: 'row', justifyContent: 'space-around', paddingHorizontal: 20 }}>
-                <BottomBarItem name='Copy' icon={<Feather name='copy' size={30} />} onPress={() => { }} />
-                <BottomBarItem name='Move' icon={<Feather name='scissors' size={30} />} onPress={() => { }} />
-                <BottomBarItem name='Rename' icon={<Foundation name='pencil' size={30} />} onPress={() => { }} />
-                <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} />} onPress={() => { }} />
-                <BottomBarItem name='More' icon={<MaterialIcons name='more-vert' size={30} />} onPress={() => { }} />
+                <BottomBarItem name='Copy' icon={<Feather name='copy' size={30} />} onPress={props.copyActionHandler} />
+                <BottomBarItem name='Move' icon={<Feather name='scissors' size={30} />} onPress={props.moveActionHandler} />
+                <BottomBarItem name='Rename' icon={<Foundation name='pencil' size={30} />} onPress={props.renameActionHandler} />
+                <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} />} onPress={() => Alert.alert("More options", "This feature is not implemented yet.", [{ text: "OK" }])} />
             </View>
         );
     }
+
+    if (props.isMoving) {
+        return (<View style={{ backgroundColor: '#d9d9d9', borderTopWidth: 1, borderColor: '#e7e7e7', flexDirection: 'row', justifyContent: 'space-around', paddingHorizontal: 20 }}>
+            <BottomBarItem name='Cancel' icon={<MaterialIcons name='cancel' size={30} />} onPress={props.pasteCancelActionHandler} />
+            <BottomBarItem name='Paste' icon={<MaterialIcons name='content-paste' size={30} />} onPress={props.pasteActionHandler} />
+        </View>);
+    }
+
     return <></>;
 }
+
+
 
 function ItemCreator(props: {
     enabled: boolean,
