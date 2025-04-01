@@ -77,9 +77,12 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
     const route = useRoute();
     const routeParams = route.params as ContentContainerRouteParams;
+    const storageName = routeParams.containerName;
+    const containerType = routeParams.containerType;
 
     const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{ selectionSet: Set<RNFS.ReadDirItem>, isSelecting: boolean }>({ selectionSet: new Set(), isSelecting: false });
     const [movingState, setMovingState] = useState<MovingState | null>(null);
+    const [movingProgress, setMovingProgress] = useState<number | null>(null);
 
     const [currentViewMode, setCurrentViewMode] = useState(ViewMode.FILES);
     const [sortByOptionVisible, setSortByOptionVisible] = useState(false);//modal
@@ -89,8 +92,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     const [sortType, setSortType] = useState(SortType.ALPHABETICAL);
     const [navpath, setNavPath] = useState(routeParams.path);
 
-    const storageName = routeParams.containerName ?? "ERROR!! I LOVE FIXING ERRORS!";
-    const containerType = routeParams.containerType;
 
     const [content, setContent] = useState<RNFS.ReadDirItem[] | null>(null);
 
@@ -155,7 +156,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     }
 
     function handleSelect(select: boolean, item: RNFS.ReadDirItem) {
-        
         if (select) {
             selectionSet.add(item);
         } else {
@@ -187,9 +187,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 !isSelecting
                     //Default Mode
                     ? <Toolbar navigation={navigation} containerName={storageName}
-                        goBackHandler={() => { handleGoBack() }}
-                        sortByHandler={() => { setSortByOptionVisible(true); }}
-                        createHandler={containerType == ContainerType.DEFAULT ? () => { setItemCreatorVisible(true); console.log("Create Action") } : undefined}
+                        goBackHandler={() => handleGoBack()}
+                        sortByHandler={() => setSortByOptionVisible(true)}
+                        createHandler={containerType == ContainerType.DEFAULT ? () => setItemCreatorVisible(true) : undefined}
                     />
                     //Selection Mode
                     : <SelectionToolBar
@@ -227,24 +227,57 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
         </View>
 
-        <SelectionBottomBar isSelecting={selectionSet.size > 0} isMoving={movingState != null}
+        <SelectionBottomBar isSelecting={selectionSet.size > 0} isMoving={movingState != null} isPasteLocationValid={movingState?.sourceDir.build() != navpath.build()}
             copyActionHandler={function (): void {
+                let itemArray = Array.from(selectionSet);
+
+                itemArray.forEach((item) => {
+                    if (item.isDirectory()) {
+                        throw new Error("Copying folders is currently not supported!");
+                    }
+                });
+
                 setMovingState({
                     sourceDir: navpath.clone(),
                     moveType: MoveType.COPY,
-                    items: Array.from(selectionSet),
-                })
+                    items: itemArray,
+                });
+
                 unselectAll();
             }} moveActionHandler={function (): void {
-                throw new Error("Function not implemented.");
+                throw new Error("Move action not implemented.");
             }} renameActionHandler={function (): void {
-                throw new Error("Function not implemented.");
+                throw new Error("Rename action not implemented.");
             }} deleteActionHandler={function (): void {
-                throw new Error("Function not implemented.");
+                throw new Error("Delete action not implemented.");
             }} pasteCancelActionHandler={function (): void {
                 setMovingState(null);
-            }} pasteActionHandler={function (): void {
-                throw new Error("Function not implemented.");
+            }} pasteActionHandler={async function () {
+                console.log("This is nothing is actually happening here!");
+                if (movingState == null) {
+                    throw new Error("movingState shouldn't be null!");
+                }
+                setMovingProgress(0);
+                
+                async function mockAction() {
+                    const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+                    await sleep(Math.random() * 1000);
+                    setMovingProgress((prevProgress) => {
+                        if (movingState == null) return null;
+
+                        let newProgress = (prevProgress ?? 0) + 1;
+                        if (newProgress == movingState.items.length) return null;
+                        return newProgress;
+                    });
+                }
+
+                for (const item of movingState.items) {
+                    console.log(`mv ${movingState.sourceDir.appendToPath(item.path)} ${navpath.appendToPath(item.path)}`);
+                    if (movingState == null) break;
+                    await mockAction();
+                }
+
+                setMovingState(null);
             }}
         />
 
@@ -259,6 +292,44 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                         updateSortType(SortType.DATE);
                         setSortByOptionVisible(false);
                     }} />
+                </View>
+            </View>
+        </Modal>
+
+        <Modal visible={movingProgress != null} transparent={true}>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10, alignItems: 'center' }}>
+                    <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Moving Items</Text>
+                    {movingState && movingProgress !== null ? (
+                        <>
+                            <Text style={{ fontSize: 16, marginBottom: 10 }}>
+                                {`Moving ${movingProgress + 1} of ${movingState.items.length} items...`}
+                            </Text>
+                            <View style={{ width: '100%', height: 10, backgroundColor: '#e0e0e0', borderRadius: 5, overflow: 'hidden', marginBottom: 10 }}>
+                                <View
+                                    style={{
+                                        width: `${((movingProgress + 1) / movingState.items.length) * 100}%`,
+                                        height: '100%',
+                                        backgroundColor: '#007BFF',
+                                    }}
+                                />
+                            </View>
+                        </>
+                    ) : (
+                        <Text style={{ fontSize: 16, marginBottom: 10 }}>Preparing to move items...</Text>
+                    )}
+                    <TouchableOpacity
+                        style={{
+                            backgroundColor: '#007BFF',
+                            padding: 10,
+                            borderRadius: 5,
+                            alignItems: 'center',
+                            width: '100%',
+                        }}
+                        onPress={() => setMovingState(null)}
+                    >
+                        <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
         </Modal>
@@ -279,6 +350,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 function SelectionBottomBar(props: {
     isSelecting: boolean,
     isMoving: boolean,
+    isPasteLocationValid: boolean,
     copyActionHandler: () => void,
     moveActionHandler: () => void,
     renameActionHandler: () => void,
@@ -301,7 +373,7 @@ function SelectionBottomBar(props: {
     if (props.isMoving) {
         return (<View style={{ backgroundColor: '#d9d9d9', borderTopWidth: 1, borderColor: '#e7e7e7', flexDirection: 'row', justifyContent: 'space-around', paddingHorizontal: 20 }}>
             <BottomBarItem name='Cancel' icon={<MaterialIcons name='cancel' size={30} />} onPress={props.pasteCancelActionHandler} />
-            <BottomBarItem name='Paste' icon={<MaterialIcons name='content-paste' size={30} />} onPress={props.pasteActionHandler} />
+            <BottomBarItem name='Paste' icon={<MaterialIcons name='content-paste' size={30} />} onPress={props.pasteActionHandler} disabled={!props.isPasteLocationValid} />
         </View>);
     }
 
