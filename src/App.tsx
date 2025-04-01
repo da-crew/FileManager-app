@@ -1,15 +1,15 @@
-import * as FileSystem from 'expo-file-system';
-import * as React from 'react'
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
-import HomeScreen from './screens/HomeScreen';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import * as React from 'react';
 import ContentContainer, { ContentContainerRouteParams } from './screens/ContentContainer';
-import LargeFiles from './screens/LargeFiles';
 import DuplicateFiles from './screens/Duplicates';
+import HomeScreen from './screens/HomeScreen';
+import LargeFiles from './screens/LargeFiles';
 import RecycleBin from './screens/RecycleBin';
 import SearchScreen from './screens/Search';
 import SettingsScreen from './screens/Settings';
 import TestScreen from './screens/TestScreen';
+import TextEditor from './screens/TextEditor';
 
 export type RootStackParamList = {
     Home: undefined,
@@ -18,6 +18,7 @@ export type RootStackParamList = {
     RecycleBin: undefined,
     Test: undefined,
     Container: ContentContainerRouteParams,
+    TextEditor: ContentContainerRouteParams,
 };
 
 const Stack = createNativeStackNavigator();
@@ -38,6 +39,7 @@ export default function App() {
             <Stack.Screen name="Search" component={SearchScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="Test" component={TestScreen} />
+            <Stack.Screen name="TextEditor" component={TextEditor} />
         </Stack.Navigator>
     </NavigationContainer>;
 }

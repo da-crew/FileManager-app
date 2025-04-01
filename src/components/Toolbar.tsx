@@ -12,6 +12,7 @@ interface ToolbarProps {
     layoutChangeHandler?: (event: GestureResponderEvent) => void,
     sortByHandler?: (event: GestureResponderEvent) => void,
     createHandler?: (event: GestureResponderEvent) => void,
+    onBack?: () => void,
 }
 
 /**
@@ -25,15 +26,16 @@ interface ToolbarProps {
  * @param {Function} [props.layoutChangeHandler] - Optional handler function for layout change.
  * @param {Function} [props.sortByHandler] - Optional handler function for sorting items.
  * @param {Function} [props.createHandler] - Optional handler function for creating a new item.
+ * @param {Function} [props.onBack] - Optional custom back navigation function.
  * @returns {JSX.Element} The rendered Toolbar component.
  */
 
-export default function Toolbar({ navigation, containerName, layoutChangeHandler, sortByHandler, createHandler }: ToolbarProps) {
+export default function Toolbar({ navigation, containerName, layoutChangeHandler, sortByHandler, createHandler, onBack }: ToolbarProps) {
 
     let a = useNavigation()
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#d9d9d9' }}>
-            <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={() => navigation.goBack()}>
+            <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={onBack || (() => navigation.goBack())}>
                 <MaterialIcons name="arrow-back-ios-new" size={20} />
             </TouchableOpacity>
             <Text style={{ fontSize: 20 }}>{containerName}</Text>
@@ -81,4 +83,5 @@ Toolbar.propTypes = {
     layoutChangeHandler: PropTypes.func,
     sortByHandler: PropTypes.func,
     createHandler: PropTypes.func,
+    onBack: PropTypes.func,
 };

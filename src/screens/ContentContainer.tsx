@@ -1,7 +1,7 @@
 import { AntDesign, Feather, FontAwesome, Foundation, MaterialIcons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useEffect, useState} from "react";
+import React, { useEffect, useState } from 'react';
 import { Alert, BackHandler, Modal, SafeAreaView, StatusBar, Text, TextInput, TouchableOpacity, View } from "react-native";
 import * as RNFS from 'react-native-fs';
 import { RootStackParamList } from "../App";
@@ -9,7 +9,6 @@ import { PathDisplayer } from '../components/PathDisplayer';
 import SelectionToolBar from "../components/SelectionToolbar";
 import Toolbar from "../components/Toolbar";
 import { Path } from "../FileSystem";
-import React from 'react';
 
 import BottomBarItem from "../components/ContentContainer/BottomBarItem";
 import BottomBarOptions from "../components/ContentContainer/BottomBarOptions";
@@ -156,7 +155,18 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     function handleOpen(item: RNFS.ReadDirItem): void {
         if (item.isFile()) {
             console.log("Open file", item.name);
+            if(getFileType(item) == "text/plain"){
+                console.log("Open Text editor", navpath.build())
+                navpath.nodes.push(item.name);
+                navigation.navigate("TextEditor", {
+                    containerName: storageName,
+                    path: navpath,
+                    containerType: ContainerType.DEFAULT
+                });
+            }
+            else{
             openWith(item.path, getFileType(item));
+            }
         } else if (item.isDirectory()) {
             navpath.nodes.push(item.name);
             console.log("Open directory", navpath.build());
