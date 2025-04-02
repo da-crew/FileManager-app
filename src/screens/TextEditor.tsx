@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, BackHandler, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import * as RNFS from 'react-native-fs';
 import { RootStackParamList } from '../App';
 import { PathDisplayer } from '../components/PathDisplayer';
@@ -17,31 +17,37 @@ export default function TextEditor({ route, navigation }: NativeStackScreenProps
   useEffect(() => {
     loadFile();
   }, []);
+  
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+    const backAction = () => {
       if (hasUnsavedChanges) {
-        // Prevent default behavior of leaving the screen
-        e.preventDefault();
-
-        // Prompt the user before leaving the screen
         Alert.alert(
           'Unsaved Changes',
           'You have unsaved changes. Do you want to save them?',
           [
-            { text: "Don't Save", style: 'destructive', onPress: () => navigation.dispatch(e.data.action) },
+            { text: "Don't Save", style: 'destructive', onPress: () => {
+              path.nodes.pop();
+              navigation.goBack();
+            }},
             { text: 'Cancel', style: 'cancel' },
             { text: 'Save', onPress: async () => {
               await saveFile();
-              navigation.dispatch(e.data.action);
+              path.nodes.pop();
+              navigation.goBack();
             }},
           ]
         );
+        return true; // Prevent default back behavior
       }
-    });
+      path.nodes.pop();
+      navigation.goBack();
+      return true; // Prevent default back behavior
+    };
 
-    return unsubscribe;
-  }, [navigation, hasUnsavedChanges]);
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
+  }, [navigation, hasUnsavedChanges, content]);
 
   const loadFile = async () => {
     try {
@@ -75,9 +81,31 @@ export default function TextEditor({ route, navigation }: NativeStackScreenProps
   };
 
   const handleBack = () => {
-    // Remove the file name from the path before going back
-    path.nodes.pop();
-    navigation.goBack();
+    if (hasUnsavedChanges) {
+      Alert.alert(
+        'Unsaved Changes',
+        'You have unsaved changes. Do you want to save them?',
+        [
+          { text: "Don't Save", style: 'destructive', onPress: () => {
+            path.nodes.pop();
+            navigation.goBack();
+          }},
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Save', onPress: async () => {
+            try{
+              await saveFile();
+              path.nodes.pop();
+              navigation.goBack();
+            } catch(error) {
+              console.error("Save failed", error)
+            }
+          }},
+        ]
+      );
+    } else {
+      path.nodes.pop();
+      navigation.goBack();
+    }
   };
 
   return (
