@@ -18,15 +18,6 @@ export default function ContentList({content, selectionSet, handleSelect, handle
             </View>);
         }
         return (
-            // <ScrollView>
-            // {content.map((item: RNFS.ReadDirItem, i: number) => (
-            //     <ItemCard item={item} key={i}
-            //         onSelect={handleSelect}
-            //         onOpen={handleOpen}
-            //         isSelected={selectionSet.has(item.name)}
-            //     />
-            // ))}
-            // </ScrollView>
             <FlatList
                 data={content}
                 keyExtractor={(item, i) => item + i.toString()}

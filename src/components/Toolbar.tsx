@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity, GestureResponderEvent } from 'react-nativ
 import { MaterialIcons, Ionicons, AntDesign } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import PropTypes from 'prop-types';
-import { useNavigation } from '@react-navigation/native';
 
 
 interface ToolbarProps {
