@@ -6,6 +6,20 @@ import SelectionToolBar from '../components/SelectionToolbar';
 import ItemCard from '../components/ItemCard';
 import * as RNFS from "react-native-fs";
 
+//https://www.npmjs.com/package/react-native-fs#API
+//ใช้ RNFS.ReadDirItem แทน FileItem!!!!!
+/*
+type ReadDirItem = {
+  ctime: date;     // The creation date of the file (iOS only)
+  mtime: date;     // The last modified date of the file
+  name: string;     // The name of the item
+  path: string;     // The absolute path to the item
+  size: string;     // Size in bytes
+  isFile: () => boolean;        // Is the item just a file?
+  isDirectory: () => boolean;   // Is the item a directory?
+};
+*/
+
 interface FileItem {
     name: string;
     path: string;
