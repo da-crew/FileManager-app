@@ -6,6 +6,8 @@ import { RootStackParamList } from '../App';
 import { PathDisplayer } from '../components/PathDisplayer';
 import Toolbar from '../components/Toolbar';
 import { ContentContainerRouteParams } from './ContentContainer';
+import { MaterialIcons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 export default function TextEditor({ route, navigation }: NativeStackScreenProps<RootStackParamList>) {
   const [content, setContent] = useState<string>('');
@@ -17,7 +19,7 @@ export default function TextEditor({ route, navigation }: NativeStackScreenProps
   useEffect(() => {
     loadFile();
   }, []);
-  
+
 
   useEffect(() => {
     const backAction = () => {
@@ -26,16 +28,20 @@ export default function TextEditor({ route, navigation }: NativeStackScreenProps
           'Unsaved Changes',
           'You have unsaved changes. Do you want to save them?',
           [
-            { text: "Don't Save", style: 'destructive', onPress: () => {
-              path.nodes.pop();
-              navigation.goBack();
-            }},
+            {
+              text: "Don't Save", style: 'destructive', onPress: () => {
+                path.nodes.pop();
+                navigation.goBack();
+              }
+            },
             { text: 'Cancel', style: 'cancel' },
-            { text: 'Save', onPress: async () => {
-              await saveFile();
-              path.nodes.pop();
-              navigation.goBack();
-            }},
+            {
+              text: 'Save', onPress: async () => {
+                await saveFile();
+                path.nodes.pop();
+                navigation.goBack();
+              }
+            },
           ]
         );
         return true; // Prevent default back behavior
@@ -63,15 +69,17 @@ export default function TextEditor({ route, navigation }: NativeStackScreenProps
   };
 
   const saveFile = async () => {
-    try {
-      console.log("Saving file to:", filePath);
-      await RNFS.writeFile(filePath, content, 'utf8');
-      setOriginalContent(content);
-      setHasUnsavedChanges(false);
-      Alert.alert('Success', 'File saved!');
-    } catch (error) {
-      console.error("Error saving file:", error);
-      Alert.alert('Error', 'Failed to save file.');
+    if (hasUnsavedChanges) {
+      try {
+        console.log("Saving file to:", filePath);
+        await RNFS.writeFile(filePath, content, 'utf8');
+        setOriginalContent(content);
+        setHasUnsavedChanges(false);
+        Alert.alert('Success', 'File saved!');
+      } catch (error) {
+        console.error("Error saving file:", error);
+        Alert.alert('Error', 'Failed to save file.');
+      }
     }
   };
 
@@ -86,20 +94,24 @@ export default function TextEditor({ route, navigation }: NativeStackScreenProps
         'Unsaved Changes',
         'You have unsaved changes. Do you want to save them?',
         [
-          { text: "Don't Save", style: 'destructive', onPress: () => {
-            path.nodes.pop();
-            navigation.goBack();
-          }},
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Save', onPress: async () => {
-            try{
-              await saveFile();
+          {
+            text: "Don't Save", style: 'destructive', onPress: () => {
               path.nodes.pop();
               navigation.goBack();
-            } catch(error) {
-              console.error("Save failed", error)
             }
-          }},
+          },
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Save', onPress: async () => {
+              try {
+                await saveFile();
+                path.nodes.pop();
+                navigation.goBack();
+              } catch (error) {
+                console.error("Save failed", error)
+              }
+            }
+          },
         ]
       );
     } else {
@@ -110,33 +122,26 @@ export default function TextEditor({ route, navigation }: NativeStackScreenProps
 
   return (
     <SafeAreaView style={styles.container}>
-      <Toolbar 
-        navigation={navigation} 
-        containerName={containerName}
-        onBack={handleBack}
-      />
-      <PathDisplayer navpath={path} />
+      <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#d9d9d9' }}>
+        <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={handleBack}>
+          <MaterialIcons name="arrow-back-ios-new" size={20} />
+        </TouchableOpacity>
+        <Text style={{ fontSize: 20 }}>{containerName}</Text>
+        <TouchableOpacity
+          style={{ marginLeft: 'auto', marginRight: 15 }}
+          onPress={saveFile}
+        >
+          <Ionicons name="save-sharp" size={24} color={hasUnsavedChanges ? "black" : "gray"} />
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.editorContainer}>
-        {hasUnsavedChanges && (
-          <View style={styles.unsavedChanges}>
-            <Text style={styles.unsavedText}>You have unsaved changes</Text>
-          </View>
-        )}
         <TextInput
           style={styles.input}
           multiline
           value={content}
           onChangeText={handleContentChange}
         />
-        <TouchableOpacity 
-          onPress={saveFile} 
-          style={[
-            styles.saveButton,
-            hasUnsavedChanges ? styles.saveButtonUnsaved : styles.saveButtonSaved
-          ]}
-        >
-          <Text style={styles.saveText}>Save</Text>
-        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -149,15 +154,14 @@ const styles = StyleSheet.create({
   },
   editorContainer: {
     flex: 1,
-    padding: 10,
+    padding: 5,
   },
   input: {
     flex: 1,
     padding: 10,
     fontSize: 16,
     textAlignVertical: 'top',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderWidth: 0,
     borderRadius: 5,
   },
   saveButton: {
