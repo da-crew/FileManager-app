@@ -6,8 +6,8 @@ import SelectionToolBar from '../components/SelectionToolbar';
 import ItemCard from '../components/ItemCard';
 import * as RNFS from "react-native-fs";
 
-//https://www.npmjs.com/package/react-native-fs#API
-//ใช้ RNFS.ReadDirItem แทน FileItem!!!!!
+// https://www.npmjs.com/package/react-native-fs#API
+// ใช้ RNFS.ReadDirItem แทน FileItem!!!!!
 /*
 type ReadDirItem = {
   ctime: date;     // The creation date of the file (iOS only)
@@ -19,6 +19,10 @@ type ReadDirItem = {
   isDirectory: () => boolean;   // Is the item a directory?
 };
 */
+
+// แก้ padding ของทั้งสองหน้า
+// ทำให้แสดงbottom barเวลาเลือกitem
+// เอาหน้า Recycle Bin ออก
 
 interface FileItem {
     name: string;
