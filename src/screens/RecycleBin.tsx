@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import { SafeAreaView, View, Text, FlatList, TouchableOpacity, StyleSheet, StatusBar, Modal } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import { MaterialCommunityIcons, MaterialIcons, Ionicons, AntDesign, FontAwesome5 } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'; 
+import SelectionToolBar from '../components/SelectionToolbar';
+
+type RootStackParamList = {
+  Search: undefined; 
+  RecycleBin: undefined;
+};
 
 interface FileItem {
     id: string;
@@ -13,31 +18,34 @@ interface FileItem {
 }
 
 export default function RecycleBin() {
-    const navigation = useNavigation();
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
+    const [isSelecting, setIsSelecting] = useState<boolean>(false);
     const [isConfirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [isConfirmRestoreVisible, setConfirmRestoreVisible] = useState(false);
+    const [sortByOptionVisible, setSortByOptionVisible] = useState(false);
+    const [menuVisible, setMenuVisible] = useState(false);
 
     const data: FileItem[] = [
-        { id: '1', name: '01 51-01-0384 คู่มือความหล่อ', date: '22:41 Feb 11,2025', size: '5.5 MB' },
-        { id: '2', name: '01 51-01-0384 คู่มือความหล่อ', date: '22:41 Feb 11,2025', size: '5.5 MB' },
-        { id: '3', name: '01 51-01-0384 คู่มือความหล่อ', date: '22:41 Feb 11,2025', size: '5.5 MB' }
+        { id: '1', name: 'Document 1', date: 'Feb 11, 2025', size: '5.5 MB' },
+        { id: '2', name: 'Document 2', date: 'Feb 12, 2025', size: '3.2 MB' },
+        { id: '3', name: 'Document 3', date: 'Feb 13, 2025', size: '2.8 MB' }
     ];
+    
     const toggleSelect = (id: string) => {
-        setSelectedItems((prev) =>
-            prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-        );
-    };
-
-
-    const handleDelete = () => {
-        console.log("File deleted permanently");
-        setConfirmDeleteVisible(false);
-    };
-
-    const handleRestore = () => {
-        console.log("File restored");
-        setConfirmRestoreVisible(false);
+        if (!isSelecting) setIsSelecting(true);
+        setSelectedItems(prev => {
+            const newSelection = prev.includes(id) 
+                ? prev.filter(item => item !== id) 
+                : [...prev, id];
+            
+            // ถ้าไม่มีไฟล์ที่เลือกแล้ว ให้ปิดโหมดการเลือก
+            if (newSelection.length === 0) {
+                setIsSelecting(false);
+            }
+            
+            return newSelection;
+        });
     };
 
     const renderItem = ({ item }: { item: FileItem }) => {
@@ -62,82 +70,95 @@ export default function RecycleBin() {
         <SafeAreaView style={styles.container}>
             <StatusBar backgroundColor="#fff" barStyle="dark-content" />
 
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <AntDesign name="left" size={24} color="black" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Recycle Bin</Text>
-                <TouchableOpacity>
-                    <MaterialCommunityIcons name="dots-vertical" size={24} color="black" />
-                </TouchableOpacity>
-            </View>
+            {!isSelecting ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#d9d9d9' }}>
+                    <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={() => navigation.goBack()}>
+                        <MaterialIcons name="arrow-back-ios-new" size={20} />
+                    </TouchableOpacity>
+                    <Text style={{ fontSize: 20 }}>Recycle Bin</Text>
+                    
+                    {/* ปุ่มค้นหาที่ลิงก์ไปยังหน้าค้นหา */}
+                    <TouchableOpacity
+                        style={{ marginLeft: 'auto', marginRight: 15 }}
+                        onPress={() => navigation.navigate("Search")} // 3. ใช้ navigation แบบมีประเภทแล้ว
+                    >
+                        <Ionicons name="search" size={24} color="black" />
+                    </TouchableOpacity>
 
-            {/* SubHeader */}
-            <Text style={styles.subHeader}>
-                Files will be permanently deleted after 30 days.
-            </Text>
+                    <TouchableOpacity
+                        style={{ marginRight: 15 }}
+                        onPress={() => setSortByOptionVisible(true)}
+                    >
+                        <FontAwesome5 name="sort" size={24} color="black" />
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity
+                        style={{ marginRight: 15 }}
+                        onPress={() => setMenuVisible(true)}
+                    >
+                        <MaterialIcons name="more-vert" size={24} color="black" />
+                    </TouchableOpacity>
+                </View>
+            ) : (
+                <SelectionToolBar
+                    onCancel={() => { setIsSelecting(false); setSelectedItems([]); }}
+                    onSelectAll={() => {
+                        if (data.length === selectedItems.length) {
+                            setSelectedItems([]);
+                        } else {
+                            setSelectedItems(data.map(file => file.id));
+                        }
+                    }}
+                    count={selectedItems.length}
+                    maxCount={data.length}
+                />
+            )}
 
-            {/* File List */}
+            <Text style={styles.subHeader}>Files will be permanently deleted after 30 days.</Text>
+
             <FlatList
                 data={data}
-                keyExtractor={(item) => item.id}
+                keyExtractor={item => item.id}
                 renderItem={renderItem}
                 contentContainerStyle={styles.listContainer}
             />
 
-            {/* Bottom Bar */}
-            <View style={styles.bottomBar}>
-                <TouchableOpacity style={styles.bottomButton} onPress={() => setConfirmRestoreVisible(true)}>
-                    <MaterialCommunityIcons name="replay" size={30} color="black" />
-                    <Text style={styles.bottomButtonText}>Restore</Text>
-                </TouchableOpacity>
+            {/* เมนูสามจุด */}
+            <Modal
+                transparent
+                visible={menuVisible}
+                animationType="fade"
+                onRequestClose={() => setMenuVisible(false)}
+            >
+                <TouchableOpacity 
+                    style={styles.menuModalOverlay} 
+                    activeOpacity={1} 
+                    onPress={() => setMenuVisible(false)}
+                >
+                    <View style={styles.menuContainer}>
+                        <TouchableOpacity style={styles.menuItem} onPress={() => {
+                            setMenuVisible(false);
+                            setSortByOptionVisible(true);
+                        }}>
 
-                <TouchableOpacity style={styles.bottomButton} onPress={() => setConfirmDeleteVisible(true)}>
-                    <Ionicons name="trash-bin" size={30} color="black" />
-                    <Text style={styles.bottomButtonText}>Permanently delete</Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* Confirm Delete Modal */}
-            <Modal transparent visible={isConfirmDeleteVisible} animationType="fade">
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContainer}>
-                        <Text style={styles.modalTitle}>Confirm Deletion</Text>
-                        <Text style={styles.modalMessage}>
-                            Are you sure you want to permanently delete the selected items?
-                        </Text>
-                        <View style={styles.modalButtonRow}>
-                            <TouchableOpacity style={styles.modalButton} onPress={() => setConfirmDeleteVisible(false)}>
-                                <Text style={[styles.modalButtonText, styles.cancelText]}>Cancel</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.modalButton} onPress={handleDelete}>
-                                <Text style={[styles.modalButtonText, styles.deleteText]}>Delete</Text>
-                            </TouchableOpacity>
-                        </View>
+                            <MaterialCommunityIcons name="select-all" size={24} color="black" />
+                            <Text style={styles.menuItemText}>Select All</Text>
+                        </TouchableOpacity>
+                        
+                        <TouchableOpacity style={styles.menuItem} onPress={() => {
+                            setMenuVisible(false);
+                            setConfirmDeleteVisible(true);
+                        }}>
+                            <Ionicons name="trash-bin" size={24} color="black" />
+                            <Text style={styles.menuItemText}>Empty Recycle Bin</Text>
+                        </TouchableOpacity>
                     </View>
-                </View>
-            </Modal>
-
-            <Modal transparent visible={isConfirmRestoreVisible} animationType="fade">
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContainer}>
-                        <Text style={styles.modalTitle}>Confirm Restore</Text>
-                        <Text style={styles.modalMessage}>Are you sure you want to restore the selected items?</Text>
-                        <View style={styles.modalButtonRow}>
-                            <TouchableOpacity style={styles.modalButton} onPress={() => setConfirmRestoreVisible(false)}>
-                                <Text style={[styles.modalButtonText, styles.cancelText]}>Cancel</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.modalButton} onPress={handleRestore}>
-                                <Text style={[styles.modalButtonText, styles.deleteText]}>Restore</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
+                </TouchableOpacity>
             </Modal>
         </SafeAreaView>
     );
 }
+
 
 const styles = StyleSheet.create({
     container: {
@@ -245,7 +266,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginHorizontal: 5,
         borderRadius: 5
-
     },
     modalButtonText: {
         fontSize: 16,
@@ -256,5 +276,33 @@ const styles = StyleSheet.create({
     },
     deleteText: {
         color: 'red'
+    },
+    menuModalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.3)',
+    },
+    menuContainer: {
+        position: 'absolute',
+        top: 60,
+        right: 20,
+        backgroundColor: 'white',
+        borderRadius: 5,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    menuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    menuItemText: {
+        marginLeft: 10,
+        fontSize: 16,
+        color: 'black',
     }
 });
