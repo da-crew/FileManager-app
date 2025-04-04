@@ -140,15 +140,7 @@ export default function RecycleBin() {
                             setMenuVisible(false);
                             setSortByOptionVisible(true);
                         }}>
-                            <MaterialCommunityIcons name="sort" size={24} color="black" />
-                            <Text style={styles.menuItemText}>Sort by</Text>
-                        </TouchableOpacity>
-                        
-                        <TouchableOpacity style={styles.menuItem} onPress={() => {
-                            setMenuVisible(false);
-                            setIsSelecting(true);
-                            setSelectedItems(data.map(file => file.id));
-                        }}>
+
                             <MaterialCommunityIcons name="select-all" size={24} color="black" />
                             <Text style={styles.menuItemText}>Select All</Text>
                         </TouchableOpacity>

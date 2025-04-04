@@ -172,10 +172,12 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         flex: 1,
-        padding: 16
+        paddingHorizontal: 10,
+        paddingTop: 0,
+        paddingBottom: 10
     },
     listContent: {
-        paddingVertical: 8
+        paddingVertical: 0
     },
     bottomBar: {
         backgroundColor: '#d9d9d9', 
