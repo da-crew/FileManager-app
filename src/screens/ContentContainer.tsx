@@ -138,11 +138,11 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 finalDestPath = `${destPath.slice(0, extIdx)} (${attempt})${ext}`;
             }
 
-            console.log("Final Path: ", finalDestPath);
+            console.log("Destination: ", finalDestPath);
 
-            if (attempt > 0) {
-                await RNFS.writeFile(finalDestPath, "");
-            }
+            //if (attempt > 0) {
+            //    await RNFS.writeFile(finalDestPath, "");
+            //}
 
             switch (movingState.moveType) {
                 case MoveType.COPY:
@@ -152,6 +152,8 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     await RNFS.moveFile(sourcePath, finalDestPath);
                     break;
             }
+            
+            console.log("Done: ", finalDestPath);
         } catch (e) {
             console.log("Error: ", e);
         }
@@ -213,7 +215,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                         finalName = itemHead.name + `(${attempts})`;
                         p = headPath + "/" + finalName;
                     }
-                    
+
                     console.log("mkdir " + p);
                     await RNFS.mkdir(p);
                     try {
@@ -234,13 +236,22 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             if (stackHead.items.length == 0 && !increased) {
                 let headPath = buildStackPath();
                 let n = dirStack.pop();
+                if (movingState.moveType == MoveType.CUT && n?.name) {
+                    let items = await RNFS.readDir(headPath);
+                    if (items.length > 0) {
+                        throw new Error("the popped path isnt empty!!!!!");
+                    } else {
+                        await RNFS.unlink(headPath);
+                    }
+                }
+
                 setMovingProgress((prevProgress) => {//this makes the operation atomic i think
                     if (movingState == null) return null;
                     let newProgress = (prevProgress ?? 0) + 1;
                     if (newProgress == movingState.items.length) return null;
                     return newProgress;
                 });
-                console.log("Popped node: ", n?.name);
+                console.log("Popped node: ", headPath);
             }
         }
 
@@ -293,13 +304,12 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             <View style={{ margin: 10, flex: 1 }}>
                 <ContentList content={content} handleOpen={handleOpen} handleSelect={handleSelect} selectionSet={selectionSet} />
             </View>
-
         </View>
 
-        <SelectionBottomBar 
-        isSelecting={selectionSet.size > 0} 
-        isMoving={movingState != null} 
-        isPasteLocationValid={movingState?.sourceDir.build() != navpath.build()}
+        <SelectionBottomBar
+            isSelecting={selectionSet.size > 0}
+            isMoving={movingState != null}
+            isPasteLocationValid={movingState?.sourceDir.build() != navpath.build()}
             copyActionHandler={function (): void {
                 setMovingProgress(null);
                 let itemArray = Array.from(selectionSet);
@@ -312,14 +322,23 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
                 unselectAll();
             }} moveActionHandler={function (): void {
-                throw new Error("Move action not implemented.");
+                setMovingProgress(null);
+                let itemArray = Array.from(selectionSet);
+
+                setMovingState({
+                    sourceDir: navpath.clone(),
+                    moveType: MoveType.CUT,
+                    items: itemArray,
+                });
+
+                unselectAll();
             }} renameActionHandler={function (): void {
                 throw new Error("Rename action not implemented.");
             }} deleteActionHandler={function (): void {
                 throw new Error("Delete action not implemented.");
             }} pasteCancelActionHandler={function (): void {
                 setMovingState(null);
-            }} pasteActionHandler={() => handlePasteAction().then(() => {})}
+            }} pasteActionHandler={() => handlePasteAction().catch((reason) => {throw new Error(reason)})}
         />
 
         <Modal visible={sortByOptionVisible} transparent={true} onRequestClose={() => setSortByOptionVisible(false)} >

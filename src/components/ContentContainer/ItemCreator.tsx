@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import * as RNFS from 'react-native-fs';
 import { Path } from "../../FileSystem";
 import BottomBarOptions from "./BottomBarOptions";
-import { CreationType } from "./Common";
+import { CreationType } from "./common";
 
 
 export default function ItemCreator(props: {
