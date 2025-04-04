@@ -147,6 +147,7 @@ export default function LargeFiles() {
 
             {!isSelecting ? (
                 <Toolbar
+                    goBackHandler={() => navigation.goBack()}
                     navigation={navigation}
                     containerName="Large Files"
                     sortByHandler={() => setSortByOptionVisible(true)}
