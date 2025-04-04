@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, View, Text, FlatList, StyleSheet, StatusBar } from "react-native";
+import { SafeAreaView, View, Text, FlatList, StyleSheet, StatusBar, Modal } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import Toolbar from "../components/Toolbar";
 import SelectionToolBar from '../components/SelectionToolbar';
 import ItemCard from '../components/ItemCard';
 import * as RNFS from "react-native-fs";
-import { Feather, Foundation, MaterialIcons } from '@expo/vector-icons';
+import { Feather, Foundation, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import BottomBarItem from "../components/ContentContainer/BottomBarItem";
+import BottomBarOptions from "../components/ContentContainer/BottomBarOptions";
 
 // ใช้ RNFS.ReadDirItem แทน FileItem
 /*
@@ -79,16 +80,36 @@ const mockDuplicateFiles: RNFS.ReadDirItem[] = [
     }
 ];
 
+// เพิ่ม enum สำหรับประเภทการเรียงลำดับ
+enum SortType {
+    ALPHABETICAL,
+    DATE,
+}
+
 export default function Duplicates() {
     const navigation = useNavigation();
     const [duplicateFiles, setDuplicateFiles] = useState<RNFS.ReadDirItem[]>(mockDuplicateFiles);
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
     const [isSelecting, setIsSelecting] = useState(false);
+    const [sortByOptionVisible, setSortByOptionVisible] = useState(false);
+    const [sortType, setSortType] = useState<SortType>(SortType.ALPHABETICAL);
 
     // อัพเดทรายการไฟล์
     const updateFileList = async () => {
         // สำหรับ mock data ไม่ต้องตรวจสอบว่าไฟล์มีอยู่จริง
-        setDuplicateFiles(mockDuplicateFiles);
+        // เรียงข้อมูลตามประเภทการเรียงที่เลือก
+        const sortedFiles = [...mockDuplicateFiles].sort((a, b) => {
+            switch (sortType) {
+                case SortType.ALPHABETICAL:
+                    return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+                case SortType.DATE:
+                    return (b.mtime?.getTime() ?? 0) - (a.mtime?.getTime() ?? 0);
+                default:
+                    return 0;
+            }
+        });
+        
+        setDuplicateFiles(sortedFiles);
         
         // อัพเดท selectedItems ให้มีเฉพาะไฟล์ที่ยังอยู่ในรายการ
         setSelectedItems(prev => 
@@ -96,12 +117,18 @@ export default function Duplicates() {
         );
     };
 
-    // เรียกใช้ updateFileList เมื่อหน้าจอถูกโฟกัส
+    // เรียกใช้ updateFileList เมื่อหน้าจอถูกโฟกัสหรือเมื่อประเภทการเรียงเปลี่ยน
     useFocusEffect(
         React.useCallback(() => {
             updateFileList();
-        }, [])
+        }, [sortType])
     );
+
+    function updateSortType(type: SortType) {
+        if (sortType !== type) {
+            setSortType(type);
+        }
+    }
 
     const handleSelect = (selected: boolean, item: RNFS.ReadDirItem) => {
         if (!isSelecting) setIsSelecting(true);
@@ -149,7 +176,7 @@ export default function Duplicates() {
                 <Toolbar
                     navigation={navigation}
                     containerName="Duplicate Files"
-                    sortByHandler={() => console.log("Sort Duplicates")}
+                    sortByHandler={() => setSortByOptionVisible(true)}
                 />
             ) : (
                 <SelectionToolBar
@@ -157,6 +184,7 @@ export default function Duplicates() {
                     onSelectAll={() => {
                         if (duplicateFiles.length === selectedItems.length) {
                             setSelectedItems([]);
+                            setIsSelecting(false);
                         } else {
                             setSelectedItems(duplicateFiles.map(file => file.path));
                         }
@@ -184,13 +212,28 @@ export default function Duplicates() {
 
             {isSelecting && (
                 <View style={styles.bottomBar}>
-                    <BottomBarItem name='Copy' icon={<Feather name='copy' size={30} />} onPress={() => console.log('Copy')} />
-                    <BottomBarItem name='Move' icon={<Feather name='scissors' size={30} />} onPress={() => console.log('Move')} />
-                    <BottomBarItem name='Rename' icon={<Foundation name='pencil' size={30} />} onPress={() => console.log('Rename')} />
-                    <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} />} onPress={() => console.log('Delete')} />
-                    <BottomBarItem name='More' icon={<MaterialIcons name='more-vert' size={30} />} onPress={() => console.log('More')} />
+                    <BottomBarItem name='Copy' icon={<Feather name='copy' size={24} />} onPress={() => console.log('Copy')} />
+                    <BottomBarItem name='Move' icon={<Feather name='scissors' size={24} />} onPress={() => console.log('Move')} />
+                    <BottomBarItem name='Rename' icon={<Foundation name='pencil' size={24} />} onPress={() => console.log('Rename')} />
+                    <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={24} />} onPress={() => console.log('Delete')} />
+                    <BottomBarItem name='More' icon={<MaterialIcons name='more-vert' size={24} />} onPress={() => console.log('More')} />
                 </View>
             )}
+
+            <Modal visible={sortByOptionVisible} transparent={true} onRequestClose={() => setSortByOptionVisible(false)} >
+                <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <View style={{ backgroundColor: 'white', justifyContent: 'space-between', paddingBottom: 5 }}>
+                        <BottomBarOptions name='Alphabetical' icon={<FontAwesome name="sort-alpha-asc" size={30} style={{ padding: 15 }} />} onPress={() => {
+                            updateSortType(SortType.ALPHABETICAL);
+                            setSortByOptionVisible(false);
+                        }} />
+                        <BottomBarOptions name='Date' icon={<FontAwesome name="sort-numeric-asc" size={30} style={{ padding: 15 }} />} onPress={() => {
+                            updateSortType(SortType.DATE);
+                            setSortByOptionVisible(false);
+                        }} />
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -215,7 +258,7 @@ const styles = StyleSheet.create({
         borderColor: '#e7e7e7', 
         flexDirection: 'row', 
         justifyContent: 'space-between', 
-        paddingHorizontal: 20,
-        paddingVertical: 10
+        paddingHorizontal: 15,
+        paddingVertical: 8
     }
 });
