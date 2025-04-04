@@ -6,58 +6,40 @@ import SelectionToolBar from '../components/SelectionToolbar';
 import ItemCard from '../components/ItemCard';
 import * as RNFS from "react-native-fs";
 
-interface FileItem {
-    name: string;
-    path: string;
-    size: number;
-    mtime: Date;
-    ctime: Date;
-    isFile: () => boolean;
-    isDirectory: () => boolean;
-    isSymbolicLink: () => boolean;
-    type: string;
-}
-
 // Mock data
-const mockLargeFiles: FileItem[] = [
+const mockLargeFiles: RNFS.ReadDirItem[] = [
     {
         name: "BigVideo_2024.mp4",
         path: RNFS.ExternalStorageDirectoryPath + "/BigVideo_2024.mp4",
-        size: 1.5 * 1024 * 1024 * 1024, // 1.5 GB
+        size: 1610612736, // 1.5 GB
         mtime: new Date(),
         ctime: new Date(),
         isFile: () => true,
-        isDirectory: () => false,
-        isSymbolicLink: () => false,
-        type: "file"
+        isDirectory: () => false
     },
     {
         name: "GameInstaller.exe",
         path: RNFS.ExternalStorageDirectoryPath + "/GameInstaller.exe",
-        size: 4.2 * 1024 * 1024 * 1024, // 4.2 GB
+        size: 4508876800, // 4.2 GB
         mtime: new Date(),
         ctime: new Date(),
         isFile: () => true,
-        isDirectory: () => false,
-        isSymbolicLink: () => false,
-        type: "file"
+        isDirectory: () => false
     },
     {
         name: "BackupArchive.zip",
         path: RNFS.ExternalStorageDirectoryPath + "/BackupArchive.zip",
-        size: 2.8 * 1024 * 1024 * 1024, // 2.8 GB
+        size: 3006477107, // 2.8 GB
         mtime: new Date(),
         ctime: new Date(),
         isFile: () => true,
-        isDirectory: () => false,
-        isSymbolicLink: () => false,
-        type: "file"
+        isDirectory: () => false
     }
 ];
 
 export default function LargeFiles() {
     const navigation = useNavigation();
-    const [largeFiles, setLargeFiles] = useState<FileItem[]>([]);
+    const [largeFiles, setLargeFiles] = useState<RNFS.ReadDirItem[]>(mockLargeFiles);
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
     const [isSelecting, setIsSelecting] = useState(false);
 
@@ -71,56 +53,14 @@ export default function LargeFiles() {
         return unsubscribe;
     }, [navigation]);
 
-    // อ่านไฟล์จาก storage
-    const readFilesFromStorage = async () => {
-        try {
-            // อ่านไฟล์จาก internal storage
-            const files = await RNFS.readDir(RNFS.ExternalStorageDirectoryPath);
-            
-            // กรองเอาเฉพาะไฟล์ที่มีขนาดใหญ่ (มากกว่า 100MB)
-            const largeFiles = files.filter(file => 
-                file.isFile() && file.size > 100 * 1024 * 1024 // 100MB
-            );
-
-            // แปลงเป็น FileItem
-            const fileItems: FileItem[] = largeFiles.map(file => ({
-                name: file.name,
-                path: file.path,
-                size: file.size,
-                mtime: file.mtime ? new Date(file.mtime) : new Date(),
-                ctime: file.ctime ? new Date(file.ctime) : new Date(),
-                isFile: () => true,
-                isDirectory: () => false,
-                isSymbolicLink: () => false,
-                type: "file"
-            }));
-
-            // รวม mock data กับไฟล์จริง
-            setLargeFiles([...mockLargeFiles, ...fileItems]);
-        } catch (error) {
-            console.error("Error reading files:", error);
-            // ถ้าเกิด error ให้แสดงแค่ mock data
-            setLargeFiles(mockLargeFiles);
-        }
-    };
-
-    // เช็คว่าไฟล์ยังมีอยู่จริงไหม
-    const checkFileExists = async (path: string) => {
-        try {
-            return await RNFS.exists(path);
-        } catch (error) {
-            console.error("Error checking file existence:", error);
-            return false;
-        }
-    };
-
     // อัพเดทรายการไฟล์
     const updateFileList = async () => {
-        await readFilesFromStorage();
+        // สำหรับ mock data ไม่ต้องตรวจสอบว่าไฟล์มีอยู่จริง
+        setLargeFiles(mockLargeFiles);
         
-        // ถ้าไฟล์ที่เลือกไว้ถูกลบ ให้ลบออกจาก selectedItems ด้วย
+        // อัพเดท selectedItems ให้มีเฉพาะไฟล์ที่ยังอยู่ในรายการ
         setSelectedItems(prev => 
-            prev.filter(path => largeFiles.some(file => file.path === path))
+            prev.filter(path => mockLargeFiles.some(file => file.path === path))
         );
     };
 
@@ -131,7 +71,7 @@ export default function LargeFiles() {
         }, [])
     );
 
-    const handleSelect = (selected: boolean, item: FileItem) => {
+    const handleSelect = (selected: boolean, item: RNFS.ReadDirItem) => {
         if (!isSelecting) setIsSelecting(true);
         setSelectedItems(prev => {
             const newSelection = selected 
@@ -147,23 +87,18 @@ export default function LargeFiles() {
         });
     };
 
-    const handleOpen = async (item: FileItem) => {
-        // เช็คว่าไฟล์ยังมีอยู่ก่อนเปิด
-        const exists = await checkFileExists(item.path);
-        if (exists) {
-            console.log("Opening file:", item.name);
-        } else {
-            // ถ้าไฟล์ไม่มีอยู่แล้ว ให้อัพเดทรายการ
-            updateFileList();
-        }
+    const handleOpen = async (item: RNFS.ReadDirItem) => {
+        // สำหรับ mock data เราแค่แสดง log แทนการตรวจสอบไฟล์
+        console.log("Attempting to open file:", item.name);
+        console.log("File path:", item.path);
     };
 
     const handleItemSelect = (selected: boolean, item: RNFS.ReadDirItem) => {
-        handleSelect(selected, item as unknown as FileItem);
+        handleSelect(selected, item);
     };
 
     const handleItemOpen = (item: RNFS.ReadDirItem) => {
-        handleOpen(item as unknown as FileItem);
+        handleOpen(item);
     };
 
     // ฟังก์ชันรีเซ็ตการเลือกทั้งหมด
@@ -204,7 +139,7 @@ export default function LargeFiles() {
                 keyExtractor={(item) => item.path}
                 renderItem={({ item }) => (
                     <ItemCard
-                        item={item as unknown as RNFS.ReadDirItem}
+                        item={item}
                         onSelect={handleItemSelect}
                         onOpen={handleItemOpen}
                         isSelected={selectedItems.includes(item.path)}

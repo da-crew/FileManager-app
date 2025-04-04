@@ -6,8 +6,7 @@ import SelectionToolBar from '../components/SelectionToolbar';
 import ItemCard from '../components/ItemCard';
 import * as RNFS from "react-native-fs";
 
-// https://www.npmjs.com/package/react-native-fs#API
-// ใช้ RNFS.ReadDirItem แทน FileItem!!!!!
+// ใช้ RNFS.ReadDirItem แทน FileItem
 /*
 type ReadDirItem = {
   ctime: date;     // The creation date of the file (iOS only)
@@ -20,95 +19,67 @@ type ReadDirItem = {
 };
 */
 
-// แก้ padding ของทั้งสองหน้า
-// ทำให้แสดงbottom barเวลาเลือกitem
-// เอาหน้า Recycle Bin ออก
-
-interface FileItem {
-    name: string;
-    path: string;
-    size: number;
-    mtime: Date;
-    ctime: Date;
-    isFile: () => boolean;
-    isDirectory: () => boolean;
-    isSymbolicLink: () => boolean;
-    type: string;
-}
-
 // Mock data สำหรับไฟล์ซ้ำ
-const mockDuplicateFiles: FileItem[] = [
+const mockDuplicateFiles: RNFS.ReadDirItem[] = [
     {
         name: "Report_v1.pdf",
         path: RNFS.ExternalStorageDirectoryPath + "/Report_v1.pdf",
-        size: 5.2 * 1024 * 1024, // 5.2 MB
+        size: 5452595, // 5.2 MB
         mtime: new Date(),
         ctime: new Date(),
         isFile: () => true,
-        isDirectory: () => false,
-        isSymbolicLink: () => false,
-        type: "file"
+        isDirectory: () => false
     },
     {
         name: "Report_v1_copy.pdf",
         path: RNFS.ExternalStorageDirectoryPath + "/Report_v1_copy.pdf",
-        size: 5.2 * 1024 * 1024, // 5.2 MB (ขนาดเท่ากัน)
+        size: 5452595, // 5.2 MB (ขนาดเท่ากัน)
         mtime: new Date(),
         ctime: new Date(),
         isFile: () => true,
-        isDirectory: () => false,
-        isSymbolicLink: () => false,
-        type: "file"
+        isDirectory: () => false
     },
     {
         name: "Photo_001.jpg",
         path: RNFS.ExternalStorageDirectoryPath + "/Photo_001.jpg",
-        size: 3.8 * 1024 * 1024, // 3.8 MB
+        size: 3984588, // 3.8 MB
         mtime: new Date(),
         ctime: new Date(),
         isFile: () => true,
-        isDirectory: () => false,
-        isSymbolicLink: () => false,
-        type: "file"
+        isDirectory: () => false
     },
     {
         name: "Photo_001_duplicate.jpg",
         path: RNFS.ExternalStorageDirectoryPath + "/Photo_001_duplicate.jpg",
-        size: 3.8 * 1024 * 1024, // 3.8 MB (ขนาดเท่ากัน)
+        size: 3984588, // 3.8 MB (ขนาดเท่ากัน)
         mtime: new Date(),
         ctime: new Date(),
         isFile: () => true,
-        isDirectory: () => false,
-        isSymbolicLink: () => false,
-        type: "file"
+        isDirectory: () => false
     },
     {
         name: "Presentation.pptx",
         path: RNFS.ExternalStorageDirectoryPath + "/Presentation.pptx",
-        size: 12.5 * 1024 * 1024, // 12.5 MB
+        size: 13107200, // 12.5 MB
         mtime: new Date(),
         ctime: new Date(),
         isFile: () => true,
-        isDirectory: () => false,
-        isSymbolicLink: () => false,
-        type: "file"
+        isDirectory: () => false
     },
     {
         name: "Presentation_backup.pptx",
         path: RNFS.ExternalStorageDirectoryPath + "/Presentation_backup.pptx", 
-        size: 12.5 * 1024 * 1024, // 12.5 MB (ขนาดเท่ากัน)
+        size: 13107200, // 12.5 MB (ขนาดเท่ากัน)
         mtime: new Date(),
         ctime: new Date(),
         isFile: () => true,
-        isDirectory: () => false,
-        isSymbolicLink: () => false,
-        type: "file"
+        isDirectory: () => false
     }
 ];
 
 export default function Duplicates() {
     const navigation = useNavigation();
-    const [duplicateFiles, setDuplicateFiles] = useState<FileItem[]>(mockDuplicateFiles);
+    const [duplicateFiles, setDuplicateFiles] = useState<RNFS.ReadDirItem[]>(mockDuplicateFiles);
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
     const [isSelecting, setIsSelecting] = useState(false);
 
@@ -130,7 +101,7 @@ export default function Duplicates() {
         }, [])
     );
 
-    const handleSelect = (selected: boolean, item: FileItem) => {
+    const handleSelect = (selected: boolean, item: RNFS.ReadDirItem) => {
         if (!isSelecting) setIsSelecting(true);
         setSelectedItems(prev => {
             const newSelection = selected 
@@ -146,18 +117,18 @@ export default function Duplicates() {
         });
     };
 
-    const handleOpen = async (item: FileItem) => {
+    const handleOpen = async (item: RNFS.ReadDirItem) => {
         // สำหรับ mock data เราแค่แสดง log แทนการตรวจสอบไฟล์
         console.log("Attempting to open file:", item.name);
         console.log("File path:", item.path);
     };
 
     const handleItemSelect = (selected: boolean, item: RNFS.ReadDirItem) => {
-        handleSelect(selected, item as unknown as FileItem);
+        handleSelect(selected, item);
     };
 
     const handleItemOpen = (item: RNFS.ReadDirItem) => {
-        handleOpen(item as unknown as FileItem);
+        handleOpen(item);
     };
 
     // ฟังก์ชันรีเซ็ตการเลือกทั้งหมด
@@ -198,7 +169,7 @@ export default function Duplicates() {
                 keyExtractor={(item) => item.path}
                 renderItem={({ item }) => (
                     <ItemCard
-                        item={item as unknown as RNFS.ReadDirItem}
+                        item={item}
                         onSelect={handleItemSelect}
                         onOpen={handleItemOpen}
                         isSelected={selectedItems.includes(item.path)}
