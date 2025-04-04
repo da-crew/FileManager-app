@@ -5,6 +5,8 @@ import Toolbar from "../components/Toolbar";
 import SelectionToolBar from '../components/SelectionToolbar';
 import ItemCard from '../components/ItemCard';
 import * as RNFS from "react-native-fs";
+import { Feather, Foundation, MaterialIcons } from '@expo/vector-icons';
+import BottomBarItem from "../components/ContentContainer/BottomBarItem";
 
 // Mock data
 const mockLargeFiles: RNFS.ReadDirItem[] = [
@@ -134,18 +136,31 @@ export default function LargeFiles() {
                 />
             )}
 
-            <FlatList
-                data={largeFiles}
-                keyExtractor={(item) => item.path}
-                renderItem={({ item }) => (
-                    <ItemCard
-                        item={item}
-                        onSelect={handleItemSelect}
-                        onOpen={handleItemOpen}
-                        isSelected={selectedItems.includes(item.path)}
-                    />
-                )}
-            />
+            <View style={styles.contentContainer}>
+                <FlatList
+                    data={largeFiles}
+                    keyExtractor={(item) => item.path}
+                    renderItem={({ item }) => (
+                        <ItemCard
+                            item={item}
+                            onSelect={handleItemSelect}
+                            onOpen={handleItemOpen}
+                            isSelected={selectedItems.includes(item.path)}
+                        />
+                    )}
+                    contentContainerStyle={styles.listContent}
+                />
+            </View>
+
+            {isSelecting && (
+                <View style={styles.bottomBar}>
+                    <BottomBarItem name='Copy' icon={<Feather name='copy' size={30} />} onPress={() => console.log('Copy')} />
+                    <BottomBarItem name='Move' icon={<Feather name='scissors' size={30} />} onPress={() => console.log('Move')} />
+                    <BottomBarItem name='Rename' icon={<Foundation name='pencil' size={30} />} onPress={() => console.log('Rename')} />
+                    <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} />} onPress={() => console.log('Delete')} />
+                    <BottomBarItem name='More' icon={<MaterialIcons name='more-vert' size={30} />} onPress={() => console.log('More')} />
+                </View>
+            )}
         </SafeAreaView>
     );
 }
@@ -154,5 +169,21 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#F2F2F7"
+    },
+    contentContainer: {
+        flex: 1,
+        padding: 16
+    },
+    listContent: {
+        paddingVertical: 8
+    },
+    bottomBar: {
+        backgroundColor: '#d9d9d9', 
+        borderTopWidth: 1, 
+        borderColor: '#e7e7e7', 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        paddingHorizontal: 20,
+        paddingVertical: 10
     }
 });
