@@ -254,7 +254,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 console.log("Popped node: ", headPath);
             }
         }
-
+        
         fetchContent();
         setMovingState(null);
         setMovingProgress(null);

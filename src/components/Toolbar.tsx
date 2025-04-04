@@ -30,7 +30,7 @@ interface ToolbarProps {
  * @returns {JSX.Element} The rendered Toolbar component.
  */
 
-export default function Toolbar({ navigation, containerName, goBackHandler, layoutChangeHandler, sortByHandler, createHandler }: ToolbarProps) {
+export default function Toolbar({ navigation, containerName, goBackHandler, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#d9d9d9' }}>
             <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={goBackHandler}>

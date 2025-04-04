@@ -175,6 +175,7 @@ export default function Duplicates() {
             {!isSelecting ? (
                 <Toolbar
                     navigation={navigation}
+                    goBackHandler={() => navigation.goBack()}
                     containerName="Duplicate Files"
                     sortByHandler={() => setSortByOptionVisible(true)}
                 />
