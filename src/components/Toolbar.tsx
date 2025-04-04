@@ -3,12 +3,12 @@ import { View, Text, TouchableOpacity, GestureResponderEvent } from 'react-nativ
 import { MaterialIcons, Ionicons, AntDesign } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import PropTypes from 'prop-types';
-import { useNavigation } from '@react-navigation/native';
 
 
 interface ToolbarProps {
     navigation: any,
     containerName: string,
+    goBackHandler: (event: GestureResponderEvent) => void,
     layoutChangeHandler?: (event: GestureResponderEvent) => void,
     sortByHandler?: (event: GestureResponderEvent) => void,
     createHandler?: (event: GestureResponderEvent) => void,
@@ -30,12 +30,10 @@ interface ToolbarProps {
  * @returns {JSX.Element} The rendered Toolbar component.
  */
 
-export default function Toolbar({ navigation, containerName, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
-
-    let a = useNavigation()
+export default function Toolbar({ navigation, containerName, goBackHandler, layoutChangeHandler, sortByHandler, createHandler }: ToolbarProps) {
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#d9d9d9' }}>
-            <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={() => navigation.goBack()}>
+            <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={goBackHandler}>
                 <MaterialIcons name="arrow-back-ios-new" size={20} />
             </TouchableOpacity>
             <Text style={{ fontSize: 20 }}>{containerName}</Text>

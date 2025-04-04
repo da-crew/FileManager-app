@@ -2,13 +2,13 @@ import React, { ReactNode, useEffect, useState } from 'react';
 import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, ScrollView, GestureResponderEvent } from 'react-native';
 import HomeSearchBar from '../components/HomeSearchBar';
 import { Feather, MaterialIcons, Ionicons, MaterialCommunityIcons, createIconSet } from '@expo/vector-icons';
-import { ContainerType, ContentContainerRouteParams } from './ContentContainer';
 import { Path } from '../FileSystem';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
 import { checkManagePermission } from 'manage-external-storage';
 import RNFS, { writeFile } from 'react-native-fs';
 import { openAppSettings, StorageCapacity, StorageDevice } from '../FileSystem';
+import { ContainerType } from '../components/ContentContainer/common';
 
 
 
