@@ -76,7 +76,7 @@ export default function LargeFiles() {
                 case SortType.DATE:
                     return (b.mtime?.getTime() ?? 0) - (a.mtime?.getTime() ?? 0);
                 case SortType.SIZE:
-                    return (parseInt(b.size.toString()) || 0) - (parseInt(a.size.toString()) || 0);
+                    return (b.size || 0) - (a.size || 0);
                 default:
                     return 0;
             }
