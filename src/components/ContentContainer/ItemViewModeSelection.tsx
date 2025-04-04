@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ViewMode } from "./Common";
+import { ViewMode } from "./common";
 import { TouchableOpacity, View, Text } from "react-native";
 
 
