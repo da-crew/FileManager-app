@@ -211,12 +211,12 @@ export default function Duplicates() {
             </View>
 
             {isSelecting && (
-                <View style={styles.bottomBar}>
-                    <BottomBarItem name='Copy' icon={<Feather name='copy' size={24} />} onPress={() => console.log('Copy')} />
-                    <BottomBarItem name='Move' icon={<Feather name='scissors' size={24} />} onPress={() => console.log('Move')} />
-                    <BottomBarItem name='Rename' icon={<Foundation name='pencil' size={24} />} onPress={() => console.log('Rename')} />
-                    <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={24} />} onPress={() => console.log('Delete')} />
-                    <BottomBarItem name='More' icon={<MaterialIcons name='more-vert' size={24} />} onPress={() => console.log('More')} />
+                <View style={{ backgroundColor: '#d9d9d9', borderTopWidth: 1, borderColor: '#e7e7e7', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20 }}>
+                    <BottomBarItem name='Copy' icon={<Feather name='copy' size={30} />} onPress={() => console.log('Copy')} />
+                    <BottomBarItem name='Move' icon={<Feather name='scissors' size={30} />} onPress={() => console.log('Move')} />
+                    <BottomBarItem name='Rename' icon={<Foundation name='pencil' size={30} />} onPress={() => console.log('Rename')} />
+                    <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} />} onPress={() => console.log('Delete')} />
+                    <BottomBarItem name='More' icon={<MaterialIcons name='more-vert' size={30} />} onPress={() => console.log('More')} />
                 </View>
             )}
 
