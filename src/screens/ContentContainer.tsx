@@ -243,7 +243,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 console.log("Popped node: ", n?.name);
             }
         }
-
+        
         fetchContent();
         setMovingState(null);
         setMovingProgress(null);
