@@ -14,7 +14,7 @@ import BottomBarOptions from "../components/ContentContainer/BottomBarOptions";
 import ContentList from "../components/ContentContainer/ContentList";
 import SelectionBottomBar from "../components/ContentContainer/SelectionBottomBar";
 import ItemCreator from "../components/ContentContainer/ItemCreator";
-import { ContainerType, ContentContainerRouteParams, MoveType, MovingState, SortType, ViewMode } from "../components/ContentContainer/Common";
+import { ContainerType, ContentContainerRouteParams, MoveType, MovingState, SortType, ViewMode } from "../components/ContentContainer/common";
 import ItemViewModeSelection from "../components/ContentContainer/ItemViewModeSelection";
 
 export function ContentContainer({ navigation }: NativeStackScreenProps<RootStackParamList>) {

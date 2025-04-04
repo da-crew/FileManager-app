@@ -8,7 +8,7 @@ import { RootStackParamList } from '../App';
 import { checkManagePermission } from 'manage-external-storage';
 import RNFS, { writeFile } from 'react-native-fs';
 import { openAppSettings, StorageCapacity, StorageDevice } from '../FileSystem';
-import { ContainerType } from '../components/ContentContainer/Common';
+import { ContainerType } from '../components/ContentContainer/common';
 
 
 
