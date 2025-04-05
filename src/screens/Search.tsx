@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View, StatusBar } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '../components/ThemeContext';
 
 interface SearchItem {
     id: string;
@@ -10,7 +11,7 @@ interface SearchItem {
 const SearchScreen = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<SearchItem[]>([]);
-
+    const { theme } = useTheme();
     const handleSearch = (text: string) => {
         setSearchQuery(text);
         
@@ -23,12 +24,13 @@ const SearchScreen = () => {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar/>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+            <StatusBar />
             <View style={styles.searchContainer}>
                 <TextInput
-                    style={styles.searchInput}
+                    style={[styles.searchInput, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]}
                     placeholder="search..."
+                    placeholderTextColor={theme.textSecondary}
                     value={searchQuery}
                     onChangeText={handleSearch}
                 />
@@ -36,14 +38,14 @@ const SearchScreen = () => {
             <FlatList<SearchItem>
                 data={searchResults}
                 renderItem={({ item }) => (
-                    <TouchableOpacity style={styles.resultItem}>
-                        <Text>{item.title}</Text>
+                    <TouchableOpacity style={[styles.resultItem, { backgroundColor: theme.card }]}>
+                        <Text style={{ color: theme.text }}>{item.title}</Text>
                     </TouchableOpacity>
                 )}
                 keyExtractor={item => item.id}
                 ListEmptyComponent={() => (
                     <View style={styles.emptyContainer}>
-                        <Text>No search results found.</Text>
+                        <Text style={{ color: theme.textSecondary }}>No search results found.</Text>
                     </View>
                 )}
             />

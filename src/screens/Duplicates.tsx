@@ -3,7 +3,7 @@ import { SafeAreaView, View, Text, FlatList, TouchableOpacity, StyleSheet, Statu
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { FontAwesome5 } from '@expo/vector-icons';
-
+import { useTheme } from '../components/ThemeContext';
 // กำหนด type สำหรับไฟล์ซ้ำ
 interface DuplicateFile {
     id: string;
@@ -13,7 +13,7 @@ interface DuplicateFile {
 
 export default function DuplicateFiles() {
     const navigation = useNavigation();
-
+    const { theme } = useTheme();
     // กำหนด type ให้ state ของ duplicateFiles
     const [duplicateFiles, setDuplicateFiles] = useState<DuplicateFile[]>([
         {
@@ -41,52 +41,52 @@ export default function DuplicateFiles() {
         const isSelected = selectedItems.includes(item.id);
 
         return (
-            <TouchableOpacity style={styles.itemRow} onPress={() => toggleSelect(item.id)}>
+            <TouchableOpacity style={[styles.itemRow, { borderBottomColor: theme.border }]} onPress={() => toggleSelect(item.id)}>
                 <MaterialCommunityIcons
                     name={isSelected ? "checkbox-marked" : "checkbox-blank-outline"}
                     size={24}
-                    color="black"
+                    color={theme.primary}
                     style={{ marginRight: 10 }}
                 />
                 <MaterialCommunityIcons
                     name="file-video-outline"
                     size={40}
-                    color="black"
+                    color={theme.primary}
                     style={{ marginRight: 10 }}
                 />
                 <View style={{ flex: 1 }}>
-                    <Text style={styles.fileName}>{item.fileName}</Text>
-                    <Text style={styles.fileSize}>{item.size}</Text>
+                <Text style={[styles.fileName, { color: theme.text }]}>{item.fileName}</Text>
+                <Text style={[styles.fileSize, { color: theme.textSecondary }]}>{item.size}</Text>
                 </View>
             </TouchableOpacity>
         );
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+            <StatusBar barStyle="dark-content" backgroundColor={theme.background} />
 
-            <View style={styles.header}>
+            <View style={[styles.header, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <AntDesign name="left" size={24} color="black" />
+                    <AntDesign name="left" size={24} color={theme.iconColor} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Find Duplicate Files</Text>
+                <Text style={[styles.headerTitle, { color: theme.text }]}>Find Duplicate Files</Text>
                 <View style={styles.headerRightIcons}>
-                    <AntDesign name="search1" size={24} color="black" style={{ marginRight: 15 }} />
-                    <AntDesign name="appstore-o" size={24} color="black" style={{ marginRight: 15 }} />
-                    <FontAwesome5 name="sort" size={24} color="black" />
+                    <AntDesign name="search1" size={24} color={theme.iconColor} style={{ marginRight: 15 }} />
+                    <AntDesign name="appstore-o" size={24} color={theme.iconColor} style={{ marginRight: 15 }} />
+                    <FontAwesome5 name="sort" size={24} color={theme.iconColor} />
                 </View>
             </View>
 
-            <View style={styles.infoContainer}>
+            <View style={[styles.infoContainer, { borderBottomColor: theme.border }]}>
                 <MaterialCommunityIcons
                     name="file-document-outline"
                     size={60}
-                    color="black"
+                    color={theme.iconColor}
                     style={{ marginBottom: 10 }}
                 />
-                <Text style={styles.largeText}>2 Duplicate Files(0.92 GB)</Text>
-                <Text style={styles.subText}>
+                 <Text style={[styles.largeText, { color: theme.text }]}>2 Duplicate Files(0.92 GB)</Text>
+                 <Text style={[styles.subText, { color: theme.textSecondary }]}>
                     Free up space by deleting redundant files and keeping original files.
                 </Text>
             </View>
@@ -104,7 +104,7 @@ export default function DuplicateFiles() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff"
+        
     },
     header: {
         flexDirection: "row",

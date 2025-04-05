@@ -4,6 +4,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme } from '../components/ThemeContext';
+
 
 interface FileItem {
     id: string;
@@ -14,6 +16,7 @@ interface FileItem {
 
 export default function RecycleBin() {
     const navigation = useNavigation();
+    const { theme } = useTheme();
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
     const [isConfirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [isConfirmRestoreVisible, setConfirmRestoreVisible] = useState(false);
@@ -44,37 +47,37 @@ export default function RecycleBin() {
         const isSelected = selectedItems.includes(item.id);
         return (
             <TouchableOpacity style={styles.itemContainer} onPress={() => toggleSelect(item.id)}>
-                <MaterialCommunityIcons name="file-pdf-box" size={40} color="red" />
+                <MaterialCommunityIcons name="file-pdf-box" size={40} color={theme.textSecondary} />
                 <View style={styles.itemInfo}>
-                    <Text style={styles.itemName}>{item.name}</Text>
-                    <Text style={styles.itemDetail}>{item.date} - {item.size}</Text>
+                    <Text style={[styles.itemName, { color: theme.text }]}>{item.name}</Text>
+                    <Text style={[styles.itemDetail, { color: theme.textSecondary }]}>{item.date} - {item.size}</Text>
                 </View>
                 <MaterialCommunityIcons
                     name={isSelected ? "checkbox-marked" : "checkbox-blank-outline"}
                     size={24}
-                    color="black"
+                    color={theme.primary}
                 />
             </TouchableOpacity>
         );
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+            <StatusBar backgroundColor={theme.background} barStyle="dark-content" />
 
             {/* Header */}
-            <View style={styles.header}>
+            <View style={[styles.header, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <AntDesign name="left" size={24} color="black" />
+                    <AntDesign name="left" size={24} color={theme.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Recycle Bin</Text>
+                <Text style={[styles.headerTitle, { color: theme.text }]}>Recycle Bin</Text>
                 <TouchableOpacity>
-                    <MaterialCommunityIcons name="dots-vertical" size={24} color="black" />
+                    <MaterialCommunityIcons name="dots-vertical" size={24} color={theme.text} />
                 </TouchableOpacity>
             </View>
 
             {/* SubHeader */}
-            <Text style={styles.subHeader}>
+            <Text style={[styles.subHeader, { backgroundColor: theme.card, color: theme.textSecondary }]}>
                 Files will be permanently deleted after 30 days.
             </Text>
 
@@ -87,15 +90,15 @@ export default function RecycleBin() {
             />
 
             {/* Bottom Bar */}
-            <View style={styles.bottomBar}>
+            <View style={[styles.bottomBar, { borderTopColor: theme.border }]}>
                 <TouchableOpacity style={styles.bottomButton} onPress={() => setConfirmRestoreVisible(true)}>
-                    <MaterialCommunityIcons name="replay" size={30} color="black" />
-                    <Text style={styles.bottomButtonText}>Restore</Text>
+                    <MaterialCommunityIcons name="replay" size={30} color={theme.text} />
+                    <Text style={[styles.bottomButtonText, { color: theme.text }]}>Restore</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.bottomButton} onPress={() => setConfirmDeleteVisible(true)}>
-                    <Ionicons name="trash-bin" size={30} color="black" />
-                    <Text style={styles.bottomButtonText}>Permanently delete</Text>
+                    <Ionicons name="trash-bin" size={30} color={theme.text} />
+                    <Text style={[styles.bottomButtonText, { color: theme.text }]}>Permanently delete</Text>
                 </TouchableOpacity>
             </View>
 
@@ -121,9 +124,9 @@ export default function RecycleBin() {
 
             <Modal transparent visible={isConfirmRestoreVisible} animationType="fade">
                 <View style={styles.modalOverlay}>
-                    <View style={styles.modalContainer}>
-                        <Text style={styles.modalTitle}>Confirm Restore</Text>
-                        <Text style={styles.modalMessage}>Are you sure you want to restore the selected items?</Text>
+                    <View style={[styles.modalContainer, { backgroundColor: theme.card }]}>
+                        <Text style={[styles.modalTitle, { color: theme.text }]}>Confirm Restore</Text>
+                        <Text style={[styles.modalMessage, { color: theme.textSecondary }]}>Are you sure you want to restore the selected items?</Text>
                         <View style={styles.modalButtonRow}>
                             <TouchableOpacity style={styles.modalButton} onPress={() => setConfirmRestoreVisible(false)}>
                                 <Text style={[styles.modalButtonText, styles.cancelText]}>Cancel</Text>

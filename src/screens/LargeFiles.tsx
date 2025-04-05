@@ -4,7 +4,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
 import { FontAwesome5 } from '@expo/vector-icons';
-
+import { useTheme } from '../components/ThemeContext';
 // กำหนด type สำหรับไฟล์ใหญ่
 interface LargeFile {
     id: string;
@@ -14,6 +14,7 @@ interface LargeFile {
 
 export default function LargeFiles() {
     const navigation = useNavigation();
+    const { theme } = useTheme();
 
     // กำหนด type ให้ state ของ largeFiles
     const [largeFiles, setLargeFiles] = useState<LargeFile[]>([
@@ -42,54 +43,54 @@ export default function LargeFiles() {
         const isSelected = selectedItems.includes(item.id);
 
         return (
-            <TouchableOpacity style={styles.itemRow} onPress={() => toggleSelect(item.id)}>
+            <TouchableOpacity style={[styles.itemRow, { borderBottomColor: theme.border }]} onPress={() => toggleSelect(item.id)}>
                 <MaterialCommunityIcons
                     name={isSelected ? "checkbox-marked" : "checkbox-blank-outline"}
                     size={24}
-                    color="black"
+                    color={theme.primary}
                     style={{ marginRight: 10 }}
                 />
 
                 <MaterialCommunityIcons
                     name="file-pdf-box"
                     size={40}
-                    color="red"
+                    color={theme.primary}
                     style={{ marginRight: 10 }}
                 />
 
                 <View style={{ flex: 1 }}>
-                    <Text style={styles.fileName}>{item.fileName}</Text>
-                    <Text style={styles.fileSize}>{item.size}</Text>
+                    <Text style={[styles.fileName, { color: theme.text }]}>{item.fileName}</Text>
+                    <Text style={[styles.fileSize, { color: theme.textSecondary }]}>{item.size}</Text>
                 </View>
             </TouchableOpacity>
         );
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+            <StatusBar barStyle="dark-content" backgroundColor={theme.background} /> 
 
-            <View style={styles.header}>
+            <View style={[styles.header, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <AntDesign name="left" size={24} color="black" />
+                    <AntDesign name="left" size={24} color={theme.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Find Large Files</Text>
+                <Text style={[styles.headerTitle, { color: theme.text }]}>Find Large Files</Text>
                 <View style={styles.headerRightIcons}>
-                    <AntDesign name="search1" size={24} color="black" style={{ marginRight: 15 }} />
-                    <AntDesign name="appstore-o" size={24} color="black" style={{ marginRight: 15 }} />
-                    <FontAwesome5 name="sort" size={24} color="black" />
+                    <AntDesign name="search1" size={24} color={theme.text} style={{ marginRight: 15 }} />
+                    <AntDesign name="appstore-o" size={24} color={theme.text} style={{ marginRight: 15 }} />
+                    <FontAwesome5 name="sort" size={24} color={theme.text} />
                 </View>
             </View>
 
-            <View style={styles.infoContainer}>
+            <View style={[styles.infoContainer, { borderBottomColor: theme.border }]}>
                 <MaterialCommunityIcons
                     name="file-document-outline"
                     size={60}
-                    color="black"
+                    color={theme.text}
                     style={{ marginBottom: 10 }}
                 />
-                <Text style={styles.largeText}>2 Large Files(0.92 GB)</Text>
-                <Text style={styles.subText}>
+                <Text style={[styles.largeText, { color: theme.text }]}>2 Large Files(0.92 GB)</Text>
+                <Text style={[styles.subText, { color: theme.textSecondary }]}>
                     Quickly free up space by deleting large files or moving them to another storage location.
                 </Text>
             </View>

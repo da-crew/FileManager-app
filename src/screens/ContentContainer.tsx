@@ -9,7 +9,7 @@ import { useRoute } from '@react-navigation/native';
 import * as RNFS from 'react-native-fs';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
-
+import { useTheme } from '../components/ThemeContext';
 import BottomBarItem from "../components/ContentContainer/BottomBarItem";
 import BottomBarOptions from "../components/ContentContainer/BottomBarOptions";
 import ContentList from "../components/ContentContainer/ContentList";
@@ -35,19 +35,20 @@ const ItemViewModeSelection = ({ onChange }: { onChange: (mode: ViewMode) => voi
 
     const highlightColor = '#B6B6B6';
     const [selection, setSelection] = useState(ViewMode.FILES);
+    const { theme } = useTheme();
 
-    return <View style={{ flexDirection: 'row', backgroundColor: '#d9d9d9' }}>
+    return <View style={{ flexDirection: 'row', backgroundColor: theme.background }}>
         <TouchableOpacity onPress={() => {
             onChange(ViewMode.FILES);
             setSelection(ViewMode.FILES);
         }} style={{ flex: 1, backgroundColor: selection == ViewMode.FILES ? highlightColor : undefined, padding: 10, alignItems: 'center' }}>
-            <Text style={{ fontSize: 16 }}>Files</Text>
+            <Text style={{ color: theme.text, fontSize: 16 }}>Files</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => {
             onChange(ViewMode.FOLDERS);
             setSelection(ViewMode.FOLDERS);
         }} style={{ flex: 1, backgroundColor: selection == ViewMode.FOLDERS ? highlightColor : undefined, padding: 10, alignItems: 'center' }}>
-            <Text style={{ fontSize: 16 }}>Folders</Text>
+            <Text style={{ color: theme.text, fontSize: 16 }}>Folders</Text>
         </TouchableOpacity>
     </View>;
 };
@@ -81,6 +82,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     const containerType = routeParams.containerType;
 
     const [content, setContent] = useState<RNFS.ReadDirItem[] | null>(null);
+    const { theme } = useTheme();
 
     function fetchContent() {
         setContent(null);
@@ -209,7 +211,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         </View>
         {
             isSelecting
-                ? <View style={{ backgroundColor: '#d9d9d9', borderTopWidth: 1, borderColor: '#e7e7e7', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20 }}>
+                ? <View style={{ backgroundColor: theme.background, borderTopWidth: 1, borderColor: theme.border, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20 }}>
                     <BottomBarItem name='Copy' icon={<Feather name='copy' size={30} />} onPress={() => { }} />
                     <BottomBarItem name='Move' icon={<Feather name='scissors' size={30} />} onPress={() => { }} />
                     <BottomBarItem name='Rename' icon={<Foundation name='pencil' size={30} />} onPress={() => { }} />
@@ -218,10 +220,10 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 </View>
                 : <></>
         }
-        
+
         <Modal visible={sortByOptionVisible} transparent={true} onRequestClose={() => setSortByOptionVisible(false)} >
-            <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                <View style={{ backgroundColor: 'white', justifyContent: 'space-between', paddingBottom: 5 }}>
+            <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: theme.background }}>
+                <View style={{ backgroundColor: theme.background, justifyContent: 'space-between', paddingBottom: 5 }}>
                     <BottomBarOptions name='Alphabetical' icon={<FontAwesome name="sort-alpha-asc" size={30} style={{ padding: 15 }} />} onPress={() => {
                         updateSortType(SortType.ALPHABETICAL);
                         setSortByOptionVisible(false);
@@ -255,7 +257,7 @@ function ItemCreator(props: {
 
     const [creationState, setCreationState] = useState<{ itemName: string, creationType: CreationType } | null>(null);
     const [newItemOptionVisible, setNewItemOptionVisible] = useState(false);
-
+    const { theme } = useTheme()
     useEffect(() => {
         setNewItemOptionVisible(props.enabled);
         setCreationState(null);
@@ -263,8 +265,8 @@ function ItemCreator(props: {
 
     return (<>
         <Modal visible={newItemOptionVisible} transparent={true} onRequestClose={() => props.onCreationCanceled()}>
-            <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                <View style={{ backgroundColor: 'white', justifyContent: 'space-between', paddingBottom: 5 }}>
+            <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: theme.background }}>
+                <View style={{ backgroundColor: theme.background, justifyContent: 'space-between', paddingBottom: 5 }}>
                     <BottomBarOptions name='New Folder' icon={<MaterialIcons name="create-new-folder" size={30} style={{ padding: 15 }} />} onPress={() => {
                         setNewItemOptionVisible(false);
                         setCreationState({
@@ -284,8 +286,8 @@ function ItemCreator(props: {
         </Modal>
 
         <Modal visible={creationState != null && props.enabled} transparent={true} onRequestClose={() => props.onCreationCanceled()}>
-            <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: 30 }}>
-                <View style={{ padding: 15, backgroundColor: 'white', borderRadius: 5 }}>
+            <View style={{ flex: 1, justifyContent: 'center', backgroundColor: theme.background, padding: 30 }}>
+                <View style={{ padding: 15, backgroundColor: theme.background, borderRadius: 5 }}>
                     <Text style={{ fontSize: 20, paddingBottom: 10 }}>Enter a name</Text>
                     <TextInput
                         style={{
@@ -311,7 +313,7 @@ function ItemCreator(props: {
                     {/* Buttons */}
                     <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'space-between' }}>
                         <TouchableOpacity
-                            style={{ flex: 1, backgroundColor: '#007BFF', marginRight: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
+                            style={{ flex: 1, backgroundColor: theme.background, marginRight: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
                             onPress={() => {
                                 if (creationState == null) {
                                     throw new Error("creationState is null!");
@@ -365,13 +367,13 @@ function ItemCreator(props: {
                                 props.onCreationCanceled();
                             }}
                         >
-                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Ok</Text>
+                            <Text style={{ color: theme.text, fontWeight: 'bold' }}>Ok</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={{ flex: 1, backgroundColor: '#6C757D', marginLeft: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
+                            style={{ flex: 1, backgroundColor: theme.text, marginLeft: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
                             onPress={() => props.onCreationCanceled()}
                         >
-                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
+                            <Text style={{ color: theme.text, fontWeight: 'bold' }}>Cancel</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

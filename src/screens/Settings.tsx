@@ -4,17 +4,21 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { RootStackParamList } from "../App";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useTheme } from '../components/ThemeContext';
+import { lightTheme, darkTheme } from '../components/theme'; 
 
 export default function SettingsScreen({ navigation }: NativeStackScreenProps<RootStackParamList>) {
     const [imageViewer, setImageViewer] = useState(true);
     const [videoPlayer, setVideoPlayer] = useState(true);
     const [musicPlayer, setMusicPlayer] = useState(true);
     const [textEditor, setTextEditor] = useState(true);
-    const [darkMode, setDarkMode] = useState(false);
+    const {isDarkMode, toggleDarkMode, theme } = useTheme();
     const [storageFull, setStorageFull] = useState(true);
     const [recycleBin, setRecycleBin] = useState(true);
     const [recycleConfirm, setRecycleConfirm] = useState(true);
     const [detectUSB, setDetectUSB] = useState(false);
+    const styles = getStyles(theme);
+    const [update, setUpdate] = useState(false);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -23,7 +27,7 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                     onPress={() => navigation.goBack()}
                     style={styles.backButton}
                 >
-                    <AntDesign name="left" size={24} color="#333" />
+                    <AntDesign name="left" size={24} color={theme.text} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Settings</Text>
                 <View style={{ width: 40 }} />
@@ -37,13 +41,13 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         onPress={() => setImageViewer(!imageViewer)}
                     >
                         <View style={styles.rowContent}>
-                            <MaterialCommunityIcons name="image" size={24} color="#666" style={styles.rowIcon} />
+                            <MaterialCommunityIcons name="image" size={24} color={theme.textSecondary} style={styles.rowIcon} />
                             <Text style={styles.label}>Image viewer</Text>
                         </View>
                         <MaterialCommunityIcons
                             name={imageViewer ? "checkbox-marked" : "checkbox-blank-outline"}
                             size={24}
-                            color="#007AFF"
+                            color={theme.primary}
                         />
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -51,13 +55,13 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         onPress={() => setVideoPlayer(!videoPlayer)}
                     >
                         <View style={styles.rowContent}>
-                            <MaterialCommunityIcons name="video" size={24} color="#666" style={styles.rowIcon} />
+                            <MaterialCommunityIcons name="video" size={24} color={theme.textSecondary} style={styles.rowIcon} />
                             <Text style={styles.label}>Video player</Text>
                         </View>
                         <MaterialCommunityIcons
                             name={videoPlayer ? "checkbox-marked" : "checkbox-blank-outline"}
                             size={24}
-                            color="#007AFF"
+                            color={theme.primary}
                         />
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -65,13 +69,13 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         onPress={() => setMusicPlayer(!musicPlayer)}
                     >
                         <View style={styles.rowContent}>
-                            <MaterialCommunityIcons name="music" size={24} color="#666" style={styles.rowIcon} />
+                            <MaterialCommunityIcons name="music" size={24} color={theme.textSecondary} style={styles.rowIcon} />
                             <Text style={styles.label}>Music player</Text>
                         </View>
                         <MaterialCommunityIcons
                             name={musicPlayer ? "checkbox-marked" : "checkbox-blank-outline"}
                             size={24}
-                            color="#007AFF"
+                            color={theme.primary}
                         />
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -79,13 +83,13 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         onPress={() => setTextEditor(!textEditor)}
                     >
                         <View style={styles.rowContent}>
-                            <MaterialCommunityIcons name="text-box" size={24} color="#666" style={styles.rowIcon} />
+                            <MaterialCommunityIcons name="text-box" size={24} color={theme.textSecondary} style={styles.rowIcon} />
                             <Text style={styles.label}>Text editor</Text>
                         </View>
                         <MaterialCommunityIcons
                             name={textEditor ? "checkbox-marked" : "checkbox-blank-outline"}
                             size={24}
-                            color="#007AFF"
+                            color={theme.primary}
                         />
                     </TouchableOpacity>
                 </View>
@@ -94,17 +98,17 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                 <View style={styles.sectionContainer}>
                     <TouchableOpacity
                         style={styles.row}
-                        onPress={() => setDarkMode(!darkMode)}
+                        onPress={toggleDarkMode}
                     >
                         <View style={styles.rowContent}>
-                            <MaterialCommunityIcons name="theme-light-dark" size={24} color="#666" style={styles.rowIcon} />
+                            <MaterialCommunityIcons name="theme-light-dark" size={24} color={theme.textSecondary} style={styles.rowIcon} />
                             <Text style={styles.label}>Dark mode</Text>
                         </View>
                         <Switch
-                            value={darkMode}
-                            onValueChange={(value) => setDarkMode(value)}
+                            value={isDarkMode}
+                            onValueChange={toggleDarkMode}
                             trackColor={{ false: "#767577", true: "#81b0ff" }}
-                            thumbColor={darkMode ? "#007AFF" : "#f4f3f4"}
+                            thumbColor={isDarkMode ? "#F2F2F7" : "#f4f3f4"}
                         />
                     </TouchableOpacity>
                 </View>
@@ -116,7 +120,7 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         onPress={() => setStorageFull(!storageFull)}
                     >
                         <View style={styles.rowContent}>
-                            <MaterialCommunityIcons name="harddisk" size={24} color="#666" style={styles.rowIcon} />
+                            <MaterialCommunityIcons name="harddisk" size={24} color={theme.textSecondary} style={styles.rowIcon} />
                             <View>
                                 <Text style={styles.label}>Storage is full</Text>
                                 <Text style={styles.subLabel}>
@@ -127,7 +131,7 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         <MaterialCommunityIcons
                             name={storageFull ? "checkbox-marked" : "checkbox-blank-outline"}
                             size={24}
-                            color="#007AFF"
+                            color={theme.primary}
                         />
                     </TouchableOpacity>
                 </View>
@@ -139,13 +143,13 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         onPress={() => setRecycleBin(!recycleBin)}
                     >
                         <View style={styles.rowContent}>
-                            <MaterialCommunityIcons name="delete" size={24} color="#666" style={styles.rowIcon} />
+                            <MaterialCommunityIcons name="delete" size={24} color={theme.textSecondary} style={styles.rowIcon} />
                             <Text style={styles.label}>Use Recycle bin by default</Text>
                         </View>
                         <MaterialCommunityIcons
                             name={recycleBin ? "checkbox-marked" : "checkbox-blank-outline"}
                             size={24}
-                            color="#007AFF"
+                            color={theme.primary}
                         />
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -153,13 +157,13 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         onPress={() => setRecycleConfirm(!recycleConfirm)}
                     >
                         <View style={styles.rowContent}>
-                            <MaterialCommunityIcons name="alert-circle" size={24} color="#666" style={styles.rowIcon} />
+                            <MaterialCommunityIcons name="alert-circle" size={24} color={theme.textSecondary} style={styles.rowIcon} />
                             <Text style={styles.label}>Show recycle confirmation</Text>
                         </View>
                         <MaterialCommunityIcons
                             name={recycleConfirm ? "checkbox-marked" : "checkbox-blank-outline"}
                             size={24}
-                            color="#007AFF"
+                            color={theme.primary}
                         />
                     </TouchableOpacity>
                 </View>
@@ -171,13 +175,13 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         onPress={() => setDetectUSB(!detectUSB)}
                     >
                         <View style={styles.rowContent}>
-                            <MaterialCommunityIcons name="usb" size={24} color="#666" style={styles.rowIcon} />
+                            <MaterialCommunityIcons name="usb" size={24} color={theme.textSecondary} style={styles.rowIcon} />
                             <Text style={styles.label}>Detect USB connection</Text>
                         </View>
                         <MaterialCommunityIcons
                             name={detectUSB ? "checkbox-marked" : "checkbox-blank-outline"}
                             size={24}
-                            color="#007AFF"
+                            color={theme.primary}
                         />
                     </TouchableOpacity>
                 </View>
@@ -186,10 +190,10 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#F2F2F7"
+        backgroundColor: theme.background, 
     },
     header: {
         flexDirection: "row",
@@ -197,9 +201,9 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         paddingHorizontal: 16,
         paddingVertical: 12,
-        backgroundColor: "#fff",
+        backgroundColor: theme.card, 
         borderBottomWidth: 1,
-        borderBottomColor: "#E5E5EA",
+        borderBottomColor: theme.border, 
         marginTop: Platform.OS === 'ios' ? 0 : 20
     },
     backButton: {
@@ -208,7 +212,7 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 17,
         fontWeight: "600",
-        color: "#000",
+        color: theme.text, 
         flex: 1,
         textAlign: 'center'
     },
@@ -220,12 +224,12 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         marginTop: 20,
         marginBottom: 8,
-        color: "#8E8E93",
+        color: theme.textSecondary, 
         textTransform: 'uppercase',
         letterSpacing: 0.5
     },
     sectionContainer: {
-        backgroundColor: "#fff",
+        backgroundColor: theme.card, 
         borderRadius: 10,
         overflow: 'hidden'
     },
@@ -236,7 +240,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderBottomWidth: 1,
-        borderBottomColor: "#E5E5EA"
+        borderBottomColor: theme.border 
     },
     rowContent: {
         flexDirection: "row",
@@ -248,11 +252,12 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 17,
-        color: "#000"
+        color: theme.text 
     },
     subLabel: {
         fontSize: 13,
-        color: "#8E8E93",
+        color: theme.textSecondary, 
         marginTop: 2
     }
 });
+
