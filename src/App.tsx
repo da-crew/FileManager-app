@@ -4,13 +4,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { ThemeProvider } from './components/ThemeContext';
 import HomeScreen from './screens/HomeScreen';
-import ContentContainer, { ContentContainerRouteParams } from './screens/ContentContainer';
+import ContentContainer from './screens/ContentContainer';
 import LargeFiles from './screens/LargeFiles';
 import DuplicateFiles from './screens/Duplicates';
 import RecycleBin from './screens/RecycleBin';
 import SearchScreen from './screens/Search';
 import SettingsScreen from './screens/Settings';
 import TestScreen from './screens/TestScreen';
+import { ContentContainerRouteParams } from './components/ContentContainer/common';
 
 export type RootStackParamList = {
     Home: undefined,

@@ -1,85 +1,41 @@
-import { SafeAreaView, View, StatusBar, Text, TouchableOpacity, Modal, Alert, BackHandler, TextInput } from "react-native";
+import { SafeAreaView, View, StatusBar, Text, TouchableOpacity, Modal, BackHandler } from "react-native";
 import { PathDisplayer } from '../components/PathDisplayer';
 import { Path } from "../FileSystem";
 import Toolbar from "../components/Toolbar";
 import SelectionToolBar from "../components/SelectionToolbar";
-import { AntDesign, Feather, FontAwesome, Foundation, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome, } from '@expo/vector-icons';
 import { useEffect, useState } from "react";
 import { useRoute } from '@react-navigation/native';
 import * as RNFS from 'react-native-fs';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
-import { useTheme } from '../components/ThemeContext';
-import BottomBarItem from "../components/ContentContainer/BottomBarItem";
+
 import BottomBarOptions from "../components/ContentContainer/BottomBarOptions";
 import ContentList from "../components/ContentContainer/ContentList";
-
-export enum ContainerType {
-    CATEGORIZED,
-    DEFAULT,
-}
-
-export enum ViewMode {
-    FILES,
-    FOLDERS,
-}
-
-export type ContentContainerRouteParams = {
-    containerName: string,
-    path: Path,
-    containerType: ContainerType,
-};
-
-
-const ItemViewModeSelection = ({ onChange }: { onChange: (mode: ViewMode) => void }) => {
-
-    const highlightColor = '#B6B6B6';
-    const [selection, setSelection] = useState(ViewMode.FILES);
-    const { theme } = useTheme();
-
-    return <View style={{ flexDirection: 'row', backgroundColor: theme.background }}>
-        <TouchableOpacity onPress={() => {
-            onChange(ViewMode.FILES);
-            setSelection(ViewMode.FILES);
-        }} style={{ flex: 1, backgroundColor: selection == ViewMode.FILES ? highlightColor : undefined, padding: 10, alignItems: 'center' }}>
-            <Text style={{ color: theme.text, fontSize: 16 }}>Files</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => {
-            onChange(ViewMode.FOLDERS);
-            setSelection(ViewMode.FOLDERS);
-        }} style={{ flex: 1, backgroundColor: selection == ViewMode.FOLDERS ? highlightColor : undefined, padding: 10, alignItems: 'center' }}>
-            <Text style={{ color: theme.text, fontSize: 16 }}>Folders</Text>
-        </TouchableOpacity>
-    </View>;
-};
-
-enum SortType {
-    ALPHABETICAL,
-    DATE,
-}
-
-enum CreationType {
-    FOLDER,
-    FILE,
-}
-
-
+import SelectionBottomBar from "../components/ContentContainer/SelectionBottomBar";
+import ItemCreator from "../components/ContentContainer/ItemCreator";
+import { ContainerType, ContentContainerRouteParams, MoveType, MovingState, SortType, ViewMode } from "../components/ContentContainer/common";
+import ItemViewModeSelection from "../components/ContentContainer/ItemViewModeSelection";
 
 export function ContentContainer({ navigation }: NativeStackScreenProps<RootStackParamList>) {
 
     const route = useRoute();
     const routeParams = route.params as ContentContainerRouteParams;
-    const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{ selectionSet: Set<string>, isSelecting: boolean }>({ selectionSet: new Set(), isSelecting: false });
+    const storageName = routeParams.containerName;
+    const containerType = routeParams.containerType;
+
+    const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{ selectionSet: Set<RNFS.ReadDirItem>, isSelecting: boolean }>({ selectionSet: new Set(), isSelecting: false });
+    const [movingState, setMovingState] = useState<MovingState | null>(null);
+    const [movingProgress, setMovingProgress] = useState<number | null>(null);
+
     const [currentViewMode, setCurrentViewMode] = useState(ViewMode.FILES);
     const [sortByOptionVisible, setSortByOptionVisible] = useState(false);//modal
 
     const [itemCreatorVisible, setItemCreatorVisible] = useState(false);
 
-    const [sortType, setSortType] = useState<SortType>(SortType.ALPHABETICAL);
+    const [sortType, setSortType] = useState(SortType.ALPHABETICAL);
     const [navpath, setNavPath] = useState(routeParams.path);
 
-    const storageName = routeParams.containerName ?? "ERROR!! I LOVE FIXING ERRORS!";
-    const containerType = routeParams.containerType;
 
     const [content, setContent] = useState<RNFS.ReadDirItem[] | null>(null);
     const { theme } = useTheme();
@@ -112,17 +68,21 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
     useEffect(() => fetchContent(), [sortType]);
 
+    function handleGoBack() {
+        if (navpath.nodes.length == 0) {
+            navigation.goBack();
+            return;
+        }
+        navpath.nodes.pop();
+        console.log("new path: ", navpath.build());
+        setNavPath(navpath);
+        unselectAll();
+        fetchContent();
+    }
+
     useEffect(() => {
         const backAction = () => {
-            if (navpath.nodes.length == 0) {
-                navigation.goBack();
-                return true;
-            }
-            navpath.nodes.pop();
-            console.log("new path: ", navpath.build());
-            setNavPath(navpath);
-            unselectAll();
-            fetchContent();
+            handleGoBack();
             return true; // Prevent default behavior
         };
 
@@ -142,9 +102,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
     function handleSelect(select: boolean, item: RNFS.ReadDirItem) {
         if (select) {
-            selectionSet.add(item.name);
+            selectionSet.add(item);
         } else {
-            selectionSet.delete(item.name);
+            selectionSet.delete(item);
         }
         updateSelectionState({ selectionSet, isSelecting: selectionSet.size > 0 });
     }
@@ -160,19 +120,146 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             navpath.nodes.push(item.name);
             console.log("Open directory", navpath.build());
             setNavPath(navpath);
+            unselectAll();
             fetchContent();
         }
     }
 
+    async function pasteAction(sourcePath: string, destPath: string) {
+
+        if (movingState == null) throw new Error("movingState shouldn't be null!");
+        try {
+            let finalDestPath = destPath;
+            let attempt = 0;
+            console.log("Path: ", finalDestPath);
+            while (await RNFS.exists(finalDestPath)) {
+                attempt += 1;
+                let extIdx = destPath.lastIndexOf('.');
+                let ext = destPath.slice(extIdx);
+                finalDestPath = `${destPath.slice(0, extIdx)} (${attempt})${ext}`;
+            }
+
+            console.log("Final Path: ", finalDestPath);
+
+            if (attempt > 0) {
+                await RNFS.writeFile(finalDestPath, "");
+            }
+
+            switch (movingState.moveType) {
+                case MoveType.COPY:
+                    await RNFS.copyFile(sourcePath, finalDestPath);
+                    break;
+                case MoveType.CUT:
+                    await RNFS.moveFile(sourcePath, finalDestPath);
+                    break;
+            }
+        } catch (e) {
+            console.log("Error: ", e);
+        }
+
+        //increment progress
+
+    }
+
+    async function handlePasteAction() {
+        if (movingState == null) {
+            throw new Error("movingState shouldn't be null!");
+        }
+
+        let destPath = navpath.clone();
+
+        type DirNode = {
+            name: string | null,
+            items: RNFS.ReadDirItem[],
+        }
+
+        let dirStack: DirNode[] = [{ name: null, items: Array.from(movingState.items) }];
+
+        const buildStackPath = () => {
+            let path = destPath.build();
+            dirStack.forEach((node, i) => {
+                if (node.name == null && i > 0) throw new Error("Unexpected null value for directory name in stack path.");
+                if (node.name == null) return;
+                path += "/" + node.name;
+            });
+            return path;
+        }
+
+        setMovingProgress(0);
+        while (dirStack.length > 0) {
+            if (movingState == null) break;
+
+            let stackHead = dirStack[dirStack.length - 1];
+            let increased = false;
+
+            while (stackHead.items.length > 0) {
+                if (movingState == null) break;
+
+                let headPath = buildStackPath();
+                let itemHead = stackHead.items.pop() as RNFS.ReadDirItem;
+                if (itemHead.isFile()) {
+                    let source = itemHead.path;
+                    let dest = headPath + "/" + itemHead.name;
+                    console.log(`mv ${source} ${dest}`);
+                    await pasteAction(source, dest);
+
+                } else if (itemHead.isDirectory()) {
+                    let finalName = itemHead.name;
+                    let p = headPath + "/" + finalName;
+
+                    let attempts = 0;
+                    while (await RNFS.exists(p)) {
+                        if (movingState == null) break;
+                        attempts += 1;
+                        finalName = itemHead.name + `(${attempts})`;
+                        p = headPath + "/" + finalName;
+                    }
+                    
+                    console.log("mkdir " + p);
+                    await RNFS.mkdir(p);
+                    try {
+                        let items = await RNFS.readDir(itemHead.path);
+                        console.log("Got " + items.length + " items");
+                        dirStack.push({
+                            name: finalName,
+                            items,
+                        });
+                        increased = true;
+                    } catch (e) {
+                        console.log("Error while reading directory: ", e);
+                    }
+                    break;
+                }
+            }
+
+            if (stackHead.items.length == 0 && !increased) {
+                let headPath = buildStackPath();
+                let n = dirStack.pop();
+                setMovingProgress((prevProgress) => {//this makes the operation atomic i think
+                    if (movingState == null) return null;
+                    let newProgress = (prevProgress ?? 0) + 1;
+                    if (newProgress == movingState.items.length) return null;
+                    return newProgress;
+                });
+                console.log("Popped node: ", n?.name);
+            }
+        }
+        
+        fetchContent();
+        setMovingState(null);
+        setMovingProgress(null);
+    }
+
     return <SafeAreaView style={{ flex: 1 }}>
+        <StatusBar />
         <View style={{ flex: 1 }}>
-            <StatusBar />
             {//Toolbar 1
                 !isSelecting
                     //Default Mode
                     ? <Toolbar navigation={navigation} containerName={storageName}
-                        sortByHandler={() => { setSortByOptionVisible(true); }}
-                        createHandler={containerType == ContainerType.DEFAULT ? () => { setItemCreatorVisible(true); console.log("Create Action") } : undefined}
+                        goBackHandler={() => handleGoBack()}
+                        sortByHandler={() => setSortByOptionVisible(true)}
+                        createHandler={containerType == ContainerType.DEFAULT ? () => setItemCreatorVisible(true) : undefined}
                     />
                     //Selection Mode
                     : <SelectionToolBar
@@ -183,7 +270,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                     unselectAll();
                                 } else {
                                     for (const item of content) {
-                                        selectionSet.add(item.name);
+                                        selectionSet.add(item);
                                     }
                                     updateSelectionState({ selectionSet, isSelecting: selectionSet.size > 0 });
                                 }
@@ -209,21 +296,36 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             </View>
 
         </View>
-        {
-            isSelecting
-                ? <View style={{ backgroundColor: theme.background, borderTopWidth: 1, borderColor: theme.border, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20 }}>
-                    <BottomBarItem name='Copy' icon={<Feather name='copy' size={30} />} onPress={() => { }} />
-                    <BottomBarItem name='Move' icon={<Feather name='scissors' size={30} />} onPress={() => { }} />
-                    <BottomBarItem name='Rename' icon={<Foundation name='pencil' size={30} />} onPress={() => { }} />
-                    <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} />} onPress={() => { }} />
-                    <BottomBarItem name='More' icon={<MaterialIcons name='more-vert' size={30} />} onPress={() => { }} />
-                </View>
-                : <></>
-        }
+
+        <SelectionBottomBar 
+        isSelecting={selectionSet.size > 0} 
+        isMoving={movingState != null} 
+        isPasteLocationValid={movingState?.sourceDir.build() != navpath.build()}
+            copyActionHandler={function (): void {
+                setMovingProgress(null);
+                let itemArray = Array.from(selectionSet);
+
+                setMovingState({
+                    sourceDir: navpath.clone(),
+                    moveType: MoveType.COPY,
+                    items: itemArray,
+                });
+
+                unselectAll();
+            }} moveActionHandler={function (): void {
+                throw new Error("Move action not implemented.");
+            }} renameActionHandler={function (): void {
+                throw new Error("Rename action not implemented.");
+            }} deleteActionHandler={function (): void {
+                throw new Error("Delete action not implemented.");
+            }} pasteCancelActionHandler={function (): void {
+                setMovingState(null);
+            }} pasteActionHandler={() => handlePasteAction().then(() => {})}
+        />
 
         <Modal visible={sortByOptionVisible} transparent={true} onRequestClose={() => setSortByOptionVisible(false)} >
-            <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: theme.background }}>
-                <View style={{ backgroundColor: theme.background, justifyContent: 'space-between', paddingBottom: 5 }}>
+            <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }} >
+                <View style={{ backgroundColor: 'white', justifyContent: 'space-between', paddingBottom: 5 }} >
                     <BottomBarOptions name='Alphabetical' icon={<FontAwesome name="sort-alpha-asc" size={30} style={{ padding: 15 }} />} onPress={() => {
                         updateSortType(SortType.ALPHABETICAL);
                         setSortByOptionVisible(false);
@@ -232,6 +334,44 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                         updateSortType(SortType.DATE);
                         setSortByOptionVisible(false);
                     }} />
+                </View>
+            </View>
+        </Modal>
+
+        <Modal visible={movingProgress != null && movingState != null} transparent={true}>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10, alignItems: 'center' }}>
+                    <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Moving Items</Text>
+                    {movingState && movingProgress !== null ? (
+                        <>
+                            <Text style={{ fontSize: 16, marginBottom: 10 }}>
+                                {`Moving ${movingProgress + 1} of ${movingState.items.length} items...`}
+                            </Text>
+                            <View style={{ width: '100%', height: 10, backgroundColor: '#e0e0e0', borderRadius: 5, overflow: 'hidden', marginBottom: 10 }}>
+                                <View
+                                    style={{
+                                        width: `${((movingProgress + 1) / movingState.items.length) * 100}%`,
+                                        height: '100%',
+                                        backgroundColor: '#007BFF',
+                                    }}
+                                />
+                            </View>
+                        </>
+                    ) : (
+                        <Text style={{ fontSize: 16, marginBottom: 10 }}>Preparing to move items...</Text>
+                    )}
+                    <TouchableOpacity
+                        style={{
+                            backgroundColor: '#007BFF',
+                            padding: 10,
+                            borderRadius: 5,
+                            alignItems: 'center',
+                            width: '100%',
+                        }}
+                        onPress={() => setMovingState(null)}
+                    >
+                        <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
         </Modal>
@@ -247,6 +387,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         />
     </SafeAreaView>;
 }
+
 
 function ItemCreator(props: {
     enabled: boolean,
@@ -382,5 +523,6 @@ function ItemCreator(props: {
         </Modal>
     </>);
 }
+
 
 export default ContentContainer;

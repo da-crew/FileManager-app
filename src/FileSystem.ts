@@ -27,6 +27,10 @@ export class Path implements PathType {
         return new Path(this.root.displayName, this.root.path, [...this.nodes]);
     }
 
+    appendToPath(itemPath: string) {
+        return this.build() + "/" + itemPath;
+    }
+
     build() {
         let fullPath = this.root.path;
         for (const p of this.nodes) {
