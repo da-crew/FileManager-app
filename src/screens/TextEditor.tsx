@@ -1,13 +1,11 @@
+import { MaterialIcons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { Alert, BackHandler, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import * as RNFS from 'react-native-fs';
 import { RootStackParamList } from '../App';
-import { PathDisplayer } from '../components/PathDisplayer';
-import Toolbar from '../components/Toolbar';
 import { ContentContainerRouteParams } from '../components/ContentContainer/common';
-import { MaterialIcons } from '@expo/vector-icons';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
 export default function TextEditor({ route, navigation }: NativeStackScreenProps<RootStackParamList>) {
   const [content, setContent] = useState<string>('');
@@ -126,7 +124,7 @@ export default function TextEditor({ route, navigation }: NativeStackScreenProps
         <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={handleBack}>
           <MaterialIcons name="arrow-back-ios-new" size={20} />
         </TouchableOpacity>
-        <Text style={{ fontSize: 20 }}>{containerName}</Text>
+        <Text style={{ fontSize: 20 }}>{filePath.split('/').pop()}</Text>
         <TouchableOpacity
           style={{ marginLeft: 'auto', marginRight: 15 }}
           onPress={saveFile}
