@@ -5,7 +5,7 @@ import * as RNFS from 'react-native-fs';
 import { RootStackParamList } from '../App';
 import { PathDisplayer } from '../components/PathDisplayer';
 import Toolbar from '../components/Toolbar';
-import { ContentContainerRouteParams } from './ContentContainer';
+import { ContentContainerRouteParams } from '../components/ContentContainer/common';
 import { MaterialIcons } from '@expo/vector-icons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
