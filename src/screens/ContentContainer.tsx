@@ -1,4 +1,4 @@
-import { SafeAreaView, View, StatusBar, Text, TouchableOpacity, Modal, BackHandler } from "react-native";
+import { SafeAreaView, View, StatusBar, Text, TouchableOpacity, Modal, BackHandler, Alert, TextInput } from "react-native";
 import { PathDisplayer } from '../components/PathDisplayer';
 import { Path } from "../FileSystem";
 import Toolbar from "../components/Toolbar";
@@ -39,6 +39,11 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
     const [currentViewMode, setCurrentViewMode] = useState(ViewMode.FILES);
     const [sortByOptionVisible, setSortByOptionVisible] = useState(false);//modal
+
+    const [renameModalVisible, setRenameModalVisible] = useState(false);
+    const [renameItem, setRenameItem] = useState<RNFS.ReadDirItem | null>(null);
+    const [newName, setNewName] = useState("");
+
 
     const [itemCreatorVisible, setItemCreatorVisible] = useState(false);
 
@@ -171,7 +176,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         } catch (e) {
             console.log("Error: ", e);
         }
-        //increment progress
     }
 
     async function scanItems(items: RNFS.ReadDirItem[], onItemFound?: () => void) {
@@ -210,7 +214,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 if (movingState.moveType == MoveType.CUT) {
                     let popCount = await scanItems([item]) - 1;
                     if (popCount > 0) {
-                        console.error(`The directory "${item.path}" is not empty after processing. ${popCount} items remain.`);
                         throw new Error(`The directory "${item.path}" is not empty after processing. ${popCount} items remain.`);
                     }
                     console.log("rm ", item.path);
@@ -244,10 +247,53 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         });
 
         let destPath = navpath.clone();
-        await moveItems(movingState.items, destPath, progress.incrementProgress);
+
+        try {
+            moveItems(movingState.items, destPath, progress.incrementProgress);
+        } catch (error) {
+            console.log("Error moving items: ", error);
+        }
 
         fetchContent();
         setMovingState(null);
+    }
+
+    async function handleRename(item: RNFS.ReadDirItem, newName: string) {
+        try {
+            const sourcePath = item.path;
+            const destPath = navpath.appendToPath(newName);
+
+            if (await RNFS.exists(destPath)) {
+                Alert.alert("Already Exists!", `An item with the name "${newName}" already exists!`, [{ text: "Dismiss" }]);
+                return;
+            }
+
+            await RNFS.moveFile(sourcePath, destPath);
+
+            console.log(`Renamed: ${sourcePath} -> ${destPath}`);
+            fetchContent();
+        } catch (error) {
+            console.error("Error renaming item:", error);
+        }
+    }
+
+    function openRenameModal(item: RNFS.ReadDirItem) {
+        setRenameItem(item);
+        setNewName(item.name);
+        setRenameModalVisible(true);
+    }
+
+    function closeRenameModal() {
+        setRenameModalVisible(false);
+        setRenameItem(null);
+        setNewName("");
+    }
+
+    function confirmRename() {
+        if (renameItem && newName) {
+            handleRename(renameItem, newName);
+            closeRenameModal();
+        }
     }
 
     return <SafeAreaView style={{ flex: 1 }}>
@@ -297,6 +343,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         </View>
 
         <SelectionBottomBar
+            selectionSet={selectionSet}
             isSelecting={selectionSet.size > 0}
             isMoving={movingState != null}
             isPasteLocationValid={movingState?.sourceDir.build() != navpath.build()}
@@ -321,7 +368,14 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
                 unselectAll();
             }} renameActionHandler={function (): void {
-                throw new Error("Rename action not implemented.");
+                if (selectionSet.size !== 1) {
+                    throw new Error("Selection Set has more than element!");
+                }
+
+                const itemToRename = Array.from(selectionSet)[0];
+                openRenameModal(itemToRename);
+                unselectAll();
+                
             }} deleteActionHandler={function (): void {
                 throw new Error("Delete action not implemented.");
             }} pasteCancelActionHandler={function (): void {
@@ -344,7 +398,47 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             </View>
         </Modal>
 
-        <ProgressBar/>
+        <Modal visible={renameModalVisible} transparent={true} onRequestClose={closeRenameModal}>
+            <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: 30 }}>
+                <View style={{ padding: 15, backgroundColor: 'white', borderRadius: 5 }}>
+                    <Text style={{ fontSize: 20, paddingBottom: 10 }}>Rename Item</Text>
+                    <TextInput
+                        style={{
+                            height: 40,
+                            borderWidth: 1,
+                            borderColor: '#ddd',
+                            paddingHorizontal: 12,
+                            borderRadius: 5,
+                            fontSize: 17,
+                            backgroundColor: '#fff',
+                        }}
+                        value={newName}
+                        placeholder="Enter new name"
+                        onChangeText={setNewName}
+                    />
+
+                    {/* Buttons */}
+                    <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'space-between' }}>
+                        <TouchableOpacity
+                            style={{ flex: 1, backgroundColor: '#6C757D', marginRight: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
+                            onPress={closeRenameModal}
+                        >
+                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{ flex: 1, backgroundColor: newName == "" ? '#6C757D' : '#007BFF', marginLeft: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
+                            onPress={confirmRename}
+                            disabled={newName == ""}
+                        >
+                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Rename</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+            </View>
+        </Modal>
+
+        <ProgressBar />
 
         <ItemCreator enabled={itemCreatorVisible} currentPath={navpath}
             onCreationCanceled={() => {
