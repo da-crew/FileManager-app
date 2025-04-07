@@ -147,11 +147,11 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
                         icon={<Feather name="download" size={28} color="black" />}
                         onPress={() => gotoCategory("Downloads")}
                     />
-                    <QuickAccessButton
+                    {/* <QuickAccessButton
                         name="Recycle Bin"
                         icon={<Feather name="trash" size={28} color="black" />}
                         onPress={() => navigation.navigate("RecycleBin")}
-                    />
+                    /> */}
                 </View>
 
                 <Text style={styles.sectionTitle}>All storage</Text>
@@ -183,12 +183,12 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
                         icon={<MaterialCommunityIcons name="content-copy" size={24} color="#666" />}
                         onPress={() => navigation.navigate("Duplicates")}
                     />
-                    <UtilityButton
+                    {/* <UtilityButton
                         title="Test Screen"
                         desc="For testing purposes only"
                         icon={<MaterialCommunityIcons name="content-copy" size={24} color="#666" />}
                         onPress={() => navigation.navigate("Test")}
-                    />
+                    /> */}
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -202,12 +202,13 @@ const styles = StyleSheet.create({
     },
     scrollView: {
         flex: 1,
-        padding: 16,
+        margin: 16,
     },
     quickAccessGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
         backgroundColor: '#fff',
         borderRadius: 12,
         padding: 16,
