@@ -3,12 +3,16 @@ import { PathDisplayer } from '../components/PathDisplayer';
 import { Path } from "../FileSystem";
 import Toolbar from "../components/Toolbar";
 import SelectionToolBar from "../components/SelectionToolbar";
-import { FontAwesome, } from '@expo/vector-icons';
-import { useEffect, useState } from "react";
+import React,{ useEffect, useState } from "react";
+import { AntDesign, Feather, FontAwesome, Foundation, MaterialIcons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
-import * as RNFS from 'react-native-fs';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as RNFS from 'react-native-fs';
 import { RootStackParamList } from "../App";
+
+
+
+
 
 import BottomBarOptions from "../components/ContentContainer/BottomBarOptions";
 import ContentList from "../components/ContentContainer/ContentList";
@@ -16,6 +20,11 @@ import SelectionBottomBar from "../components/ContentContainer/SelectionBottomBa
 import ItemCreator from "../components/ContentContainer/ItemCreator";
 import { ContainerType, ContentContainerRouteParams, MoveType, MovingState, SortType, ViewMode } from "../components/ContentContainer/common";
 import ItemViewModeSelection from "../components/ContentContainer/ItemViewModeSelection";
+import { getFileType, openWith } from "../utils/openWith";
+
+
+
+
 
 export function ContentContainer({ navigation }: NativeStackScreenProps<RootStackParamList>) {
 
@@ -115,6 +124,18 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     function handleOpen(item: RNFS.ReadDirItem): void {
         if (item.isFile()) {
             console.log("Open file", item.name);
+            if(getFileType(item) == "text/plain"){
+                console.log("Open Text editor", navpath.build())
+                navpath.nodes.push(item.name);
+                navigation.navigate("TextEditor", {
+                    containerName: storageName,
+                    path: navpath,
+                    containerType: ContainerType.DEFAULT
+                });
+            }
+            else{
+            openWith(item.path, getFileType(item));
+            }
         } else if (item.isDirectory()) {
             navpath.nodes.push(item.name);
             console.log("Open directory", navpath.build());
