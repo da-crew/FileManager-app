@@ -181,7 +181,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             if (parent.isDirectory()) {
                 total += await scanItems(await RNFS.readDir(parent.path), onItemFound);
             }
-
             if (onItemFound) onItemFound();
         }
         return total;
@@ -192,25 +191,29 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             if (movingState == null) return;
 
             if (item.isFile()) {
-                await pasteAction(item.path, destPath.build());
+                await pasteAction(item.path, destPath.appendToPath(item.name));
+                console.log(movingState.moveType == MoveType.COPY ? "cp" : movingState.moveType == MoveType.CUT ? "mv" : "UNKNOWN", " ", item.path, destPath.appendToPath(item.name));
             } else if (item.isDirectory()) {
                 let newDestPath = destPath.clone();
                 newDestPath.push(item.name);
 
                 let newDestPathBuilt = newDestPath.build();
-                
+
                 if (!await RNFS.exists(newDestPathBuilt)) {
+                    console.log("mkdir ", newDestPathBuilt);
                     await RNFS.mkdir(newDestPathBuilt);
                 }
 
                 let innerItems = await RNFS.readDir(item.path);
-                await moveItems(innerItems, destPath, onItemDone);
+                await moveItems(innerItems, newDestPath, onItemDone);
 
                 if (movingState.moveType == MoveType.CUT) {
-                    let popCount = await scanItems([item]);
+                    let popCount = await scanItems([item]) - 1;
                     if (popCount > 0) {
+                        console.error(`The directory "${item.path}" is not empty after processing. ${popCount} items remain.`);
                         throw new Error(`The directory "${item.path}" is not empty after processing. ${popCount} items remain.`);
                     }
+                    console.log("rm ", item.path);
                     await RNFS.unlink(item.path);
                 }
             }
@@ -241,89 +244,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         });
 
         let destPath = navpath.clone();
-        moveItems(movingState.items, destPath, progress.incrementProgress);
-
-        // type DirNode = {
-        //     name: string | null,
-        //     directory: RNFS.ReadDirItem | null,
-        //     items: RNFS.ReadDirItem[],
-        // }
-
-        // let dirStack: DirNode[] = [{ name: null, directory: null, items: Array.from(movingState.items) }];
-
-        // const buildStackPath = () => {
-        //     let path = destPath.build();
-        //     dirStack.forEach((node, i) => {
-        //         if (node.name == null && i > 0) throw new Error("Unexpected null value for directory name in stack path.");
-        //         if (node.name == null) return;
-        //         path += "/" + node.name;
-        //     });
-        //     return path;
-        // }
-
-
-        // while (dirStack.length > 0) {
-        //     if (movingState == null) break;
-
-        //     let stackHead = dirStack[dirStack.length - 1];
-        //     let increased = false;
-
-        //     while (stackHead.items.length > 0) {
-        //         if (movingState == null) break;
-
-        //         let headPath = buildStackPath();
-        //         let itemHead = stackHead.items.pop() as RNFS.ReadDirItem;
-        //         if (itemHead.isFile()) {
-        //             let source = itemHead.path;
-        //             let dest = headPath + "/" + itemHead.name;
-        //             await pasteAction(source, dest);
-
-        //         } else if (itemHead.isDirectory()) {
-        //             let finalName = itemHead.name;
-        //             let p = headPath + "/" + finalName;
-
-        //             let attempts = 0;
-        //             while (await RNFS.exists(p)) {
-        //                 if (movingState == null) break;
-        //                 attempts += 1;
-        //                 finalName = itemHead.name + `(${attempts})`;
-        //                 p = headPath + "/" + finalName;
-        //             }
-
-        //             console.log("mkdir " + p);
-        //             await RNFS.mkdir(p);
-        //             try {
-        //                 let items = await RNFS.readDir(itemHead.path);
-        //                 dirStack.push({
-        //                     name: finalName,
-        //                     directory: itemHead,
-        //                     items,
-        //                 });
-        //                 increased = true;
-        //             } catch (e) {
-        //                 console.log("Error while reading directory: ", e);
-        //             }
-        //             break;
-        //         }
-        //     }
-
-        //     if (stackHead.items.length == 0 && !increased) {
-        //         let headPath = buildStackPath();
-        //         let n = dirStack.pop() as DirNode;
-        //         if (movingState.moveType == MoveType.CUT && n.directory) {
-        //             if (!n.directory.isDirectory()) throw new Error("Item isnt a directory for some reason.");
-        //             let items = await RNFS.readDir(n.directory.path);
-        //             if (items.length > 0) {
-        //                 throw new Error("the popped path isnt empty!!!!!");
-        //             } else {
-        //                 console.log("rm ", n.directory.path);
-        //                 //await RNFS.unlink(headPath);
-        //             }
-        //         }
-
-        //         //TODO: increment progress
-        //     }
-        // }
+        await moveItems(movingState.items, destPath, progress.incrementProgress);
 
         fetchContent();
         setMovingState(null);
