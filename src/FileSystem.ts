@@ -31,6 +31,14 @@ export class Path implements PathType {
         return this.build() + "/" + itemPath;
     }
 
+    push(dirName: string) {
+        this.nodes.push(dirName);
+    }
+
+    pop(): string | undefined {
+        return this.nodes.pop();
+    }
+
     build() {
         let fullPath = this.root.path;
         for (const p of this.nodes) {

@@ -158,10 +158,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
             console.log("Destination: ", finalDestPath);
 
-            //if (attempt > 0) {
-            //    await RNFS.writeFile(finalDestPath, "");
-            //}
-
             switch (movingState.moveType) {
                 case MoveType.COPY:
                     await RNFS.copyFile(sourcePath, finalDestPath);
@@ -175,22 +171,51 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         } catch (e) {
             console.log("Error: ", e);
         }
-
         //increment progress
-
     }
 
-    async function scanItems(items: RNFS.ReadDirItem[], onItemFound: () => void) {
+    async function scanItems(items: RNFS.ReadDirItem[], onItemFound?: () => void) {
         let total = 0;
         for (const parent of items) {
-            if (parent.isFile()) {
-                total += 1;
-                onItemFound();
-            } else if (parent.isDirectory()) {
+            total += 1;
+            if (parent.isDirectory()) {
                 total += await scanItems(await RNFS.readDir(parent.path), onItemFound);
             }
+
+            if (onItemFound) onItemFound();
         }
         return total;
+    }
+
+    async function moveItems(items: RNFS.ReadDirItem[], destPath: Path, onItemDone: () => void) {
+        for (const item of items) {
+            if (movingState == null) return;
+
+            if (item.isFile()) {
+                await pasteAction(item.path, destPath.build());
+            } else if (item.isDirectory()) {
+                let newDestPath = destPath.clone();
+                newDestPath.push(item.name);
+
+                let newDestPathBuilt = newDestPath.build();
+                
+                if (!await RNFS.exists(newDestPathBuilt)) {
+                    await RNFS.mkdir(newDestPathBuilt);
+                }
+
+                let innerItems = await RNFS.readDir(item.path);
+                await moveItems(innerItems, destPath, onItemDone);
+
+                if (movingState.moveType == MoveType.CUT) {
+                    let popCount = await scanItems([item]);
+                    if (popCount > 0) {
+                        throw new Error(`The directory "${item.path}" is not empty after processing. ${popCount} items remain.`);
+                    }
+                    await RNFS.unlink(item.path);
+                }
+            }
+            onItemDone();
+        }
     }
 
     async function handlePasteAction() {
@@ -199,18 +224,24 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         }
 
         progress.startProgress(0, -1, "Scanning for items", (done: boolean) => {
-            if (done) {
-                
-            } else {
+            if (!done) {
                 console.log("Canceled");
                 setMovingState(null);
             }
         });
 
-        scanItems(movingState.items, progress.incrementProgress);
+        let items = await scanItems(movingState.items, progress.incrementProgress);
+        progress.quitProgress(true, items);
 
+        progress.startProgress(0, items, "Moving items", (done: boolean) => {
+            if (!done) {
+                console.log("Canceled");
+                setMovingState(null);
+            }
+        });
 
         let destPath = navpath.clone();
+        moveItems(movingState.items, destPath, progress.incrementProgress);
 
         // type DirNode = {
         //     name: string | null,
