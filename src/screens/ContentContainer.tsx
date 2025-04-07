@@ -3,15 +3,12 @@ import { PathDisplayer } from '../components/PathDisplayer';
 import { Path } from "../FileSystem";
 import Toolbar from "../components/Toolbar";
 import SelectionToolBar from "../components/SelectionToolbar";
-import React,{ useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AntDesign, Feather, FontAwesome, Foundation, MaterialIcons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as RNFS from 'react-native-fs';
 import { RootStackParamList } from "../App";
-
-
-
 
 
 import BottomBarOptions from "../components/ContentContainer/BottomBarOptions";
@@ -21,6 +18,8 @@ import ItemCreator from "../components/ContentContainer/ItemCreator";
 import { ContainerType, ContentContainerRouteParams, MoveType, MovingState, SortType, ViewMode } from "../components/ContentContainer/common";
 import ItemViewModeSelection from "../components/ContentContainer/ItemViewModeSelection";
 import { getFileType, openWith } from "../utils/openWith";
+import { useProgress } from "../components/ProgressBar/ProgressContext";
+import ProgressBar from "../components/ProgressBar/ProgressBar";
 
 
 
@@ -35,7 +34,8 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
     const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{ selectionSet: Set<RNFS.ReadDirItem>, isSelecting: boolean }>({ selectionSet: new Set(), isSelecting: false });
     const [movingState, setMovingState] = useState<MovingState | null>(null);
-    const [movingProgress, setMovingProgress] = useState<number | null>(null);
+
+    const progress = useProgress();
 
     const [currentViewMode, setCurrentViewMode] = useState(ViewMode.FILES);
     const [sortByOptionVisible, setSortByOptionVisible] = useState(false);//modal
@@ -52,7 +52,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         setContent(null);
         RNFS.readDir(navpath.build())
             .then((items) => {
-                console.log("Sorting by: ", sortType);
                 const sortHandler = (a: RNFS.ReadDirItem, b: RNFS.ReadDirItem) => {
                     switch (sortType) {
                         case SortType.ALPHABETICAL:
@@ -66,7 +65,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 let hiddenFolders = items.filter((item) => item.isDirectory() && item.name.startsWith("."));
                 let folders = items.filter((item) => item.isDirectory() && !item.name.startsWith(".")).sort(sortHandler);
                 let files = items.filter((item) => item.isFile()).sort(sortHandler);
-                console.log("Got items");
                 setContent(hiddenFolders.concat(folders).concat(files));
             })
             .catch(() => {
@@ -124,7 +122,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     function handleOpen(item: RNFS.ReadDirItem): void {
         if (item.isFile()) {
             console.log("Open file", item.name);
-            if(getFileType(item) == "text/plain"){
+            if (getFileType(item) == "text/plain") {
                 console.log("Open Text editor", navpath.build())
                 navpath.nodes.push(item.name);
                 navigation.navigate("TextEditor", {
@@ -133,8 +131,8 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     containerType: ContainerType.DEFAULT
                 });
             }
-            else{
-            openWith(item.path, getFileType(item));
+            else {
+                openWith(item.path, getFileType(item));
             }
         } else if (item.isDirectory()) {
             navpath.nodes.push(item.name);
@@ -151,7 +149,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         try {
             let finalDestPath = destPath;
             let attempt = 0;
-            console.log("Path: ", finalDestPath);
             while (await RNFS.exists(finalDestPath)) {
                 attempt += 1;
                 let extIdx = destPath.lastIndexOf('.');
@@ -173,7 +170,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     await RNFS.moveFile(sourcePath, finalDestPath);
                     break;
             }
-            
+
             console.log("Done: ", finalDestPath);
         } catch (e) {
             console.log("Error: ", e);
@@ -183,102 +180,122 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
     }
 
+    async function scanItems(items: RNFS.ReadDirItem[], onItemFound: () => void) {
+        let total = 0;
+        for (const parent of items) {
+            if (parent.isFile()) {
+                total += 1;
+                onItemFound();
+            } else if (parent.isDirectory()) {
+                total += await scanItems(await RNFS.readDir(parent.path), onItemFound);
+            }
+        }
+        return total;
+    }
+
     async function handlePasteAction() {
         if (movingState == null) {
             throw new Error("movingState shouldn't be null!");
         }
 
+        progress.startProgress(0, -1, "Scanning for items", (done: boolean) => {
+            if (done) {
+                
+            } else {
+                console.log("Canceled");
+                setMovingState(null);
+            }
+        });
+
+        scanItems(movingState.items, progress.incrementProgress);
+
+
         let destPath = navpath.clone();
 
-        type DirNode = {
-            name: string | null,
-            items: RNFS.ReadDirItem[],
-        }
+        // type DirNode = {
+        //     name: string | null,
+        //     directory: RNFS.ReadDirItem | null,
+        //     items: RNFS.ReadDirItem[],
+        // }
 
-        let dirStack: DirNode[] = [{ name: null, items: Array.from(movingState.items) }];
+        // let dirStack: DirNode[] = [{ name: null, directory: null, items: Array.from(movingState.items) }];
 
-        const buildStackPath = () => {
-            let path = destPath.build();
-            dirStack.forEach((node, i) => {
-                if (node.name == null && i > 0) throw new Error("Unexpected null value for directory name in stack path.");
-                if (node.name == null) return;
-                path += "/" + node.name;
-            });
-            return path;
-        }
+        // const buildStackPath = () => {
+        //     let path = destPath.build();
+        //     dirStack.forEach((node, i) => {
+        //         if (node.name == null && i > 0) throw new Error("Unexpected null value for directory name in stack path.");
+        //         if (node.name == null) return;
+        //         path += "/" + node.name;
+        //     });
+        //     return path;
+        // }
 
-        setMovingProgress(0);
-        while (dirStack.length > 0) {
-            if (movingState == null) break;
 
-            let stackHead = dirStack[dirStack.length - 1];
-            let increased = false;
+        // while (dirStack.length > 0) {
+        //     if (movingState == null) break;
 
-            while (stackHead.items.length > 0) {
-                if (movingState == null) break;
+        //     let stackHead = dirStack[dirStack.length - 1];
+        //     let increased = false;
 
-                let headPath = buildStackPath();
-                let itemHead = stackHead.items.pop() as RNFS.ReadDirItem;
-                if (itemHead.isFile()) {
-                    let source = itemHead.path;
-                    let dest = headPath + "/" + itemHead.name;
-                    console.log(`mv ${source} ${dest}`);
-                    await pasteAction(source, dest);
+        //     while (stackHead.items.length > 0) {
+        //         if (movingState == null) break;
 
-                } else if (itemHead.isDirectory()) {
-                    let finalName = itemHead.name;
-                    let p = headPath + "/" + finalName;
+        //         let headPath = buildStackPath();
+        //         let itemHead = stackHead.items.pop() as RNFS.ReadDirItem;
+        //         if (itemHead.isFile()) {
+        //             let source = itemHead.path;
+        //             let dest = headPath + "/" + itemHead.name;
+        //             await pasteAction(source, dest);
 
-                    let attempts = 0;
-                    while (await RNFS.exists(p)) {
-                        if (movingState == null) break;
-                        attempts += 1;
-                        finalName = itemHead.name + `(${attempts})`;
-                        p = headPath + "/" + finalName;
-                    }
+        //         } else if (itemHead.isDirectory()) {
+        //             let finalName = itemHead.name;
+        //             let p = headPath + "/" + finalName;
 
-                    console.log("mkdir " + p);
-                    await RNFS.mkdir(p);
-                    try {
-                        let items = await RNFS.readDir(itemHead.path);
-                        console.log("Got " + items.length + " items");
-                        dirStack.push({
-                            name: finalName,
-                            items,
-                        });
-                        increased = true;
-                    } catch (e) {
-                        console.log("Error while reading directory: ", e);
-                    }
-                    break;
-                }
-            }
+        //             let attempts = 0;
+        //             while (await RNFS.exists(p)) {
+        //                 if (movingState == null) break;
+        //                 attempts += 1;
+        //                 finalName = itemHead.name + `(${attempts})`;
+        //                 p = headPath + "/" + finalName;
+        //             }
 
-            if (stackHead.items.length == 0 && !increased) {
-                let headPath = buildStackPath();
-                let n = dirStack.pop();
-                if (movingState.moveType == MoveType.CUT && n?.name) {
-                    let items = await RNFS.readDir(headPath);
-                    if (items.length > 0) {
-                        throw new Error("the popped path isnt empty!!!!!");
-                    } else {
-                        await RNFS.unlink(headPath);
-                    }
-                }
+        //             console.log("mkdir " + p);
+        //             await RNFS.mkdir(p);
+        //             try {
+        //                 let items = await RNFS.readDir(itemHead.path);
+        //                 dirStack.push({
+        //                     name: finalName,
+        //                     directory: itemHead,
+        //                     items,
+        //                 });
+        //                 increased = true;
+        //             } catch (e) {
+        //                 console.log("Error while reading directory: ", e);
+        //             }
+        //             break;
+        //         }
+        //     }
 
-                setMovingProgress((prevProgress) => {//this makes the operation atomic i think
-                    if (movingState == null) return null;
-                    let newProgress = (prevProgress ?? 0) + 1;
-                    if (newProgress == movingState.items.length) return null;
-                    return newProgress;
-                });
-                console.log("Popped node: ", headPath);
-            }
-        }
-        
+        //     if (stackHead.items.length == 0 && !increased) {
+        //         let headPath = buildStackPath();
+        //         let n = dirStack.pop() as DirNode;
+        //         if (movingState.moveType == MoveType.CUT && n.directory) {
+        //             if (!n.directory.isDirectory()) throw new Error("Item isnt a directory for some reason.");
+        //             let items = await RNFS.readDir(n.directory.path);
+        //             if (items.length > 0) {
+        //                 throw new Error("the popped path isnt empty!!!!!");
+        //             } else {
+        //                 console.log("rm ", n.directory.path);
+        //                 //await RNFS.unlink(headPath);
+        //             }
+        //         }
+
+        //         //TODO: increment progress
+        //     }
+        // }
+
         fetchContent();
         setMovingState(null);
-        setMovingProgress(null);
     }
 
     return <SafeAreaView style={{ flex: 1 }}>
@@ -332,7 +349,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             isMoving={movingState != null}
             isPasteLocationValid={movingState?.sourceDir.build() != navpath.build()}
             copyActionHandler={function (): void {
-                setMovingProgress(null);
                 let itemArray = Array.from(selectionSet);
 
                 setMovingState({
@@ -343,7 +359,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
                 unselectAll();
             }} moveActionHandler={function (): void {
-                setMovingProgress(null);
                 let itemArray = Array.from(selectionSet);
 
                 setMovingState({
@@ -359,7 +374,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 throw new Error("Delete action not implemented.");
             }} pasteCancelActionHandler={function (): void {
                 setMovingState(null);
-            }} pasteActionHandler={() => handlePasteAction().catch((reason) => {throw new Error(reason)})}
+            }} pasteActionHandler={() => handlePasteAction().catch((reason) => { throw new Error(reason) })}
         />
 
         <Modal visible={sortByOptionVisible} transparent={true} onRequestClose={() => setSortByOptionVisible(false)} >
@@ -377,43 +392,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             </View>
         </Modal>
 
-        <Modal visible={movingProgress != null && movingState != null} transparent={true}>
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10, alignItems: 'center' }}>
-                    <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Moving Items</Text>
-                    {movingState && movingProgress !== null ? (
-                        <>
-                            <Text style={{ fontSize: 16, marginBottom: 10 }}>
-                                {`Moving ${movingProgress + 1} of ${movingState.items.length} items...`}
-                            </Text>
-                            <View style={{ width: '100%', height: 10, backgroundColor: '#e0e0e0', borderRadius: 5, overflow: 'hidden', marginBottom: 10 }}>
-                                <View
-                                    style={{
-                                        width: `${((movingProgress + 1) / movingState.items.length) * 100}%`,
-                                        height: '100%',
-                                        backgroundColor: '#007BFF',
-                                    }}
-                                />
-                            </View>
-                        </>
-                    ) : (
-                        <Text style={{ fontSize: 16, marginBottom: 10 }}>Preparing to move items...</Text>
-                    )}
-                    <TouchableOpacity
-                        style={{
-                            backgroundColor: '#007BFF',
-                            padding: 10,
-                            borderRadius: 5,
-                            alignItems: 'center',
-                            width: '100%',
-                        }}
-                        onPress={() => setMovingState(null)}
-                    >
-                        <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </Modal>
+        <ProgressBar/>
 
         <ItemCreator enabled={itemCreatorVisible} currentPath={navpath}
             onCreationCanceled={() => {
