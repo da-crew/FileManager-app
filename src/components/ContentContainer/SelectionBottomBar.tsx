@@ -1,3 +1,4 @@
+import React from "react";
 import { View, Alert} from "react-native";
 import { Feather, Foundation, MaterialIcons } from '@expo/vector-icons';
 import BottomBarItem from "./BottomBarItem";
