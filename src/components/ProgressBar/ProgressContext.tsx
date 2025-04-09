@@ -1,19 +1,21 @@
 import React, { createContext, useContext, useState } from "react";
 
-export type onQuitEvent = (done: boolean, progress: number) => void;
+export type onQuitEvent = () => void;
 
 interface ProgressState {
     progress: number;
     maxProgress: number;
     actionTitle: string;
-    onQuit: onQuitEvent;
+    onQuit?: onQuitEvent;
+    onCancel?: onQuitEvent;
 }
 
 interface ProgressContextProps {
     progressState: ProgressState | null;
-    startProgress: (progress: number, maxProgress: number, actionTitle: string, onQuit: onQuitEvent) => void;
+    startProgress: (progress: number, maxProgress: number, actionTitle: string, onCancel?: onQuitEvent, onQuit?: onQuitEvent) => void;
     incrementProgress: () => void;
-    quitProgress: onQuitEvent;
+    quitProgress: () => void;
+    cancelProgress: () => void;
 }
 
 const ProgressContext = createContext<ProgressContextProps | undefined>(undefined);
@@ -21,8 +23,8 @@ const ProgressContext = createContext<ProgressContextProps | undefined>(undefine
 export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [progressState, setProgressState] = useState<ProgressState | null>(null);
 
-    const startProgress = (progress: number, maxProgress: number, actionTitle: string, onQuit: onQuitEvent) => {
-        setProgressState({ progress, maxProgress, actionTitle, onQuit });
+    const startProgress = (progress: number, maxProgress: number, actionTitle: string, onCancel?: onQuitEvent, onQuit?: onQuitEvent) => {
+        setProgressState({ progress, maxProgress, actionTitle, onQuit, onCancel });
     };
 
     const incrementProgress = () => {
@@ -34,13 +36,18 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         });
     };
 
-    const quitProgress = (done: boolean) => {
-        if (progressState) progressState.onQuit(done, progressState.progress);
+    const quitProgress = () => {
+        if (progressState && progressState.onQuit) progressState.onQuit();
+        setProgressState(null);
+    };
+
+    const cancelProgress = () => {
+        if (progressState && progressState.onCancel) progressState.onCancel();
         setProgressState(null);
     };
 
     return (
-        <ProgressContext.Provider value={{ progressState, startProgress, incrementProgress, quitProgress }}>
+        <ProgressContext.Provider value={{ progressState, startProgress, incrementProgress, quitProgress, cancelProgress }}>
             {children}
         </ProgressContext.Provider>
     );
