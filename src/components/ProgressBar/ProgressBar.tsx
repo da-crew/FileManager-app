@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Modal } from "react-native";
 import { useProgress } from "./ProgressContext";
 
 const ProgressBar: React.FC = () => {
-    const { progressState, quitProgress } = useProgress();
+    const { progressState, quitProgress, cancelProgress } = useProgress();
 
     if (!progressState) return null;
 
@@ -45,7 +45,7 @@ const ProgressBar: React.FC = () => {
                             alignItems: "center",
                             width: "100%",
                         }}
-                        onPress={() => quitProgress(false)}
+                        onPress={() => cancelProgress()}
                     >
                         <Text style={{ color: "white", fontWeight: "bold" }}>Cancel</Text>
                     </TouchableOpacity>
