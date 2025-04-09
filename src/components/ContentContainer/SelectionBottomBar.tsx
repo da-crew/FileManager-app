@@ -24,7 +24,7 @@ export default function SelectionBottomBar(props: SelectionBottomBarProps) {
                 <BottomBarItem name='Copy' icon={<Feather name='copy' size={30} />} onPress={props.copyActionHandler} />
                 <BottomBarItem name='Move' icon={<Feather name='scissors' size={30} />} onPress={props.moveActionHandler} />
                 <BottomBarItem name='Rename' icon={<Foundation name='pencil' size={30} />} onPress={props.renameActionHandler} disabled={props.selectionSet.size > 1} />
-                <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} />} onPress={() => Alert.alert("More options", "This feature is not implemented yet.", [{ text: "OK" }])} />
+                <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} />} onPress={props.deleteActionHandler} />
             </View>
         );
     }

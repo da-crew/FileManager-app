@@ -3,7 +3,7 @@ import { PathDisplayer } from '../components/PathDisplayer';
 import { Path } from "../FileSystem";
 import Toolbar from "../components/Toolbar";
 import SelectionToolBar from "../components/SelectionToolbar";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AntDesign, Feather, FontAwesome, Foundation, MaterialIcons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -279,6 +279,8 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
     const progress = useProgress();
 
+    const deleteCancelledRef = useRef(false);
+
     const [currentViewMode, setCurrentViewMode] = useState(ViewMode.FILES);
     const [sortByOptionVisible, setSortByOptionVisible] = useState(false);//modal
 
@@ -300,7 +302,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
     const [sortType, setSortType] = useState(SortType.DATE);
     const [navpath, setNavPath] = useState(routeParams.path);
-
 
     const [content, setContent] = useState<RNFS.ReadDirItem[] | null>(null);
 
@@ -584,38 +585,99 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         }
     }
 
+
+    async function deleteItems(items: RNFS.ReadDirItem[], onItemDone?: () => void) {
+        if (deleteCancelledRef.current) return;
+        for (const item of items) {
+            if (deleteCancelledRef.current) return;
+            if (item.isFile()) {
+                console.log(`Deleting file: ${item.path}`);
+                await RNFS.unlink(item.path);
+            } else if (item.isDirectory()) {
+                await deleteItems(await RNFS.readDir(item.path));
+                console.log(`Deleting directory: ${item.path}`);
+                await RNFS.unlink(item.path);
+            }
+            if (onItemDone) onItemDone();
+        }
+    }
+
     async function handlePasteAction() {
         if (movingState == null) {
             throw new Error("movingState shouldn't be null!");
         }
 
-        progress.startProgress(0, -1, "Scanning for items", (done: boolean) => {
-            if (!done) {
-                console.log("Canceled");
-                setMovingState(null);
-            }
-        });
+        progress.startProgress(0, -1, "Scanning for items", () => {
+            console.log("Canceled");
+            setMovingState(null);
+        }, () => {});
 
         let items = await scanItems(movingState.items, progress.incrementProgress);
-        progress.quitProgress(true, items);
+        progress.quitProgress();
 
-        progress.startProgress(0, items, "Moving items", (done: boolean) => {
-            if (!done) {
-                console.log("Canceled");
-                setMovingState(null);
-            }
-        });
+        progress.startProgress(0, items, "Moving items", () => {
+            console.log("Canceled");
+            setMovingState(null);
+        }, () => {});
 
         let destPath = navpath.clone();
 
         try {
-            moveItems(movingState.items, destPath, progress.incrementProgress);
+            await moveItems(movingState.items, destPath, progress.incrementProgress);
         } catch (error) {
             console.log("Error moving items: ", error);
         }
 
         fetchContent();
         setMovingState(null);
+    }
+
+    async function handleDeleteAction() {
+        if (selectionSet.size === 0) {
+            throw new Error("No items selected for deletion.");
+        }
+        deleteCancelledRef.current = false;
+
+        const itemsToDelete = Array.from(selectionSet);
+        const foldersCount = itemsToDelete.filter((item) => item.isDirectory()).length;
+        const filesCount = itemsToDelete.filter((item) => item.isFile()).length;
+
+        function getDeleteMessage(foldersCount: number, filesCount: number) {
+            if (foldersCount > 0 && filesCount > 0) {
+                return `${foldersCount} folder(s) and ${filesCount} file(s)?`;
+            } else if (foldersCount > 0) {
+                return `${foldersCount} folder(s)?`;
+            } else if (filesCount > 0) {
+                return `${filesCount} file(s)?`;
+            } else {
+                return "[how is this even possible]?";
+            }
+        }
+
+        Alert.alert(
+            "Delete Items",
+            "Are you sure you want to delete " 
+            + getDeleteMessage(foldersCount, filesCount),[
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                        progress.startProgress(0, foldersCount + filesCount, "Deleting items", () => {deleteCancelledRef.current = true}, () => {});
+                        try {
+                            console.log("--------------DELETION BEGIN--------------");
+                            await deleteItems(itemsToDelete, progress.incrementProgress);
+                            console.log("--------------DELETION END--------------");
+                        } catch (error) {
+                            console.error("Error deleting items:", error);
+                        }
+                        fetchContent();
+                    },
+                }
+            ]
+        );
+
+        unselectAll();
     }
 
     async function handleRename(item: RNFS.ReadDirItem, newName: string) {
@@ -1388,10 +1450,10 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 const itemToRename = Array.from(selectionSet)[0];
                 openRenameModal(itemToRename);
                 unselectAll();
-                
-            }} deleteActionHandler={function (): void {
-                throw new Error("Delete action not implemented.");
-            }} pasteCancelActionHandler={function (): void {
+
+            }} deleteActionHandler={
+                handleDeleteAction
+            } pasteCancelActionHandler={function (): void {
                 setMovingState(null);
             }} pasteActionHandler={() => handlePasteAction().catch((reason) => { throw new Error(reason) })}
         />
