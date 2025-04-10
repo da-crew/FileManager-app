@@ -4,12 +4,13 @@ import { MaterialIcons, Ionicons, AntDesign } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import PropTypes from 'prop-types';
 import { ContainerType, ContentContainerRouteParams } from './ContentContainer/common';
+import { Path } from '../FileSystem';
 
 
 interface ToolbarProps {
     navigation: any,
     containerName: string,
-    routeParams: ContentContainerRouteParams,
+    path: Path,
     goBackHandler: (event: GestureResponderEvent) => void,
     layoutChangeHandler?: (event: GestureResponderEvent) => void,
     sortByHandler?: (event: GestureResponderEvent) => void,
@@ -32,7 +33,7 @@ interface ToolbarProps {
  * @returns {JSX.Element} The rendered Toolbar component.
  */
 
-export default function Toolbar({ navigation, containerName, routeParams, goBackHandler, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
+export default function Toolbar({ navigation, containerName, path, goBackHandler, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#d9d9d9' }}>
             <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={goBackHandler}>
@@ -42,8 +43,8 @@ export default function Toolbar({ navigation, containerName, routeParams, goBack
             <TouchableOpacity
                 style={{ marginLeft: 'auto', marginRight: 15 }}
                 onPress={() => navigation.navigate("Search", {
-                                containerName: routeParams.containerName,
-                                path: routeParams.path,
+                                containerName: containerName,
+                                path: path,
                                 containerType: ContainerType.DEFAULT
                             })}
             >
