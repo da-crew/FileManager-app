@@ -4,6 +4,7 @@ import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View, StatusBa
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RootStackParamList } from "../App";
 import * as RNFS from 'react-native-fs';
+import {MaterialIcons} from '@expo/vector-icons';
 
 import { ContainerType, ContentContainerRouteParams, MovingState, SortType } from "../components/ContentContainer/common";
 import ContentList from "../components/ContentContainer/ContentList";
@@ -109,48 +110,22 @@ export default function SearchScreen({ route, navigation }: NativeStackScreenPro
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 14, marginTop: 0 }}>
             <StatusBar />
-            <View style={styles.searchContainer}>
+            <View style={{ marginBottom: 16, flexDirection: 'row', alignItems: 'center' }}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 8 }}>
+                    <MaterialIcons name="arrow-back-ios-new" size={20} color="#000" />
+                </TouchableOpacity>
                 <TextInput
-                    style={styles.searchInput}
+                    style={{ flex: 1, height: 40, borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 12, backgroundColor: '#fff' }}
                     placeholder="search..."
                     value={searchQuery}
                     onChangeText={handleSearch}
                 />
             </View>
-            <View style={{ margin: 10, flex: 1 }}>{/* ContentContainer */}
+            <View style={{ margin: 10, flex: 1 }}>
                 <ContentList content={searchResults} handleOpen={handleOpen} handleSelect={handleSelect} selectionSet={selectionSet} />
             </View>
         </SafeAreaView>
     );
 };
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingVertical: 16,
-        paddingHorizontal: 14,
-        marginTop: 20,
-    },
-    searchContainer: {
-        marginBottom: 16,
-    },
-    searchInput: {
-        height: 40,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        backgroundColor: '#fff',
-    },
-    resultItem: {
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-        backgroundColor: '#fff',
-    },
-    emptyContainer: {
-        padding: 16,
-        alignItems: 'center',
-    },
-});
