@@ -82,12 +82,13 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
     function handleGoBack() {
         if (navpath.nodes.length == 0) {
-            navigation.goBack();
+            navigation.navigate('Home');
             return;
         }
-        navpath.nodes.pop();
-        console.log("new path: ", navpath.build());
-        setNavPath(navpath);
+        const newPath = navpath.clone();
+        newPath.nodes.pop();
+        console.log("new path: ", newPath.build());
+        setNavPath(newPath);
         unselectAll();
         fetchContent();
     }
@@ -104,7 +105,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         console.log("Fetch Content");
 
         return () => backHandler.remove();
-    }, []);
+    }, [navpath]);
 
     function updateSortType(type: SortType) {
         if (sortType != type) {
