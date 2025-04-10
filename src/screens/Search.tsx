@@ -1,30 +1,116 @@
-import React, { useState } from "react";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import React, { useEffect, useState, useCallback } from "react";
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View, StatusBar } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { RootStackParamList } from "../App";
+import * as RNFS from 'react-native-fs';
 
-interface SearchItem {
-    id: string;
-    title: string;
-}
+import { ContainerType, ContentContainerRouteParams, MovingState, SortType } from "../components/ContentContainer/common";
+import ContentList from "../components/ContentContainer/ContentList";
+import { getFileType, openWith } from "../utils/openWith";
 
-const SearchScreen = () => {
+// interface SearchItem {
+//     id: string;
+//     title: string;
+// }
+
+export default function SearchScreen({ route, navigation }: NativeStackScreenProps<RootStackParamList>) {
+    const routeParams = route.params as ContentContainerRouteParams;
+    const storageName = routeParams.containerName;
+    const containerType = routeParams.containerType;
+
+    const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{ selectionSet: Set<RNFS.ReadDirItem>, isSelecting: boolean }>({ selectionSet: new Set(), isSelecting: false });
+    const [movingState, setMovingState] = useState<MovingState | null>(null);
+
     const [searchQuery, setSearchQuery] = useState('');
-    const [searchResults, setSearchResults] = useState<SearchItem[]>([]);
 
+    const [sortType, setSortType] = useState(SortType.ALPHABETICAL);//ContentContainer
+    const [navpath, setNavPath] = useState(routeParams.path);
+
+    const [searchResults, setSearchResults] = useState<RNFS.ReadDirItem[]>([]);
+    const [content, setContent] = useState<RNFS.ReadDirItem[] | null>(null);//ContentContainer
+
+    //function fetchContent() {//ContentContainer
+    const fetchContent = useCallback(() => {
+        setContent(null);
+        RNFS.readDir(navpath.build())
+            .then((items) => {
+                const sortHandler = (a: RNFS.ReadDirItem, b: RNFS.ReadDirItem) => {
+                    switch (sortType) {
+                        case SortType.ALPHABETICAL:
+                            return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+                        case SortType.DATE:
+                            return (b.mtime?.getTime() ?? 0) - (a.mtime?.getTime() ?? 0);
+                        default:
+                            return 0;
+                    }
+                };
+                let hiddenFolders = items.filter((item) => item.isDirectory() && item.name.startsWith("."));
+                let folders = items.filter((item) => item.isDirectory() && !item.name.startsWith(".")).sort(sortHandler);
+                let files = items.filter((item) => item.isFile()).sort(sortHandler);
+                setContent(hiddenFolders.concat(folders).concat(files));
+            })
+            .catch(() => {
+                console.log("An error occured");
+            });
+    }, [navpath, sortType]);
+
+    useEffect(() => {
+        fetchContent();
+    }, [fetchContent]);
+
+    function handleOpen(item: RNFS.ReadDirItem): void {//ContentContainer
+        if (item.isFile()) {
+            console.log("Open file", item.name);
+            if (getFileType(item) == "text/plain") {
+                console.log("Open Text editor", navpath.build())
+                navpath.nodes.push(item.name);
+                navigation.navigate("TextEditor", {
+                    containerName: storageName,
+                    path: navpath,
+                    containerType: ContainerType.DEFAULT
+                });
+            }
+            else {
+                openWith(item.path, getFileType(item));
+            }
+        } else if (item.isDirectory()) {//modify
+            navpath.nodes.push(item.name);
+            console.log("Open directory", navpath.build());
+            setNavPath(navpath);
+            navigation.navigate("Container", {
+                containerName: storageName,
+                path: navpath,
+                containerType: ContainerType.DEFAULT
+            });
+        }
+    }
+
+    function handleSelect(select: boolean, item: RNFS.ReadDirItem) {
+        if (select) {
+            selectionSet.add(item);
+        } else {
+            selectionSet.delete(item);
+        }
+        updateSelectionState({ selectionSet, isSelecting: selectionSet.size > 0 });
+    }
+
+    function unselectAll() {
+        updateSelectionState({ selectionSet: new Set(), isSelecting: false })
+    }
     const handleSearch = (text: string) => {
         setSearchQuery(text);
-        
-        const mockResults: SearchItem[] = [
-            { id: '1', title: 'Search Results 1' },
-        ];
-        setSearchResults(mockResults.filter(item => 
-            item.title.toLowerCase().includes(text.toLowerCase())
-        ));
+        // const mockResults: SearchItem[] = [
+        //     { id: '1', title: 'Search Results 1' },
+        // ];
+        setSearchResults(content?.filter(item =>
+            item.name.toLowerCase().includes(text.toLowerCase())
+        ) ?? []);
     };
 
     return (
         <SafeAreaView style={styles.container}>
-            <StatusBar/>
+            <StatusBar />
             <View style={styles.searchContainer}>
                 <TextInput
                     style={styles.searchInput}
@@ -33,24 +119,12 @@ const SearchScreen = () => {
                     onChangeText={handleSearch}
                 />
             </View>
-            <FlatList<SearchItem>
-                data={searchResults}
-                renderItem={({ item }) => (
-                    <TouchableOpacity style={styles.resultItem}>
-                        <Text>{item.title}</Text>
-                    </TouchableOpacity>
-                )}
-                keyExtractor={item => item.id}
-                ListEmptyComponent={() => (
-                    <View style={styles.emptyContainer}>
-                        <Text>No search results found.</Text>
-                    </View>
-                )}
-            />
+            <View style={{ margin: 10, flex: 1 }}>{/* ContentContainer */}
+                <ContentList content={searchResults} handleOpen={handleOpen} handleSelect={handleSelect} selectionSet={selectionSet} />
+            </View>
         </SafeAreaView>
     );
 };
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -80,5 +154,3 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
 });
-
-export default SearchScreen;

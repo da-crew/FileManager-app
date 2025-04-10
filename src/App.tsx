@@ -22,6 +22,7 @@ export type RootStackParamList = {
     Test: undefined,
     Container: ContentContainerRouteParams,
     TextEditor: ContentContainerRouteParams,
+    Search: ContentContainerRouteParams,
 };
 
 const Stack = createNativeStackNavigator();

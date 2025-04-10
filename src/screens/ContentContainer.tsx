@@ -364,7 +364,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             {//Toolbar 1
                 !isSelecting
                     //Default Mode
-                    ? <Toolbar navigation={navigation} containerName={storageName}
+                    ? <Toolbar navigation={navigation} containerName={storageName} routeParams={routeParams}
                         goBackHandler={() => handleGoBack()}
                         sortByHandler={() => setSortByOptionVisible(true)}
                         createHandler={containerType == ContainerType.DEFAULT ? () => setItemCreatorVisible(true) : undefined}

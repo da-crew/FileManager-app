@@ -3,11 +3,13 @@ import { View, Text, TouchableOpacity, GestureResponderEvent } from 'react-nativ
 import { MaterialIcons, Ionicons, AntDesign } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import PropTypes from 'prop-types';
+import { ContainerType, ContentContainerRouteParams } from './ContentContainer/common';
 
 
 interface ToolbarProps {
     navigation: any,
     containerName: string,
+    routeParams: ContentContainerRouteParams,
     goBackHandler: (event: GestureResponderEvent) => void,
     layoutChangeHandler?: (event: GestureResponderEvent) => void,
     sortByHandler?: (event: GestureResponderEvent) => void,
@@ -30,7 +32,7 @@ interface ToolbarProps {
  * @returns {JSX.Element} The rendered Toolbar component.
  */
 
-export default function Toolbar({ navigation, containerName, goBackHandler, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
+export default function Toolbar({ navigation, containerName, routeParams, goBackHandler, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#d9d9d9' }}>
             <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={goBackHandler}>
@@ -39,7 +41,11 @@ export default function Toolbar({ navigation, containerName, goBackHandler, layo
             <Text style={{ fontSize: 20 }}>{containerName}</Text>
             <TouchableOpacity
                 style={{ marginLeft: 'auto', marginRight: 15 }}
-                onPress={() => navigation.navigate("Search")}
+                onPress={() => navigation.navigate("Search", {
+                                containerName: routeParams.containerName,
+                                path: routeParams.path,
+                                containerType: ContainerType.DEFAULT
+                            })}
             >
                 <Ionicons name="search" size={24} color="black" />
             </TouchableOpacity>
