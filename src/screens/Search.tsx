@@ -49,16 +49,21 @@ export default function SearchScreen({ route, navigation }: NativeStackScreenPro
                 let hiddenFolders = items.filter((item) => item.isDirectory() && item.name.startsWith("."));
                 let folders = items.filter((item) => item.isDirectory() && !item.name.startsWith(".")).sort(sortHandler);
                 let files = items.filter((item) => item.isFile()).sort(sortHandler);
-                setContent(hiddenFolders.concat(folders).concat(files));
+                const sortedContent = hiddenFolders.concat(folders).concat(files);
+                setContent(sortedContent);
+                // Update search results with the new content
+                if (searchQuery.trim() === '') {
+                    setSearchResults(sortedContent);
+                }
             })
             .catch(() => {
                 console.log("An error occured");
             });
-    }, [navpath, sortType]);
+    }, [navpath, sortType, searchQuery]);
 
     useEffect(() => {
         fetchContent();
-    }, [fetchContent]);
+    }, [fetchContent, navpath]);
 
     function handleOpen(item: RNFS.ReadDirItem): void {//ContentContainer
         if (item.isFile()) {
@@ -101,12 +106,13 @@ export default function SearchScreen({ route, navigation }: NativeStackScreenPro
     }
     const handleSearch = (text: string) => {
         setSearchQuery(text);
-        // const mockResults: SearchItem[] = [
-        //     { id: '1', title: 'Search Results 1' },
-        // ];
-        setSearchResults(content?.filter(item =>
-            item.name.toLowerCase().includes(text.toLowerCase())
-        ) ?? []);
+        if (text.trim() === '') {
+            setSearchResults(content ?? []);
+        } else {
+            setSearchResults(content?.filter(item =>
+                item.name.toLowerCase().includes(text.toLowerCase())
+            ) ?? []);
+        }
     };
 
     return (
