@@ -1,14 +1,15 @@
-import { SafeAreaView, View, StatusBar, Text, TouchableOpacity, Modal, BackHandler } from "react-native";
+import { SafeAreaView, View, StatusBar, Text, TouchableOpacity, Modal, BackHandler, Alert, TextInput } from "react-native";
 import { PathDisplayer } from '../components/PathDisplayer';
 import { Path } from "../FileSystem";
 import Toolbar from "../components/Toolbar";
 import SelectionToolBar from "../components/SelectionToolbar";
-import { FontAwesome, } from '@expo/vector-icons';
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { AntDesign, Feather, FontAwesome, Foundation, MaterialIcons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
-import * as RNFS from 'react-native-fs';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as RNFS from 'react-native-fs';
 import { RootStackParamList } from "../App";
+
 
 import BottomBarOptions from "../components/ContentContainer/BottomBarOptions";
 import ContentList from "../components/ContentContainer/ContentList";
@@ -16,6 +17,13 @@ import SelectionBottomBar from "../components/ContentContainer/SelectionBottomBa
 import ItemCreator from "../components/ContentContainer/ItemCreator";
 import { ContainerType, ContentContainerRouteParams, MoveType, MovingState, SortType, ViewMode } from "../components/ContentContainer/common";
 import ItemViewModeSelection from "../components/ContentContainer/ItemViewModeSelection";
+import { getFileType, openWith } from "../utils/openWith";
+import { useProgress } from "../components/ProgressBar/ProgressContext";
+import ProgressBar from "../components/ProgressBar/ProgressBar";
+
+
+
+
 
 export function ContentContainer({ navigation }: NativeStackScreenProps<RootStackParamList>) {
 
@@ -26,16 +34,23 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
     const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{ selectionSet: Set<RNFS.ReadDirItem>, isSelecting: boolean }>({ selectionSet: new Set(), isSelecting: false });
     const [movingState, setMovingState] = useState<MovingState | null>(null);
-    const [movingProgress, setMovingProgress] = useState<number | null>(null);
+
+    const progress = useProgress();
+
+    const deleteCancelledRef = useRef(false);
 
     const [currentViewMode, setCurrentViewMode] = useState(ViewMode.FILES);
     const [sortByOptionVisible, setSortByOptionVisible] = useState(false);//modal
+
+    const [renameModalVisible, setRenameModalVisible] = useState(false);
+    const [renameItem, setRenameItem] = useState<RNFS.ReadDirItem | null>(null);
+    const [newName, setNewName] = useState("");
+
 
     const [itemCreatorVisible, setItemCreatorVisible] = useState(false);
 
     const [sortType, setSortType] = useState(SortType.ALPHABETICAL);
     const [navpath, setNavPath] = useState(routeParams.path);
-
 
     const [content, setContent] = useState<RNFS.ReadDirItem[] | null>(null);
 
@@ -43,7 +58,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         setContent(null);
         RNFS.readDir(navpath.build())
             .then((items) => {
-                console.log("Sorting by: ", sortType);
                 const sortHandler = (a: RNFS.ReadDirItem, b: RNFS.ReadDirItem) => {
                     switch (sortType) {
                         case SortType.ALPHABETICAL:
@@ -57,7 +71,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 let hiddenFolders = items.filter((item) => item.isDirectory() && item.name.startsWith("."));
                 let folders = items.filter((item) => item.isDirectory() && !item.name.startsWith(".")).sort(sortHandler);
                 let files = items.filter((item) => item.isFile()).sort(sortHandler);
-                console.log("Got items");
                 setContent(hiddenFolders.concat(folders).concat(files));
             })
             .catch(() => {
@@ -115,6 +128,18 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     function handleOpen(item: RNFS.ReadDirItem): void {
         if (item.isFile()) {
             console.log("Open file", item.name);
+            if (getFileType(item) == "text/plain") {
+                console.log("Open Text editor", navpath.build())
+                navpath.nodes.push(item.name);
+                navigation.navigate("TextEditor", {
+                    containerName: storageName,
+                    path: navpath,
+                    containerType: ContainerType.DEFAULT
+                });
+            }
+            else {
+                openWith(item.path, getFileType(item));
+            }
         } else if (item.isDirectory()) {
             navpath.nodes.push(item.name);
             console.log("Open directory", navpath.build());
@@ -130,7 +155,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         try {
             let finalDestPath = destPath;
             let attempt = 0;
-            console.log("Path: ", finalDestPath);
             while (await RNFS.exists(finalDestPath)) {
                 attempt += 1;
                 let extIdx = destPath.lastIndexOf('.');
@@ -138,11 +162,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 finalDestPath = `${destPath.slice(0, extIdx)} (${attempt})${ext}`;
             }
 
-            console.log("Final Path: ", finalDestPath);
-
-            if (attempt > 0) {
-                await RNFS.writeFile(finalDestPath, "");
-            }
+            console.log("Destination: ", finalDestPath);
 
             switch (movingState.moveType) {
                 case MoveType.COPY:
@@ -152,12 +172,74 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     await RNFS.moveFile(sourcePath, finalDestPath);
                     break;
             }
+
+            console.log("Done: ", finalDestPath);
         } catch (e) {
             console.log("Error: ", e);
         }
+    }
 
-        //increment progress
+    async function scanItems(items: RNFS.ReadDirItem[], onItemFound?: () => void) {
+        let total = 0;
+        for (const parent of items) {
+            total += 1;
+            if (parent.isDirectory()) {
+                total += await scanItems(await RNFS.readDir(parent.path), onItemFound);
+            }
+            if (onItemFound) onItemFound();
+        }
+        return total;
+    }
 
+    async function moveItems(items: RNFS.ReadDirItem[], destPath: Path, onItemDone: () => void) {
+        for (const item of items) {
+            if (movingState == null) return;
+
+            if (item.isFile()) {
+                await pasteAction(item.path, destPath.appendToPath(item.name));
+                console.log(movingState.moveType == MoveType.COPY ? "cp" : movingState.moveType == MoveType.CUT ? "mv" : "UNKNOWN", " ", item.path, destPath.appendToPath(item.name));
+            } else if (item.isDirectory()) {
+                let newDestPath = destPath.clone();
+                newDestPath.push(item.name);
+
+                let newDestPathBuilt = newDestPath.build();
+
+                if (!await RNFS.exists(newDestPathBuilt)) {
+                    console.log("mkdir ", newDestPathBuilt);
+                    await RNFS.mkdir(newDestPathBuilt);
+                }
+
+                let innerItems = await RNFS.readDir(item.path);
+                await moveItems(innerItems, newDestPath, onItemDone);
+
+                if (movingState.moveType == MoveType.CUT) {
+                    let popCount = await scanItems([item]) - 1;
+                    if (popCount > 0) {
+                        throw new Error(`The directory "${item.path}" is not empty after processing. ${popCount} items remain.`);
+                    }
+                    console.log("rm ", item.path);
+                    await RNFS.unlink(item.path);
+                }
+            }
+            onItemDone();
+        }
+    }
+
+
+    async function deleteItems(items: RNFS.ReadDirItem[], onItemDone?: () => void) {
+        if (deleteCancelledRef.current) return;
+        for (const item of items) {
+            if (deleteCancelledRef.current) return;
+            if (item.isFile()) {
+                console.log(`Deleting file: ${item.path}`);
+                await RNFS.unlink(item.path);
+            } else if (item.isDirectory()) {
+                await deleteItems(await RNFS.readDir(item.path));
+                console.log(`Deleting directory: ${item.path}`);
+                await RNFS.unlink(item.path);
+            }
+            if (onItemDone) onItemDone();
+        }
     }
 
     async function handlePasteAction() {
@@ -165,88 +247,115 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             throw new Error("movingState shouldn't be null!");
         }
 
+        progress.startProgress(0, -1, "Scanning for items", () => {
+            console.log("Canceled");
+            setMovingState(null);
+        }, () => {});
+
+        let items = await scanItems(movingState.items, progress.incrementProgress);
+        progress.quitProgress();
+
+        progress.startProgress(0, items, "Moving items", () => {
+            console.log("Canceled");
+            setMovingState(null);
+        }, () => {});
+
         let destPath = navpath.clone();
 
-        type DirNode = {
-            name: string | null,
-            items: RNFS.ReadDirItem[],
+        try {
+            await moveItems(movingState.items, destPath, progress.incrementProgress);
+        } catch (error) {
+            console.log("Error moving items: ", error);
         }
 
-        let dirStack: DirNode[] = [{ name: null, items: Array.from(movingState.items) }];
-
-        const buildStackPath = () => {
-            let path = destPath.build();
-            dirStack.forEach((node, i) => {
-                if (node.name == null && i > 0) throw new Error("Unexpected null value for directory name in stack path.");
-                if (node.name == null) return;
-                path += "/" + node.name;
-            });
-            return path;
-        }
-
-        setMovingProgress(0);
-        while (dirStack.length > 0) {
-            if (movingState == null) break;
-
-            let stackHead = dirStack[dirStack.length - 1];
-            let increased = false;
-
-            while (stackHead.items.length > 0) {
-                if (movingState == null) break;
-
-                let headPath = buildStackPath();
-                let itemHead = stackHead.items.pop() as RNFS.ReadDirItem;
-                if (itemHead.isFile()) {
-                    let source = itemHead.path;
-                    let dest = headPath + "/" + itemHead.name;
-                    console.log(`mv ${source} ${dest}`);
-                    await pasteAction(source, dest);
-
-                } else if (itemHead.isDirectory()) {
-                    let finalName = itemHead.name;
-                    let p = headPath + "/" + finalName;
-
-                    let attempts = 0;
-                    while (await RNFS.exists(p)) {
-                        if (movingState == null) break;
-                        attempts += 1;
-                        finalName = itemHead.name + `(${attempts})`;
-                        p = headPath + "/" + finalName;
-                    }
-                    
-                    console.log("mkdir " + p);
-                    await RNFS.mkdir(p);
-                    try {
-                        let items = await RNFS.readDir(itemHead.path);
-                        console.log("Got " + items.length + " items");
-                        dirStack.push({
-                            name: finalName,
-                            items,
-                        });
-                        increased = true;
-                    } catch (e) {
-                        console.log("Error while reading directory: ", e);
-                    }
-                    break;
-                }
-            }
-
-            if (stackHead.items.length == 0 && !increased) {
-                let headPath = buildStackPath();
-                let n = dirStack.pop();
-                setMovingProgress((prevProgress) => {//this makes the operation atomic i think
-                    if (movingState == null) return null;
-                    let newProgress = (prevProgress ?? 0) + 1;
-                    if (newProgress == movingState.items.length) return null;
-                    return newProgress;
-                });
-                console.log("Popped node: ", n?.name);
-            }
-        }
-        
         fetchContent();
         setMovingState(null);
-        setMovingProgress(null);
+    }
+
+    async function handleDeleteAction() {
+        if (selectionSet.size === 0) {
+            throw new Error("No items selected for deletion.");
+        }
+        deleteCancelledRef.current = false;
+
+        const itemsToDelete = Array.from(selectionSet);
+        const foldersCount = itemsToDelete.filter((item) => item.isDirectory()).length;
+        const filesCount = itemsToDelete.filter((item) => item.isFile()).length;
+
+        function getDeleteMessage(foldersCount: number, filesCount: number) {
+            if (foldersCount > 0 && filesCount > 0) {
+                return `${foldersCount} folder(s) and ${filesCount} file(s)?`;
+            } else if (foldersCount > 0) {
+                return `${foldersCount} folder(s)?`;
+            } else if (filesCount > 0) {
+                return `${filesCount} file(s)?`;
+            } else {
+                return "[how is this even possible]?";
+            }
+        }
+
+        Alert.alert(
+            "Delete Items",
+            "Are you sure you want to delete " 
+            + getDeleteMessage(foldersCount, filesCount),[
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                        progress.startProgress(0, foldersCount + filesCount, "Deleting items", () => {deleteCancelledRef.current = true}, () => {});
+                        try {
+                            console.log("--------------DELETION BEGIN--------------");
+                            await deleteItems(itemsToDelete, progress.incrementProgress);
+                            console.log("--------------DELETION END--------------");
+                        } catch (error) {
+                            console.error("Error deleting items:", error);
+                        }
+                        fetchContent();
+                    },
+                }
+            ]
+        );
+
+        unselectAll();
+    }
+
+    async function handleRename(item: RNFS.ReadDirItem, newName: string) {
+        try {
+            const sourcePath = item.path;
+            const destPath = navpath.appendToPath(newName);
+
+            if (await RNFS.exists(destPath)) {
+                Alert.alert("Already Exists!", `An item with the name "${newName}" already exists!`, [{ text: "Dismiss" }]);
+                return;
+            }
+
+            await RNFS.moveFile(sourcePath, destPath);
+
+            console.log(`Renamed: ${sourcePath} -> ${destPath}`);
+            fetchContent();
+        } catch (error) {
+            console.error("Error renaming item:", error);
+        }
+    }
+
+    function openRenameModal(item: RNFS.ReadDirItem) {
+        setRenameItem(item);
+        setNewName(item.name);
+        setRenameModalVisible(true);
+    }
+
+    function closeRenameModal() {
+        setRenameModalVisible(false);
+        setRenameItem(null);
+        setNewName("");
+    }
+
+    function confirmRename() {
+        if (renameItem && newName) {
+            handleRename(renameItem, newName);
+            closeRenameModal();
+        }
     }
 
     return <SafeAreaView style={{ flex: 1 }}>
@@ -293,15 +402,14 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             <View style={{ margin: 10, flex: 1 }}>
                 <ContentList content={content} handleOpen={handleOpen} handleSelect={handleSelect} selectionSet={selectionSet} />
             </View>
-
         </View>
 
-        <SelectionBottomBar 
-        isSelecting={selectionSet.size > 0} 
-        isMoving={movingState != null} 
-        isPasteLocationValid={movingState?.sourceDir.build() != navpath.build()}
+        <SelectionBottomBar
+            selectionSet={selectionSet}
+            isSelecting={selectionSet.size > 0}
+            isMoving={movingState != null}
+            isPasteLocationValid={movingState?.sourceDir.build() != navpath.build()}
             copyActionHandler={function (): void {
-                setMovingProgress(null);
                 let itemArray = Array.from(selectionSet);
 
                 setMovingState({
@@ -312,14 +420,29 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
                 unselectAll();
             }} moveActionHandler={function (): void {
-                throw new Error("Move action not implemented.");
+                let itemArray = Array.from(selectionSet);
+
+                setMovingState({
+                    sourceDir: navpath.clone(),
+                    moveType: MoveType.CUT,
+                    items: itemArray,
+                });
+
+                unselectAll();
             }} renameActionHandler={function (): void {
-                throw new Error("Rename action not implemented.");
-            }} deleteActionHandler={function (): void {
-                throw new Error("Delete action not implemented.");
-            }} pasteCancelActionHandler={function (): void {
+                if (selectionSet.size !== 1) {
+                    throw new Error("Selection Set has more than element!");
+                }
+
+                const itemToRename = Array.from(selectionSet)[0];
+                openRenameModal(itemToRename);
+                unselectAll();
+
+            }} deleteActionHandler={
+                handleDeleteAction
+            } pasteCancelActionHandler={function (): void {
                 setMovingState(null);
-            }} pasteActionHandler={() => handlePasteAction().then(() => {})}
+            }} pasteActionHandler={() => handlePasteAction().catch((reason) => { throw new Error(reason) })}
         />
 
         <Modal visible={sortByOptionVisible} transparent={true} onRequestClose={() => setSortByOptionVisible(false)} >
@@ -337,43 +460,47 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             </View>
         </Modal>
 
-        <Modal visible={movingProgress != null && movingState != null} transparent={true}>
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10, alignItems: 'center' }}>
-                    <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Moving Items</Text>
-                    {movingState && movingProgress !== null ? (
-                        <>
-                            <Text style={{ fontSize: 16, marginBottom: 10 }}>
-                                {`Moving ${movingProgress + 1} of ${movingState.items.length} items...`}
-                            </Text>
-                            <View style={{ width: '100%', height: 10, backgroundColor: '#e0e0e0', borderRadius: 5, overflow: 'hidden', marginBottom: 10 }}>
-                                <View
-                                    style={{
-                                        width: `${((movingProgress + 1) / movingState.items.length) * 100}%`,
-                                        height: '100%',
-                                        backgroundColor: '#007BFF',
-                                    }}
-                                />
-                            </View>
-                        </>
-                    ) : (
-                        <Text style={{ fontSize: 16, marginBottom: 10 }}>Preparing to move items...</Text>
-                    )}
-                    <TouchableOpacity
+        <Modal visible={renameModalVisible} transparent={true} onRequestClose={closeRenameModal}>
+            <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: 30 }}>
+                <View style={{ padding: 15, backgroundColor: 'white', borderRadius: 5 }}>
+                    <Text style={{ fontSize: 20, paddingBottom: 10 }}>Rename Item</Text>
+                    <TextInput
                         style={{
-                            backgroundColor: '#007BFF',
-                            padding: 10,
+                            height: 40,
+                            borderWidth: 1,
+                            borderColor: '#ddd',
+                            paddingHorizontal: 12,
                             borderRadius: 5,
-                            alignItems: 'center',
-                            width: '100%',
+                            fontSize: 17,
+                            backgroundColor: '#fff',
                         }}
-                        onPress={() => setMovingState(null)}
-                    >
-                        <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
-                    </TouchableOpacity>
+                        value={newName}
+                        placeholder="Enter new name"
+                        onChangeText={setNewName}
+                    />
+
+                    {/* Buttons */}
+                    <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'space-between' }}>
+                        <TouchableOpacity
+                            style={{ flex: 1, backgroundColor: '#6C757D', marginRight: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
+                            onPress={closeRenameModal}
+                        >
+                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{ flex: 1, backgroundColor: newName == "" ? '#6C757D' : '#007BFF', marginLeft: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
+                            onPress={confirmRename}
+                            disabled={newName == ""}
+                        >
+                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Rename</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
+
             </View>
         </Modal>
+
+        <ProgressBar />
 
         <ItemCreator enabled={itemCreatorVisible} currentPath={navpath}
             onCreationCanceled={() => {
@@ -388,3 +515,4 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 }
 
 export default ContentContainer;
+//hi

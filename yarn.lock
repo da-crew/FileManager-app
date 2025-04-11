@@ -4970,6 +4970,11 @@ mime@^2.4.1:
   resolved "https://registry.npmjs.org/mime/-/mime-2.6.0.tgz"
   integrity sha512-USPkMeET31rOMiarsBNIHZKLGgvKc/LrjofAnBlOttf5ajRvqiRA8QsenbcooctK6d6Ts6aqZXBA+XbkKthiQg==
 
+mime@^4.0.6:
+  version "4.0.6"
+  resolved "https://registry.npmjs.org/mime/-/mime-4.0.6.tgz"
+  integrity sha512-4rGt7rvQHBbaSOF9POGkk1ocRP16Md1x36Xma8sz8h8/vfCUI2OtEIeCqe4Ofes853x4xDoPiFLIT47J5fI/7A==
+
 mime@1.6.0:
   version "1.6.0"
   resolved "https://registry.npmjs.org/mime/-/mime-1.6.0.tgz"
@@ -5711,6 +5716,11 @@ react-is@^18.0.0, react-is@^18.2.0:
   version "18.3.1"
   resolved "https://registry.npmjs.org/react-is/-/react-is-18.3.1.tgz"
   integrity sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==
+
+react-native-file-viewer@^2.1.5:
+  version "2.1.5"
+  resolved "https://registry.npmjs.org/react-native-file-viewer/-/react-native-file-viewer-2.1.5.tgz"
+  integrity sha512-MGC6sx9jsqHdefhVQ6o0akdsPGpkXgiIbpygb2Sg4g4bh7v6K1cardLV1NwGB9A6u1yICOSDT/MOC//9Ez6EUg==
 
 react-native-fs@^2.20.0:
   version "2.20.0"

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {SafeAreaView,ScrollView,View,Text,Switch,StyleSheet,TouchableOpacity,Platform} from "react-native";
+import {SafeAreaView,ScrollView,View,Text,Switch,StyleSheet,TouchableOpacity,Platform, StatusBar} from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { RootStackParamList } from "../App";
@@ -22,6 +22,7 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
 
     return (
         <SafeAreaView style={styles.container}>
+            <StatusBar barStyle='default'/>
             <View style={styles.header}>
                 <TouchableOpacity 
                     onPress={() => navigation.goBack()}
@@ -136,7 +137,7 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                     </TouchableOpacity>
                 </View>
 
-                <Text style={styles.sectionHeader}>Recycle Bin Settings</Text>
+                {/* <Text style={styles.sectionHeader}>Recycle Bin Settings</Text>
                 <View style={styles.sectionContainer}>
                     <TouchableOpacity
                         style={styles.row}
@@ -166,9 +167,9 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                             color={theme.primary}
                         />
                     </TouchableOpacity>
-                </View>
+                </View> */}
 
-                <Text style={styles.sectionHeader}>Advanced Settings</Text>
+                {/* <Text style={styles.sectionHeader}>Advanced Settings</Text>
                 <View style={styles.sectionContainer}>
                     <TouchableOpacity
                         style={styles.row}
@@ -184,7 +185,7 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                             color={theme.primary}
                         />
                     </TouchableOpacity>
-                </View>
+                </View> */}
             </ScrollView>
         </SafeAreaView>
     );
