@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState, useCallback } from "react";
-import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View, StatusBar } from "react-native";
+import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View, StatusBar, BackHandler } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RootStackParamList } from "../App";
 import * as RNFS from 'react-native-fs';
@@ -36,6 +36,16 @@ export default function SearchScreen({ route, navigation }: NativeStackScreenPro
         });
         console.log("navpath:",navpath.build())
     }
+    useEffect(() => {//from ContentContainer
+            const backAction = () => {
+                handleGoBack();
+                return true; // Prevent default behavior
+            };
+            const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
+            // fetchContent();
+            // console.log("Fetch Content");
+            return () => backHandler.remove();
+        }, [navpath]);
 
     //function fetchContent() {//ContentContainer
     const fetchContent = useCallback(() => {
