@@ -125,7 +125,7 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             <HomeSearchBar navigation={navigation} />
             <ScrollView style={styles.scrollView}>
-                <View style={styles.quickAccessGrid}>
+                <View style={[styles.quickAccessGrid, { backgroundColor: theme.card}]}>
                     <QuickAccessButton
                         name="Images"
                         icon={<Feather name="image" size={28} color={theme.iconColor} />}

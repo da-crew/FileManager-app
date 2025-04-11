@@ -3,7 +3,7 @@ export const lightTheme = {
     background: "#F2F2F7",               // Main background
     text: "#000000",                     // Primary text color
     textSecondary: "#8E8E93",            // Secondary text color (for less important text)
-    primary: "#007AFF",                  // Primary color (for buttons or highlights)
+    primary: "#1C1C1E",                  // Primary color (for buttons or highlights)
     card: "#FFFFFF",                     // Card background color (used in cards, buttons)
     border: "#24242a",                   // Border color
     barStyle: "dark-content",            // Status bar style ('dark-content' or 'light-content')
@@ -25,7 +25,7 @@ export const darkTheme = {
     border: "#E5E5EA",                   // Border color
     barStyle: "light-content",           // Status bar style ('dark-content' or 'light-content')
     iconColor: "#F2F2F7",                // Icon color in dark theme
-    buttonBackground: "#007AFF",         // Button background color
+    buttonBackground: "#24242A",         // Button background color
     buttonText: "#FFFFFF",               // Button text color
     inputBackground: "#2C2C2E",          // Input field background color
     inputText: "#FFFFFF",                // Input text color

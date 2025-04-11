@@ -239,8 +239,7 @@ const getStyles = (theme: any) => StyleSheet.create({
         justifyContent: "space-between",
         paddingVertical: 12,
         paddingHorizontal: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: theme.border 
+       
     },
     rowContent: {
         flexDirection: "row",
