@@ -42,7 +42,7 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
             <Text style={{ fontSize: 20 }}>{containerName}</Text>
             <TouchableOpacity
                 style={{ marginLeft: 'auto', marginRight: 15 }}
-                onPress={() => navigation.navigate("Search", {
+                onPress={() => navigation.replace("Search", {
                                 containerName: containerName,
                                 path: path,
                                 containerType: ContainerType.DEFAULT

@@ -10,10 +10,6 @@ import { ContainerType, ContentContainerRouteParams, MovingState, SortType } fro
 import ContentList from "../components/ContentContainer/ContentList";
 import { getFileType, openWith } from "../utils/openWith";
 
-// interface SearchItem {
-//     id: string;
-//     title: string;
-// }
 
 export default function SearchScreen({ route, navigation }: NativeStackScreenProps<RootStackParamList>) {
     const routeParams = route.params as ContentContainerRouteParams;
@@ -30,6 +26,16 @@ export default function SearchScreen({ route, navigation }: NativeStackScreenPro
 
     const [searchResults, setSearchResults] = useState<RNFS.ReadDirItem[]>([]);
     const [content, setContent] = useState<RNFS.ReadDirItem[] | null>(null);//ContentContainer
+
+    function handleGoBack() {
+        console.log("navpath:",navpath.build())
+        navigation.replace("Container", {
+            containerName: storageName,
+            path: navpath,
+            containerType: ContainerType.DEFAULT
+        });
+        console.log("navpath:",navpath.build())
+    }
 
     //function fetchContent() {//ContentContainer
     const fetchContent = useCallback(() => {
@@ -119,7 +125,7 @@ export default function SearchScreen({ route, navigation }: NativeStackScreenPro
         <SafeAreaView style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 14, marginTop: 0 }}>
             <StatusBar />
             <View style={{ marginBottom: 16, flexDirection: 'row', alignItems: 'center' }}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 8 }}>
+                <TouchableOpacity onPress={handleGoBack} style={{ marginRight: 8 }}>
                     <MaterialIcons name="arrow-back-ios-new" size={20} color="#000" />
                 </TouchableOpacity>
                 <TextInput
