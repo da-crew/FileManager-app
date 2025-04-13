@@ -2347,7 +2347,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                         alignItems: 'center',
                                         borderRadius: 25,
                                         flexDirection: 'row',
-                                        justifyContent: 'center',
+                                        justifyContent: 'center'
                                     }}
                                     onPress={() => switchTab('Videos')}
                                 >
@@ -2389,24 +2389,24 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                     }}>Collections</Text>
                                 </TouchableOpacity>
                             </View>
-                        ) : storageName === "Audio" || storageName === "Downloads" ? (
+                        ) :
                             // ไม่แสดงแถบชื่อสำหรับหน้าเสียงและดาวน์โหลด
-                            null
-                        ) : <ItemViewModeSelection 
-                        fileType={currentFileType}
-                        initialMode={currentViewMode}
-                        onChange={(mode) => {//Display Viewing Options
-                            console.log('Changing view mode to:', mode);
-                            setCurrentViewMode(mode);
-                            if (mode === ViewMode.FOLDERS) {
-                                setCurrentAlbum(null);
-                                createAlbums();
-                            } else {
-                                loadAllImages();
-                            }
-                            unselectAll();
-                        }} 
-                      />
+                            storageName === "Audio" || storageName === "Downloads" || storageName === "Documents" || storageName === "Files" ? null
+                          : <ItemViewModeSelection 
+                                fileType={currentFileType}
+                                initialMode={currentViewMode}
+                                onChange={(mode) => {//Display Viewing Options
+                                    console.log('Changing view mode to:', mode);
+                                    setCurrentViewMode(mode);
+                                    if (mode === ViewMode.FOLDERS) {
+                                        setCurrentAlbum(null);
+                                        createAlbums();
+                                    } else {
+                                        loadAllImages();
+                                    }
+                                    unselectAll();
+                                }} 
+                            />
             }
 
             {/* Content is displayed here */}
