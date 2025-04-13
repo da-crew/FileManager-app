@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, FlatList, Image, Dimensions } from 'react-native';
 
-interface AlbumItem {
+// อินเตอร์เฟซสำหรับอัลบั้ม
+export interface AlbumItem {
     name: string;
     path: string;
     count: number;
@@ -9,82 +10,91 @@ interface AlbumItem {
 }
 
 interface AlbumsGridProps {
-    isLoading: boolean;
-    albums: AlbumItem[];
-    onAlbumPress: (album: AlbumItem) => void;
+    albums: AlbumItem[],
+    isLoading: boolean,
+    onAlbumPress: (album: AlbumItem) => void
 }
 
-const AlbumsGrid: React.FC<AlbumsGridProps> = ({ isLoading, albums, onAlbumPress }) => {
+const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: AlbumsGridProps) => {
+    const { width } = Dimensions.get('window');
+    const numColumns = 2;
+    const itemWidth = (width - 30) / numColumns;
+    
     if (isLoading) {
         return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' }}>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator size="large" color="#2196F3" />
-                <Text style={{ marginTop: 10, color: '#333333' }}>Loading albums...</Text>
+                <Text style={{ marginTop: 10, color: '#333' }}>กำลังโหลดอัลบั้ม...</Text>
             </View>
         );
     }
     
-    if (!albums || albums.length === 0) {
+    if (albums.length === 0) {
         return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, backgroundColor: '#ffffff' }}>
-                <Text style={{ fontSize: 18, textAlign: 'center', color: '#333333' }}>
-                    No albums found. Check app permissions to access photos.
-                </Text>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ fontSize: 16, color: '#333' }}>ไม่พบอัลบั้ม</Text>
             </View>
         );
     }
-
-    // คำนวณขนาดคอลัมน์
-    const numColumns = 3;
-    const { width } = Dimensions.get('window');
-    const itemWidth = width / numColumns;
-
+    
+    console.log('Rendering albums:', albums.length);
+    
     return (
         <FlatList
-            style={{ flex: 1, backgroundColor: '#ffffff' }}
             data={albums}
-            keyExtractor={(item) => item.path}
             numColumns={numColumns}
+            keyExtractor={(item) => item.path}
             renderItem={({ item }) => (
                 <TouchableOpacity 
                     style={{ 
                         width: itemWidth, 
-                        height: itemWidth,
-                        padding: 1
+                        height: itemWidth * 1.2, 
+                        margin: 5,
+                        borderRadius: 10,
+                        overflow: 'hidden',
+                        backgroundColor: '#ffffff',
+                        elevation: 3,
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 3,
                     }}
                     onPress={() => onAlbumPress(item)}
                 >
                     {item.thumbnail ? (
                         <Image 
-                            source={{ uri: 'file://' + item.thumbnail }} 
-                            style={{ width: '100%', height: '100%' }}
+                            source={{ uri: `file://${item.thumbnail}` }} 
+                            style={{ width: '100%', height: '70%' }}
                             resizeMode="cover"
                         />
                     ) : (
                         <View style={{ 
                             width: '100%', 
-                            height: '100%', 
+                            height: '70%',
                             backgroundColor: '#f0f0f0',
                             justifyContent: 'center',
-                            alignItems: 'center' 
+                            alignItems: 'center'
                         }}>
                             {item.name === 'Camera' ? (
-                                <Text style={{ color: '#333333', fontSize: 36 }}>📷</Text>
+                                <Text style={{ fontSize: 40 }}>📷</Text>
                             ) : item.name === 'Screenshots' ? (
-                                <Text style={{ color: '#333333', fontSize: 36 }}>📱</Text>
-                            ) : item.name === 'Download' ? (
-                                <Text style={{ color: '#333333', fontSize: 36 }}>📥</Text>
+                                <Text style={{ fontSize: 40 }}>📱</Text>
+                            ) : item.name === 'Download' || item.name === 'Downloads' ? (
+                                <Text style={{ fontSize: 40 }}>📥</Text>
                             ) : item.name === 'All Photos' ? (
-                                <Text style={{ color: '#333333', fontSize: 36 }}>🖼️</Text>
-                            ) : item.name === 'Favorites' ? (
-                                <Text style={{ color: '#333333', fontSize: 36 }}>⭐</Text>
+                                <Text style={{ fontSize: 40 }}>🖼️</Text>
                             ) : (
-                                <Text style={{ color: '#333333', fontSize: 36 }}>📁</Text>
+                                <Text style={{ fontSize: 40 }}>📁</Text>
                             )}
                         </View>
                     )}
+                    <View style={{ padding: 10 }}>
+                        <Text style={{ fontWeight: 'bold', fontSize: 14 }} numberOfLines={1}>{item.name}</Text>
+                        <Text style={{ fontSize: 12, color: '#666' }}>{item.count} รูป</Text>
+                    </View>
                 </TouchableOpacity>
             )}
+            contentContainerStyle={{ paddingHorizontal: 5, paddingVertical: 10 }}
         />
     );
 };
