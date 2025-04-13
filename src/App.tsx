@@ -13,6 +13,9 @@ import TestScreen from './screens/TestScreen';
 import { ContentContainerRouteParams } from './components/ContentContainer/common';
 import TextEditor from './screens/TextEditor';
 import { ProgressProvider } from './components/ProgressBar/ProgressContext';
+import ImageViewer from './screens/ImageViewer';
+import ProgressBar from './components/ProgressBar/ProgressBar';
+
 
 export type RootStackParamList = {
     Home: undefined,
@@ -21,30 +24,38 @@ export type RootStackParamList = {
     RecycleBin: undefined,
     Test: undefined,
     Container: ContentContainerRouteParams,
-    TextEditor: ContentContainerRouteParams,
+    Search: undefined,
+    Settings: undefined,
+    ImageViewer: {
+        imagePath: string;
+        imageName: string;
+    }
 };
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-    return <ProgressProvider>
-        <NavigationContainer>
-            <Stack.Navigator
-                initialRouteName="Home"
-                screenOptions={{
-                    headerShown: false
-                }}
-            >
-                <Stack.Screen name="Home" component={HomeScreen} />
-                <Stack.Screen name="Container" component={ContentContainer} />
-                <Stack.Screen name="LargeFiles" component={LargeFiles} />
-                <Stack.Screen name="Duplicates" component={DuplicateFiles} />
-                <Stack.Screen name="RecycleBin" component={RecycleBin} />
-                <Stack.Screen name="Search" component={SearchScreen} />
-                <Stack.Screen name="Settings" component={SettingsScreen} />
-                <Stack.Screen name="Test" component={TestScreen} />
-                <Stack.Screen name="TextEditor" component={TextEditor} />
-            </Stack.Navigator>
-        </NavigationContainer>
-    </ProgressProvider>;
+    return (
+        <ProgressProvider>
+            <NavigationContainer>
+                <Stack.Navigator
+                    initialRouteName="Home"
+                    screenOptions={{
+                        headerShown: false
+                    }}
+                >
+                    <Stack.Screen name="Home" component={HomeScreen} />
+                    <Stack.Screen name="Container" component={ContentContainer} />
+                    <Stack.Screen name="LargeFiles" component={LargeFiles} />
+                    <Stack.Screen name="Duplicates" component={DuplicateFiles} />
+                    <Stack.Screen name="RecycleBin" component={RecycleBin} />
+                    <Stack.Screen name="Search" component={SearchScreen} />
+                    <Stack.Screen name="Settings" component={SettingsScreen} />
+                    <Stack.Screen name="Test" component={TestScreen} />
+                    <Stack.Screen name="ImageViewer" component={ImageViewer} />
+                </Stack.Navigator>
+                <ProgressBar />
+            </NavigationContainer>
+        </ProgressProvider>
+    );
 }
