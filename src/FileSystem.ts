@@ -82,6 +82,42 @@ export async function openAppSettings() {
     );
 }
 
+// ฟังก์ชันสำหรับช่วยหาหรือสร้างเส้นทางถังขยะที่เหมาะสม
+export async function getRecycleBinPath(): Promise<string | null> {
+    // ทดลองใช้เส้นทางถังขยะหลายตัวเลือก
+    const pathOptions = [
+        RNFS.ExternalStorageDirectoryPath + '/.RecycleBin',      // ตัวเลือกที่ 1 (เดิม)
+        RNFS.DocumentDirectoryPath + '/.RecycleBin',             // ตัวเลือกที่ 2 (ควรเข้าถึงได้ง่ายกว่า)
+        RNFS.CachesDirectoryPath + '/.RecycleBin'                // ตัวเลือกที่ 3 (ใช้ในกรณีฉุกเฉิน)
+    ];
+    
+    // ทดสอบแต่ละเส้นทางเพื่อหาที่สามารถเข้าถึงได้
+    for (const path of pathOptions) {
+        console.log(`ทดสอบเส้นทางถังขยะที่: ${path}`);
+        try {
+            const exists = await RNFS.exists(path);
+            if (exists) {
+                console.log(`พบถังขยะที่: ${path}`);
+                return path;
+            } else {
+                try {
+                    // ลองสร้างโฟลเดอร์
+                    await RNFS.mkdir(path);
+                    console.log(`สร้างถังขยะสำเร็จที่: ${path}`);
+                    return path;
+                } catch (mkdirError) {
+                    console.log(`ไม่สามารถสร้างถังขยะที่: ${path} เนื่องจาก: ${mkdirError}`);
+                }
+            }
+        } catch (e) {
+            console.log(`ไม่สามารถเข้าถึงเส้นทาง: ${path} เนื่องจาก: ${e}`);
+        }
+    }
+    
+    console.error("ไม่สามารถเข้าถึงหรือสร้างถังขยะได้ในทุกเส้นทาง");
+    return null;
+}
+
 // ดึงรายการไฟล์ในถังขยะ
 export async function getRecycleBinContents(): Promise<RNFS.ReadDirItem[]> {
     try {

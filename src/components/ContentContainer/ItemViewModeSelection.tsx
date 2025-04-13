@@ -1,6 +1,7 @@
 import React from "react";
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { ViewMode } from "./common";
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 
 interface ItemViewModeSelectionProps {
     onChange: (mode: ViewMode) => void;
@@ -52,14 +53,106 @@ export default function ItemViewModeSelection({ onChange, fileType = 'images', i
         }
     };
 
-    const highlightColor = '#B6B6B6';
+    const getFilesIcon = (): string => {
+        switch (fileType) {
+            case 'images':
+                return 'photo-library';
+            case 'videos':
+                return 'videocam';
+            case 'audio':
+                return 'audiotrack';
+            case 'documents':
+                return 'insert-drive-file';
+            default:
+                return 'insert-drive-file';
+        }
+    };
 
-    return <View style={{ flexDirection: 'row', backgroundColor: '#d9d9d9' }}>
-        <TouchableOpacity onPress={() => handleModeChange(ViewMode.FILES)} style={{ flex: 1, backgroundColor: selectedMode == ViewMode.FILES ? highlightColor : undefined, padding: 10, alignItems: 'center' }}>
-            <Text style={{ fontSize: 16 }}>{getFilesLabel()}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleModeChange(ViewMode.FOLDERS)} style={{ flex: 1, backgroundColor: selectedMode == ViewMode.FOLDERS ? highlightColor : undefined, padding: 10, alignItems: 'center' }}>
-            <Text style={{ fontSize: 16 }}>{getFolderLabel()}</Text>
-        </TouchableOpacity>
-    </View>;
+    const getFolderIcon = (): string => {
+        return 'collections';
+    };
+
+    return (
+        <View style={styles.container}>
+            <TouchableOpacity 
+                onPress={() => handleModeChange(ViewMode.FILES)} 
+                style={[
+                    styles.tabButton,
+                    { backgroundColor: selectedMode === ViewMode.FILES ? '#FFFFFF' : 'transparent' }
+                ]}
+            >
+                <MaterialIcons 
+                    name={getFilesIcon()} 
+                    size={18} 
+                    color={selectedMode === ViewMode.FILES ? '#2196F3' : '#757575'} 
+                    style={styles.icon}
+                />
+                <Text style={[
+                    styles.tabText,
+                    { 
+                        fontWeight: selectedMode === ViewMode.FILES ? 'bold' : 'normal',
+                        color: selectedMode === ViewMode.FILES ? '#2196F3' : '#757575'
+                    }
+                ]}>
+                    {getFilesLabel()}
+                </Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+                onPress={() => handleModeChange(ViewMode.FOLDERS)} 
+                style={[
+                    styles.tabButton,
+                    { backgroundColor: selectedMode === ViewMode.FOLDERS ? '#FFFFFF' : 'transparent' }
+                ]}
+            >
+                <MaterialIcons 
+                    name={getFolderIcon()} 
+                    size={18} 
+                    color={selectedMode === ViewMode.FOLDERS ? '#2196F3' : '#757575'} 
+                    style={styles.icon}
+                />
+                <Text style={[
+                    styles.tabText,
+                    { 
+                        fontWeight: selectedMode === ViewMode.FOLDERS ? 'bold' : 'normal',
+                        color: selectedMode === ViewMode.FOLDERS ? '#2196F3' : '#757575'
+                    }
+                ]}>
+                    {getFolderLabel()}
+                </Text>
+            </TouchableOpacity>
+        </View>
+    );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flexDirection: 'row',
+        backgroundColor: '#f8f8f8',
+        borderRadius: 30,
+        overflow: 'hidden',
+        margin: 10,
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.22,
+        shadowRadius: 2.22,
+        borderWidth: 0.5,
+        borderColor: '#e0e0e0',
+        padding: 4
+    },
+    tabButton: {
+        flex: 1,
+        paddingVertical: 12,
+        paddingHorizontal: 5,
+        alignItems: 'center',
+        borderRadius: 25,
+        flexDirection: 'row',
+        justifyContent: 'center'
+    },
+    tabText: {
+        fontSize: 15
+    },
+    icon: {
+        marginRight: 6
+    }
+});

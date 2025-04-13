@@ -14,6 +14,7 @@ interface ProgressContextProps {
     progressState: ProgressState | null;
     startProgress: (progress: number, maxProgress: number, actionTitle: string, onCancel?: onQuitEvent, onQuit?: onQuitEvent) => void;
     incrementProgress: () => void;
+    updateProgress: (progress: number) => void;
     quitProgress: () => void;
     cancelProgress: () => void;
 }
@@ -36,6 +37,14 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         });
     };
 
+    const updateProgress = (progress: number) => {
+        setProgressState((prev) => {
+            if (!prev) return null;
+            if (progress >= prev.maxProgress && prev.maxProgress > 0) return null; // Automatically clear progress when done
+            return { ...prev, progress };
+        });
+    };
+
     const quitProgress = () => {
         if (progressState && progressState.onQuit) progressState.onQuit();
         setProgressState(null);
@@ -47,7 +56,7 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
 
     return (
-        <ProgressContext.Provider value={{ progressState, startProgress, incrementProgress, quitProgress, cancelProgress }}>
+        <ProgressContext.Provider value={{ progressState, startProgress, incrementProgress, updateProgress, quitProgress, cancelProgress }}>
             {children}
         </ProgressContext.Provider>
     );

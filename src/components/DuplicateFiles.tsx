@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, View, Text, FlatList, StyleSheet, StatusBar, Modal, Alert, TouchableOpacity, ActivityIndicator } from "react-native";
+import { SafeAreaView, View, Text, FlatList, StyleSheet, StatusBar, Alert, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import Toolbar from "../components/Toolbar";
-import SelectionToolBar from '../components/SelectionToolbar';
-import ItemCard from '../components/ItemCard';
+import Toolbar from "./Toolbar";
+import SelectionToolBar from './SelectionToolbar';
+import ItemCard from './ItemCard';
 import * as RNFS from "react-native-fs";
-import { Feather, Foundation, MaterialIcons, FontAwesome } from '@expo/vector-icons';
-import BottomBarItem from "../components/ContentContainer/BottomBarItem";
-import BottomBarOptions from "../components/ContentContainer/BottomBarOptions";
+import { Feather, Foundation, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import BottomBarItem from "./ContentContainer/BottomBarItem";
 import { Platform, PermissionsAndroid } from "react-native";
 import { getFileType, openWith } from "../utils/openWith";
 
@@ -15,24 +14,62 @@ import { getFileType, openWith } from "../utils/openWith";
 interface DuplicateGroup {
     id: string;
     files: RNFS.ReadDirItem[];
+    fileSize: number;
 }
 
-// เพิ่ม enum สำหรับประเภทการเรียงลำดับ
-enum SortType {
-    ALPHABETICAL,
-    DATE,
-    SIZE,
+// ช่วยในการนับจำนวนโดยชื่อไฟล์
+interface FileNameCount {
+    [key: string]: number;
 }
 
-export default function Duplicates() {
+export default function DuplicateFiles() {
     const navigation = useNavigation();
     const [duplicateGroups, setDuplicateGroups] = useState<DuplicateGroup[]>([]);
     const [allFiles, setAllFiles] = useState<RNFS.ReadDirItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [scanProgress, setScanProgress] = useState(0);
+    const [totalFiles, setTotalFiles] = useState(0);
+    const [processedFiles, setProcessedFiles] = useState(0);
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
     const [isSelecting, setIsSelecting] = useState(false);
-    const [sortByOptionVisible, setSortByOptionVisible] = useState(false);
-    const [sortType, setSortType] = useState<SortType>(SortType.ALPHABETICAL);
+
+    // ฟังก์ชันแปลงชื่อไฟล์ เอาส่วนขยายออก
+    const getBaseName = (filename: string): string => {
+        // หาตำแหน่งจุดสุดท้าย
+        const lastDotPosition = filename.lastIndexOf('.');
+        // ถ้าไม่มีจุด ให้คืนชื่อไฟล์ทั้งหมด
+        if (lastDotPosition === -1) return filename;
+        // ตัดเอาส่วนก่อนจุดสุดท้าย
+        return filename.substring(0, lastDotPosition);
+    };
+
+    // ฟังก์ชันเอาส่วนขยายของไฟล์
+    const getExtension = (filename: string): string => {
+        const lastDotPosition = filename.lastIndexOf('.');
+        if (lastDotPosition === -1) return '';
+        return filename.substring(lastDotPosition).toLowerCase();
+    };
+
+    // ตรวจสอบว่าชื่อไฟล์มีความคล้ายกันหรือไม่
+    const isSimilarFilename = (name1: string, name2: string): boolean => {
+        const baseName1 = getBaseName(name1).toLowerCase();
+        const baseName2 = getBaseName(name2).toLowerCase();
+
+        // ตรวจสอบชื่อที่เหมือนกันเลย
+        if (baseName1 === baseName2) return true;
+
+        // ตรวจสอบชื่อที่มีเลขท้าย
+        const pattern1 = baseName1.replace(/[-_]?\d+$/, '');
+        const pattern2 = baseName2.replace(/[-_]?\d+$/, '');
+        if (pattern1 === pattern2 && pattern1.length > 3) return true;
+
+        // ตรวจสอบชื่อที่มีคำลงท้ายพิเศษ
+        const simPattern1 = baseName1.replace(/[-_]?(copy|duplicate|backup)(\d*)$/i, '');
+        const simPattern2 = baseName2.replace(/[-_]?(copy|duplicate|backup)(\d*)$/i, '');
+        if (simPattern1 === simPattern2 && simPattern1.length > 3) return true;
+
+        return false;
+    };
 
     // ตรวจสอบการขออนุญาตเข้าถึงพื้นที่จัดเก็บข้อมูล
     async function checkStoragePermission() {
@@ -80,7 +117,7 @@ export default function Duplicates() {
                             buttonPositive: "ตกลง"
                         }
                     );
-                    
+
                     const requestVideos = await PermissionsAndroid.request(
                         PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
                         {
@@ -91,7 +128,7 @@ export default function Duplicates() {
                             buttonPositive: "ตกลง"
                         }
                     );
-                    
+
                     const requestAudio = await PermissionsAndroid.request(
                         PermissionsAndroid.PERMISSIONS.READ_MEDIA_AUDIO,
                         {
@@ -102,7 +139,7 @@ export default function Duplicates() {
                             buttonPositive: "ตกลง"
                         }
                     );
-                    
+
                     return (
                         requestImages === PermissionsAndroid.RESULTS.GRANTED &&
                         requestVideos === PermissionsAndroid.RESULTS.GRANTED &&
@@ -145,16 +182,18 @@ export default function Duplicates() {
         setIsLoading(true);
         setDuplicateGroups([]);
         setAllFiles([]);
+        setScanProgress(0);
+        setProcessedFiles(0);
 
         try {
             // ตรวจสอบสิทธิ์การเข้าถึง
             let hasPermission = await checkStoragePermission();
-            
+
             if (!hasPermission) {
                 console.log('ขอสิทธิ์การเข้าถึงไฟล์');
                 hasPermission = await requestStoragePermission();
             }
-            
+
             if (!hasPermission) {
                 Alert.alert(
                     "ไม่สามารถเข้าถึงไฟล์ได้",
@@ -173,26 +212,26 @@ export default function Duplicates() {
                 RNFS.ExternalStorageDirectoryPath + '/Documents',
                 RNFS.DocumentDirectoryPath,
             ];
-            
+
             let foundFiles: RNFS.ReadDirItem[] = [];
-            
-            // สแกนไดเร็กทอรีที่ระบุ
+
+            // ขั้นตอนที่ 1: สแกนและรวบรวมไฟล์ทั้งหมด
             for (const baseDir of baseDirs) {
                 try {
                     // ตรวจสอบว่าไดเร็กทอรีมีอยู่จริง
                     const exists = await RNFS.exists(baseDir);
                     if (!exists) continue;
-                    
+
                     console.log(`กำลังสแกนไดเร็กทอรี: ${baseDir}`);
                     const items = await RNFS.readDir(baseDir);
-                    
+
                     // เพิ่มไฟล์ในระดับบนสุด
                     for (const item of items) {
                         if (item.isFile()) {
                             foundFiles.push(item);
                         }
                     }
-                    
+
                     // ตรวจสอบโฟลเดอร์ย่อย (แค่ระดับเดียว)
                     for (const item of items) {
                         if (item.isDirectory() && !item.name.startsWith('.')) {
@@ -212,42 +251,135 @@ export default function Duplicates() {
                     console.log(`เกิดข้อผิดพลาดในการสแกนไดเร็กทอรี ${baseDir}:`, error);
                 }
             }
-            
+
             setAllFiles(foundFiles);
-            
-            // ค้นหาไฟล์ซ้ำโดยเช็คจากชื่อไฟล์
-            const filesByName: { [key: string]: RNFS.ReadDirItem[] } = {};
-            
-            // จัดกลุ่มไฟล์ตามชื่อไฟล์ (ไม่รวมนามสกุล)
+            setTotalFiles(foundFiles.length);
+
+            // นับไฟล์ที่มีชื่อเหมือนกัน
+            const fileNameCount: FileNameCount = {};
+
+            // ขั้นตอนที่ 2: จัดกลุ่มไฟล์ตามขนาดเพื่อลดจำนวนการเปรียบเทียบ
+            const filesBySize: { [size: number]: RNFS.ReadDirItem[] } = {};
+
+            // จัดกลุ่มไฟล์ตามขนาด
             for (const file of foundFiles) {
-                // แยกชื่อไฟล์ออกจากนามสกุล
-                const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.'));
-                const ext = file.name.substring(file.name.lastIndexOf('.'));
-                
-                // คอยตรวจหาไฟล์ที่มีชื่อคล้ายกัน เช่น file.jpg และ file_copy.jpg
-                const baseName = nameWithoutExt.replace(/_copy|_duplicate|_backup|[\d]*$/, '');
-                
-                if (!filesByName[baseName]) {
-                    filesByName[baseName] = [];
+                const size = file.size || 0;
+                if (!filesBySize[size]) {
+                    filesBySize[size] = [];
                 }
-                
-                filesByName[baseName].push(file);
+                filesBySize[size].push(file);
+
+                // นับจำนวนไฟล์ที่มีชื่อเหมือนกัน
+                const baseName = getBaseName(file.name).toLowerCase();
+                fileNameCount[baseName] = (fileNameCount[baseName] || 0) + 1;
             }
-            
-            // กรองเฉพาะกลุ่มไฟล์ที่มีไฟล์มากกว่า 1 ไฟล์ (ไฟล์ซ้ำ)
+
+            // ขั้นตอนที่ 3: ค้นหาไฟล์ซ้ำจากขนาดที่เท่ากันและชื่อที่คล้ายกัน
             const duplicates: DuplicateGroup[] = [];
-            for (const [baseName, files] of Object.entries(filesByName)) {
+            let processed = 0;
+
+            for (const [sizeStr, files] of Object.entries(filesBySize)) {
+                const size = parseInt(sizeStr);
+
+                // ถ้ามีไฟล์ขนาดเดียวกันมากกว่า 1 ไฟล์ จึงวิเคราะห์ต่อ
                 if (files.length > 1) {
-                    duplicates.push({
-                        id: baseName,
-                        files: files
-                    });
+                    // จัดกลุ่มไฟล์ตามชื่อ (คล้ายกัน) และนามสกุล
+                    const groups: RNFS.ReadDirItem[][] = [];
+                    const usedIndices = new Set<number>();
+
+                    // ค้นหาไฟล์ที่มีชื่อคล้ายกัน
+                    for (let i = 0; i < files.length; i++) {
+                        if (usedIndices.has(i)) continue;
+
+                        const currentFile = files[i];
+                        const currentExt = getExtension(currentFile.name);
+                        const group: RNFS.ReadDirItem[] = [currentFile];
+                        usedIndices.add(i);
+
+                        // ตรวจสอบไฟล์อื่นๆ ที่มีขนาดเท่ากัน
+                        for (let j = i + 1; j < files.length; j++) {
+                            if (usedIndices.has(j)) continue;
+
+                            const nextFile = files[j];
+                            const nextExt = getExtension(nextFile.name);
+
+                            // ตรวจสอบนามสกุลและความคล้ายของชื่อ
+                            if (currentExt === nextExt && isSimilarFilename(currentFile.name, nextFile.name)) {
+                                group.push(nextFile);
+                                usedIndices.add(j);
+                            }
+                        }
+
+                        // ถ้ากลุ่มมีมากกว่า 1 ไฟล์ เพิ่มเข้าไปในกลุ่ม
+                        if (group.length > 1) {
+                            groups.push(group);
+                        }
+                    }
+
+                    // เพิ่มกลุ่มที่พบลงในผลลัพธ์
+                    for (let i = 0; i < groups.length; i++) {
+                        const group = groups[i];
+                        if (group.length > 1) {
+                            const groupId = `group_${size}_${i}`;
+                            duplicates.push({
+                                id: groupId,
+                                files: group,
+                                fileSize: size
+                            });
+                        }
+                    }
+                }
+
+                processed += files.length;
+                setProcessedFiles(processed);
+                setScanProgress(Math.floor((processed / foundFiles.length) * 100));
+            }
+
+            // ค้นหาไฟล์ที่มีชื่อเดียวกันแต่ขนาดต่างกัน (อาจเป็นรุ่นต่างกัน)
+            const filenameGroups: { [name: string]: RNFS.ReadDirItem[] } = {};
+
+            for (const file of foundFiles) {
+                const baseName = getBaseName(file.name).toLowerCase();
+
+                // ถ้าชื่อไฟล์นี้มีมากกว่า 1 ไฟล์
+                if (fileNameCount[baseName] > 1) {
+                    if (!filenameGroups[baseName]) {
+                        filenameGroups[baseName] = [];
+                    }
+                    filenameGroups[baseName].push(file);
                 }
             }
-            
+
+            // เพิ่มกลุ่มไฟล์ที่มีชื่อซ้ำกัน
+            for (const [baseName, files] of Object.entries(filenameGroups)) {
+                if (files.length > 1) {
+                    // ตรวจสอบว่ากลุ่มนี้มีนามสกุลเหมือนกันหรือไม่
+                    const extGroups: { [ext: string]: RNFS.ReadDirItem[] } = {};
+
+                    for (const file of files) {
+                        const ext = getExtension(file.name);
+                        if (!extGroups[ext]) {
+                            extGroups[ext] = [];
+                        }
+                        extGroups[ext].push(file);
+                    }
+
+                    // เพิ่มกลุ่มที่มีนามสกุลเดียวกัน
+                    for (const [ext, extFiles] of Object.entries(extGroups)) {
+                        if (extFiles.length > 1) {
+                            duplicates.push({
+                                id: `${baseName}${ext}`,
+                                files: extFiles,
+                                fileSize: extFiles[0].size || 0
+                            });
+                        }
+                    }
+                }
+            }
+
             console.log(`พบกลุ่มไฟล์ซ้ำทั้งหมด: ${duplicates.length} กลุ่ม`);
             setDuplicateGroups(duplicates);
-            
+
         } catch (error) {
             console.error("Error finding duplicate files:", error);
             Alert.alert(
@@ -256,7 +388,7 @@ export default function Duplicates() {
                 [{ text: "ตกลง" }]
             );
         }
-        
+
         setIsLoading(false);
     };
 
@@ -264,39 +396,56 @@ export default function Duplicates() {
     useFocusEffect(
         React.useCallback(() => {
             findDuplicateFiles();
-        }, [sortType])
+        }, [])
     );
-
-    // อัพเดทประเภทการเรียง
-    function updateSortType(type: SortType) {
-        if (sortType !== type) {
-            setSortType(type);
-        }
-    }
 
     // ฟังก์ชันแสดงขนาดไฟล์ในรูปแบบที่อ่านง่าย
     function formatFileSize(bytes: number | undefined): string {
         if (!bytes) return "0 B";
-        
+
         const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
         const i = Math.floor(Math.log(bytes) / Math.log(1024));
-        
+
         return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+    }
+
+    // ฟังก์ชันแปลงวันที่เป็นรูปแบบที่อ่านง่าย
+    function formatDate(date: Date | null | undefined): string {
+        if (!date) return '';
+
+        const now = new Date();
+        const diff = now.getTime() - date.getTime();
+        const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) {
+            // วันนี้
+            return `วันนี้ ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        } else if (diffDays === 1) {
+            // เมื่อวาน
+            return `เมื่อวาน ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        } else if (diffDays < 7) {
+            // ภายใน 1 สัปดาห์
+            const days = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+            return `วัน${days[date.getDay()]} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        } else {
+            // เกิน 1 สัปดาห์
+            return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        }
     }
 
     // จัดการเมื่อผู้ใช้เลือกไฟล์
     const handleSelect = (selected: boolean, item: RNFS.ReadDirItem) => {
         if (!isSelecting) setIsSelecting(true);
         setSelectedItems(prev => {
-            const newSelection = selected 
+            const newSelection = selected
                 ? [...prev, item.path]
                 : prev.filter(path => path !== item.path);
-            
+
             // ถ้าไม่มีไฟล์ที่เลือกแล้ว ให้ปิดโหมดการเลือก
             if (newSelection.length === 0) {
                 setIsSelecting(false);
             }
-            
+
             return newSelection;
         });
     };
@@ -316,14 +465,6 @@ export default function Duplicates() {
         }
     };
 
-    const handleItemSelect = (selected: boolean, item: RNFS.ReadDirItem) => {
-        handleSelect(selected, item);
-    };
-
-    const handleItemOpen = (item: RNFS.ReadDirItem) => {
-        handleOpen(item);
-    };
-
     // ฟังก์ชันรีเซ็ตการเลือกทั้งหมด
     const resetSelection = () => {
         setIsSelecting(false);
@@ -333,38 +474,50 @@ export default function Duplicates() {
     // ฟังก์ชันลบไฟล์ที่เลือก
     const handleDeleteFiles = async () => {
         if (selectedItems.length === 0) return;
-        
+
         Alert.alert(
             "ลบไฟล์",
             `ต้องการลบไฟล์ที่เลือกจำนวน ${selectedItems.length} ไฟล์หรือไม่?`,
             [
                 { text: "ยกเลิก", style: "cancel" },
-                { 
-                    text: "ลบ", 
+                {
+                    text: "ลบ",
                     style: "destructive",
                     onPress: async () => {
                         setIsLoading(true);
-                        
+                        let deletedCount = 0;
+                        let errorCount = 0;
+
                         for (const filePath of selectedItems) {
                             try {
                                 await RNFS.unlink(filePath);
+                                deletedCount++;
                             } catch (error) {
                                 console.error(`เกิดข้อผิดพลาดในการลบไฟล์: ${filePath}`, error);
+                                errorCount++;
                             }
                         }
-                        
+
                         resetSelection();
-                        
+
                         // แสดงข้อความแจ้งเตือนเมื่อลบเสร็จ
-                        Alert.alert(
-                            "สำเร็จ",
-                            `ลบไฟล์จำนวน ${selectedItems.length} ไฟล์เรียบร้อยแล้ว`,
-                            [{ text: "ตกลง" }]
-                        );
-                        
+                        if (errorCount > 0) {
+                            Alert.alert(
+                                "ลบไฟล์เสร็จสิ้น",
+                                `ลบไฟล์สำเร็จ: ${deletedCount} ไฟล์\nลบไฟล์ไม่สำเร็จ: ${errorCount} ไฟล์`,
+                                [{ text: "ตกลง" }]
+                            );
+                        } else {
+                            Alert.alert(
+                                "สำเร็จ",
+                                `ลบไฟล์จำนวน ${deletedCount} ไฟล์เรียบร้อยแล้ว`,
+                                [{ text: "ตกลง" }]
+                            );
+                        }
+
                         // อัพเดทรายการไฟล์หลังลบ
                         findDuplicateFiles();
-                    } 
+                    }
                 }
             ]
         );
@@ -376,16 +529,19 @@ export default function Duplicates() {
             return (
                 <View style={styles.emptyContainer}>
                     <ActivityIndicator size="large" color="#2196F3" />
-                    <Text style={styles.emptyText}>กำลังค้นหาไฟล์ซ้ำ...</Text>
+                    <Text style={styles.emptyText}>กำลังค้นหาไฟล์ซ้ำ... ({processedFiles}/{totalFiles})</Text>
+                    <View style={styles.progressBarContainer}>
+                        <View style={[styles.progressBar, { width: `${scanProgress}%` }]} />
+                    </View>
                 </View>
             );
         }
-        
+
         return (
             <View style={styles.emptyContainer}>
                 <MaterialIcons name="find-replace" size={80} color="#cccccc" />
                 <Text style={styles.emptyText}>ไม่พบไฟล์ซ้ำในอุปกรณ์ของคุณ</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.refreshButton}
                     onPress={findDuplicateFiles}
                 >
@@ -404,7 +560,6 @@ export default function Duplicates() {
                     goBackHandler={() => navigation.goBack()}
                     navigation={navigation}
                     containerName="Duplicate Files"
-                    sortByHandler={() => setSortByOptionVisible(true)}
                 />
             ) : (
                 <SelectionToolBar
@@ -426,16 +581,36 @@ export default function Duplicates() {
             <View style={styles.contentContainer}>
                 {duplicateGroups.length > 0 ? (
                     <FlatList
-                        data={duplicateGroups.flatMap(group => group.files)}
-                        keyExtractor={(item) => item.path}
+                        data={duplicateGroups.sort((a, b) => {
+                            // เรียงกลุ่มตามขนาดไฟล์จากใหญ่ไปเล็ก
+                            return b.fileSize - a.fileSize;
+                        })}
+                        keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
-                            <View style={styles.fileItem}>
-                                <ItemCard
-                                    item={item}
-                                    onSelect={handleItemSelect}
-                                    onOpen={handleItemOpen}
-                                    isSelected={selectedItems.includes(item.path)}
-                                />
+                            <View style={styles.duplicateGroup}>
+                                <View style={styles.groupHeaderContainer}>
+                                    <Text style={styles.groupHeaderText}>
+                                        ไฟล์ซ้ำ: {item.files.length} ไฟล์ ({formatFileSize(item.fileSize)})
+                                    </Text>
+                                </View>
+                                {item.files.sort((a, b) => (b.mtime?.getTime() || 0) - (a.mtime?.getTime() || 0)).map(file => (
+                                    <View key={file.path} style={styles.fileItem}>
+                                        <ItemCard
+                                            item={file}
+                                            onSelect={handleSelect}
+                                            onOpen={handleOpen}
+                                            isSelected={selectedItems.includes(file.path)}
+                                        />
+                                        <View style={styles.fileInfoContainer}>
+                                            <Text style={styles.fileSize}>
+                                                {formatFileSize(file.size)}
+                                            </Text>
+                                            <Text style={styles.fileDate}>
+                                                {formatDate(file.mtime)}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                ))}
                             </View>
                         )}
                         contentContainerStyle={styles.listContent}
@@ -448,25 +623,6 @@ export default function Duplicates() {
                     <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} />} onPress={handleDeleteFiles} />
                 </View>
             )}
-
-            <Modal visible={sortByOptionVisible} transparent={true} onRequestClose={() => setSortByOptionVisible(false)} >
-                <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <View style={{ backgroundColor: 'white', justifyContent: 'space-between', paddingBottom: 5 }}>
-                        <BottomBarOptions name='Alphabetical' icon={<FontAwesome name="sort-alpha-asc" size={30} style={{ padding: 15 }} />} onPress={() => {
-                            updateSortType(SortType.ALPHABETICAL);
-                            setSortByOptionVisible(false);
-                        }} />
-                        <BottomBarOptions name='Date' icon={<FontAwesome name="sort-numeric-asc" size={30} style={{ padding: 15 }} />} onPress={() => {
-                            updateSortType(SortType.DATE);
-                            setSortByOptionVisible(false);
-                        }} />
-                        <BottomBarOptions name='Size' icon={<MaterialIcons name="format-size" size={30} style={{ padding: 15 }} />} onPress={() => {
-                            updateSortType(SortType.SIZE);
-                            setSortByOptionVisible(false);
-                        }} />
-                    </View>
-                </View>
-            </Modal>
         </SafeAreaView>
     );
 }
@@ -492,16 +648,14 @@ const styles = StyleSheet.create({
     fileSize: {
         fontSize: 12,
         color: '#666',
-        marginTop: -18,
-        marginLeft: 60,
-        marginBottom: 8
+        marginRight: 10
     },
     bottomBar: {
-        backgroundColor: '#ffffff', 
-        borderTopWidth: 1, 
-        borderColor: '#f2f2f2', 
-        flexDirection: 'row', 
-        justifyContent: 'center', 
+        backgroundColor: '#ffffff',
+        borderTopWidth: 1,
+        borderColor: '#f2f2f2',
+        flexDirection: 'row',
+        justifyContent: 'center',
         paddingHorizontal: 15,
         paddingVertical: 10,
         elevation: 8,
@@ -540,5 +694,58 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
         fontSize: 16
+    },
+    groupHeaderContainer: {
+        backgroundColor: '#f8f8f8',
+        padding: 12,
+        marginVertical: 10,
+        borderRadius: 12,
+        borderLeftWidth: 4,
+        borderLeftColor: '#2196F3',
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+    },
+    groupHeaderText: {
+        fontSize: 15,
+        fontWeight: 'bold',
+        color: '#333'
+    },
+    fileDate: {
+        fontSize: 12,
+        color: '#666'
+    },
+    fileInfoContainer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        marginTop: -15,
+        marginLeft: 60,
+        marginBottom: 8
+    },
+    duplicateGroup: {
+        marginBottom: 10,
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        padding: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 1,
+        elevation: 1
+    },
+    progressBarContainer: {
+        width: '80%',
+        height: 10,
+        backgroundColor: '#e0e0e0',
+        borderRadius: 5,
+        marginTop: 20,
+        overflow: 'hidden'
+    },
+    progressBar: {
+        height: '100%',
+        backgroundColor: '#2196F3',
     }
-});
+}); 
