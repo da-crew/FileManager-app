@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {SafeAreaView,ScrollView,View,Text,Switch,StyleSheet,TouchableOpacity,StatusBar,Image} from "react-native";
+import { SafeAreaView, ScrollView, View, Text, Switch, StyleSheet, TouchableOpacity, StatusBar, Image } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -7,7 +7,7 @@ import { RootStackParamList } from "../App";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import PushNotification from "react-native-push-notification";
 import { PermissionsAndroid } from "react-native";
-import { checkStorageUsage } from "../services/NotificationService";
+import { checkStorageUsage, requestNotificationPermission, } from '../services/NotificationService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from "react-native";
 
@@ -21,11 +21,11 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
     const [storageFull, setStorageFull] = useState(true);
     const [recycleBin, setRecycleBin] = useState(true);
     const [recycleConfirm, setRecycleConfirm] = useState(true);
-    
+
     // เพิ่มการตั้งค่าเพิ่มเติม
     const [sortByDate, setSortByDate] = useState(true);
     const [language, setLanguage] = useState('thai');
-    
+
     const version = "1.0.0";
 
     return (
@@ -65,7 +65,7 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         onPress={() => setImageViewer(!imageViewer)}
                     >
                         <View style={styles.rowContent}>
-                            <View style={[styles.iconCircle, {backgroundColor: '#007AFF20'}]}>
+                            <View style={[styles.iconCircle, { backgroundColor: '#007AFF20' }]}>
                                 <Ionicons name="image-outline" size={20} color="#007AFF" />
                             </View>
                             <Text style={styles.label}>โปรแกรมดูรูปภาพ</Text>
@@ -78,13 +78,13 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                             ios_backgroundColor="#E5E5EA"
                         />
                     </TouchableOpacity>
-                    
+
                     <TouchableOpacity
                         style={styles.row}
                         onPress={() => setVideoPlayer(!videoPlayer)}
                     >
                         <View style={styles.rowContent}>
-                            <View style={[styles.iconCircle, {backgroundColor: '#FF2D5520'}]}>
+                            <View style={[styles.iconCircle, { backgroundColor: '#FF2D5520' }]}>
                                 <Ionicons name="videocam-outline" size={20} color="#FF2D55" />
                             </View>
                             <Text style={styles.label}>โปรแกรมเล่นวิดีโอ</Text>
@@ -97,13 +97,13 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                             ios_backgroundColor="#E5E5EA"
                         />
                     </TouchableOpacity>
-                    
+
                     <TouchableOpacity
                         style={styles.row}
                         onPress={() => setMusicPlayer(!musicPlayer)}
                     >
                         <View style={styles.rowContent}>
-                            <View style={[styles.iconCircle, {backgroundColor: '#FF950020'}]}>
+                            <View style={[styles.iconCircle, { backgroundColor: '#FF950020' }]}>
                                 <Ionicons name="musical-notes-outline" size={20} color="#FF9500" />
                             </View>
                             <Text style={styles.label}>โปรแกรมเล่นเพลง</Text>
@@ -116,13 +116,13 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                             ios_backgroundColor="#E5E5EA"
                         />
                     </TouchableOpacity>
-                    
+
                     <TouchableOpacity
                         style={styles.row}
                         onPress={() => setTextEditor(!textEditor)}
                     >
                         <View style={styles.rowContent}>
-                            <View style={[styles.iconCircle, {backgroundColor: '#34C75920'}]}>
+                            <View style={[styles.iconCircle, { backgroundColor: '#34C75920' }]}>
                                 <Ionicons name="document-text-outline" size={20} color="#34C759" />
                             </View>
                             <Text style={styles.label}>โปรแกรมแก้ไขข้อความ</Text>
@@ -145,7 +145,7 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         onPress={() => setDarkMode(!darkMode)}
                     >
                         <View style={styles.rowContent}>
-                            <View style={[styles.iconCircle, {backgroundColor: '#8E8E9320'}]}>
+                            <View style={[styles.iconCircle, { backgroundColor: '#8E8E9320' }]}>
                                 <Ionicons name="moon-outline" size={20} color="#8E8E93" />
                             </View>
                             <Text style={styles.label}>โหมดกลางคืน</Text>
@@ -158,13 +158,13 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                             ios_backgroundColor="#E5E5EA"
                         />
                     </TouchableOpacity>
-                    
+
                     <TouchableOpacity
                         style={styles.row}
                         onPress={() => setSortByDate(!sortByDate)}
                     >
                         <View style={styles.rowContent}>
-                            <View style={[styles.iconCircle, {backgroundColor: '#5856D620'}]}>
+                            <View style={[styles.iconCircle, { backgroundColor: '#5856D620' }]}>
                                 <Ionicons name="calendar-outline" size={20} color="#5856D6" />
                             </View>
                             <Text style={styles.label}>เรียงตามวันที่เป็นค่าเริ่มต้น</Text>
@@ -177,10 +177,10 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                             ios_backgroundColor="#E5E5EA"
                         />
                     </TouchableOpacity>
-                    
+
                     <TouchableOpacity style={styles.row}>
                         <View style={styles.rowContent}>
-                            <View style={[styles.iconCircle, {backgroundColor: '#007AFF20'}]}>
+                            <View style={[styles.iconCircle, { backgroundColor: '#007AFF20' }]}>
                                 <Ionicons name="language-outline" size={20} color="#007AFF" />
                             </View>
                             <Text style={styles.label}>ภาษา</Text>
@@ -202,22 +202,20 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                             setStorageFull(newValue);
 
                             if (newValue) {
-                                // เรียกใช้งานฟังก์ชันตรวจ storage พร้อมตรวจว่าวันนี้แจ้งแล้วหรือยัง
-                                await checkStorageUsage();
+                                await requestNotificationPermission();
+                                await checkStorageUsage(); // กดแล้วแจ้งทันที
                             } else {
-                                // ปิดการแจ้งเตือน → เคลียร์วันที่ล่าสุด
-                                await AsyncStorage.removeItem('lastStorageNotificationDate');
                             }
                         }}
                     >
                         <View style={styles.rowContent}>
-                            <View style={[styles.iconCircle, {backgroundColor: '#FF370020'}]}>
+                            <View style={[styles.iconCircle, { backgroundColor: '#FF370020' }]}>
                                 <Ionicons name="disc-outline" size={20} color="#FF3700" />
                             </View>
                             <View>
                                 <Text style={styles.label}>พื้นที่เก็บข้อมูลเต็ม</Text>
                                 <Text style={styles.subLabel}>
-                                    แจ้งเตือนเมื่อพื้นที่เก็บข้อมูลเหลือน้อยกว่า 5%
+                                    แจ้งเตือนทุกครั้งเมื่อพื้นที่เหลือน้อยกว่า 5%
                                 </Text>
                             </View>
                         </View>
@@ -239,7 +237,7 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         onPress={() => setRecycleBin(!recycleBin)}
                     >
                         <View style={styles.rowContent}>
-                            <View style={[styles.iconCircle, {backgroundColor: '#8E8E9320'}]}>
+                            <View style={[styles.iconCircle, { backgroundColor: '#8E8E9320' }]}>
                                 <Ionicons name="trash-outline" size={20} color="#8E8E93" />
                             </View>
                             <Text style={styles.label}>ใช้ถังขยะเป็นค่าเริ่มต้น</Text>
@@ -252,13 +250,13 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                             ios_backgroundColor="#E5E5EA"
                         />
                     </TouchableOpacity>
-                    
+
                     <TouchableOpacity
                         style={styles.row}
                         onPress={() => setRecycleConfirm(!recycleConfirm)}
                     >
                         <View style={styles.rowContent}>
-                            <View style={[styles.iconCircle, {backgroundColor: '#FF950020'}]}>
+                            <View style={[styles.iconCircle, { backgroundColor: '#FF950020' }]}>
                                 <Ionicons name="alert-circle-outline" size={20} color="#FF9500" />
                             </View>
                             <Text style={styles.label}>แสดงการยืนยันก่อนลบ</Text>
@@ -272,13 +270,13 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         />
                     </TouchableOpacity>
                 </View>
-                
+
                 {/* เกี่ยวกับแอป */}
                 <Text style={styles.sectionHeader}>เกี่ยวกับแอป</Text>
                 <View style={styles.sectionContainer}>
                     <View style={styles.row}>
                         <View style={styles.rowContent}>
-                            <View style={[styles.iconCircle, {backgroundColor: '#5856D620'}]}>
+                            <View style={[styles.iconCircle, { backgroundColor: '#5856D620' }]}>
                                 <Ionicons name="information-circle-outline" size={20} color="#5856D6" />
                             </View>
                             <Text style={styles.label}>เวอร์ชั่น</Text>
@@ -286,12 +284,12 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         <Text style={styles.versionText}>{version}</Text>
                     </View>
                 </View>
-                
+
                 {/* ปุ่มลงชื่อออก */}
                 <TouchableOpacity style={styles.logoutButton}>
                     <Text style={styles.logoutText}>ออกจากระบบ</Text>
                 </TouchableOpacity>
-                
+
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>แอปจัดการไฟล์ © 2023-2024</Text>
                 </View>

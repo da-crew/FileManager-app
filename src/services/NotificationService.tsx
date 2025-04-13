@@ -1,9 +1,22 @@
 import PushNotification from 'react-native-push-notification';
-import { Platform } from 'react-native';
+import { Platform, PermissionsAndroid } from 'react-native';
 import RNFS from 'react-native-fs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// ตั้งค่าการแจ้งเตือน
+const LAST_NOTIFY_DATE_KEY = 'lastStorageNotificationDate';
+
+export const requestNotificationPermission = async () => {
+  if (Platform.OS === 'android' && Platform.Version >= 33) {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+    );
+
+    if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+      console.log("Notification permission not granted");
+    }
+  }
+};
+
 PushNotification.configure({
   onNotification: function (notification: any) {
     console.log("NOTIFICATION:", notification);
@@ -11,7 +24,6 @@ PushNotification.configure({
   requestPermissions: Platform.OS === 'ios',
 });
 
-// สร้างช่องทางแจ้งเตือน (Android เท่านั้น)
 if (Platform.OS === 'android') {
   PushNotification.createChannel(
     {
@@ -24,7 +36,7 @@ if (Platform.OS === 'android') {
   );
 }
 
-// แจ้งเตือน local notification
+// แจ้งเตือน (ไม่มี ongoing, กดแล้วลบได้)
 const notifyStorageFull = () => {
   PushNotification.localNotification({
     channelId: "storage-alert",
@@ -32,22 +44,11 @@ const notifyStorageFull = () => {
     message: "Your device storage is over 95% full!",
     playSound: true,
     soundName: "default",
+    autoCancel: true, //กดแล้วลบได้
   });
 };
 
-// helper: เช็คว่าวันเดียวกันมั้ย
-const isSameDay = (date1: Date, date2: Date) => {
-  return (
-    date1.getFullYear() === date2.getFullYear() &&
-    date1.getMonth() === date2.getMonth() &&
-    date1.getDate() === date2.getDate()
-  );
-};
-
-// KEY สำหรับบันทึกวันที่แจ้งเตือน
-const LAST_NOTIFY_DATE_KEY = 'lastStorageNotificationDate';
-
-// เช็คและแจ้งเตือน ถ้ายังไม่ได้แจ้งวันนี้
+//ฟังก์ชันเรียกใช้เมื่อต้องการแจ้งเตือน
 export const checkStorageUsage = async () => {
   try {
     const stats = await RNFS.getFSInfo();
@@ -59,21 +60,9 @@ export const checkStorageUsage = async () => {
     console.log(`Storage Used: ${usedPercentage.toFixed(5)}%`);
 
     if (usedPercentage >= 95) {
-      const today = new Date();
-      const lastNotify = await AsyncStorage.getItem(LAST_NOTIFY_DATE_KEY);
-
-      if (lastNotify) {
-        const lastDate = new Date(lastNotify);
-        if (isSameDay(today, lastDate)) {
-          console.log("Already notified today.");
-          return; // ไม่แจ้งซ้ำ
-        }
-      }
-
       notifyStorageFull();
-      await AsyncStorage.setItem(LAST_NOTIFY_DATE_KEY, today.toISOString());
+      await AsyncStorage.setItem(LAST_NOTIFY_DATE_KEY, new Date().toISOString());
     }
-
   } catch (error) {
     console.error("Error checking storage:", error);
   }
