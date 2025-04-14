@@ -9,6 +9,7 @@ interface ContentListProps {
     selectionSet: Set<RNFS.ReadDirItem>;  // ชุดของไอเทมที่ถูกเลือก
     handleSelect: (select: boolean, item: RNFS.ReadDirItem) => void;  // ฟังก์ชันจัดการการเลือกไอเทม
     handleOpen: (item: RNFS.ReadDirItem) => void;  // ฟังก์ชันจัดการการเปิดไอเทม
+    hideCheckbox?: boolean;  // ซ่อนกล่องเช็คบ็อกซ์หรือไม่
 }
 
 /**
@@ -20,43 +21,34 @@ interface ContentListProps {
  * @param {Function} handleSelect - ฟังก์ชันจัดการการเลือกไอเทม
  * @param {Function} handleOpen - ฟังก์ชันจัดการการเปิดไอเทม
  */
-export const ContentList = ({content, selectionSet, handleSelect, handleOpen}: ContentListProps) => {
+export const ContentList = ({content, selectionSet, handleSelect, handleOpen, hideCheckbox}: ContentListProps) => {
     if (content) {
         // กรณีไม่มีไฟล์หรือโฟลเดอร์
-        if (content.length == 0) {
-            return (<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 15 }}>Empty</Text>
-            </View>);
+        if (content.length === 0) {
+            return <Text style={{textAlign: 'center', marginTop: 10}}>No items</Text>;
         }
-        // แสดงรายการไฟล์และโฟลเดอร์
         return (
             <FlatList
                 data={content}
-                keyExtractor={(item, i) => item + i.toString()}
-                renderItem={({ item }) =>
-                    <ItemCard item={item}
-                        onSelect={handleSelect}
-                        onOpen={handleOpen}
-                        isSelected={selectionSet.has(item)}
-                    />
-                }
+                keyExtractor={(item) => item.path}
+                renderItem={({ item }) => (
+                    <View style={{ marginVertical: 4 }}>
+                        <ItemCard
+                            item={item}
+                            onSelect={handleSelect}
+                            onOpen={handleOpen}
+                            isSelected={selectionSet.has(item)}
+                            hideCheckbox={hideCheckbox}
+                            showPath={hideCheckbox}
+                        />
+                    </View>
+                )}
+                contentContainerStyle={{ paddingVertical: 8 }}
             />
         );
-    } else if (content === null) {
-        // แสดงตัวโหลดขณะกำลังโหลดข้อมูล
-        return (
-            <View style={styles.loaderContainer}>
-                <ActivityIndicator size="large" color="#0000ff" />
-                <Text style={styles.loaderText}>Loading files...</Text>
-            </View>
-        );
     } else {
-        // กรณีอื่นๆ แสดงข้อความ Loading
-        return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 15 }}>Loading</Text>
-            </View>
-        );
+        // กรณีกำลังโหลดข้อมูล
+        return <Text style={{textAlign: 'center', marginTop: 10}}>Loading...</Text>;
     }
 }
 

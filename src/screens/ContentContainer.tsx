@@ -1860,7 +1860,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         }
         
         if (navpath.nodes.length == 0) {
-            navigation.navigate("Home");
+            navigation.goBack();
             return;
         }
         navpath.nodes.pop();

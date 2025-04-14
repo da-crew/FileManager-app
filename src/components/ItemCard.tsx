@@ -9,6 +9,8 @@ interface ItemCardProps {
     onSelect: (selected: boolean, item: RNFS.ReadDirItem) => void;  // ฟังก์ชันเรียกเมื่อเลือกไอเทม
     onOpen: (item: RNFS.ReadDirItem) => void;  // ฟังก์ชันเรียกเมื่อเปิดไอเทม
     isSelected: boolean;               // สถานะว่าไอเทมถูกเลือกหรือไม่
+    hideCheckbox?: boolean;            // ซ่อนกล่องเช็คบ็อกซ์หรือไม่
+    showPath?: boolean;                // แสดง path ของไฟล์หรือไม่
 }
 
 // รายการนามสกุลไฟล์ต่างๆ
@@ -26,10 +28,12 @@ const DOCUMENT_EXTENSIONS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '
  * @param {function(boolean, RNFS.ReadDirItem): void} props.onSelect - ฟังก์ชันเรียกเมื่อเลือกหรือยกเลิกการเลือกไอเทม
  * @param {function(RNFS.ReadDirItem): void} props.onOpen - ฟังก์ชันเรียกเมื่อเปิดไอเทม
  * @param {boolean} props.isSelected - สถานะว่าไอเทมถูกเลือกหรือไม่
+ * @param {boolean} props.hideCheckbox - ซ่อนกล่องเช็คบ็อกซ์หรือไม่
+ * @param {boolean} props.showPath - แสดง path ของไฟล์หรือไม่
  * @returns {JSX.Element} คอมโพเนนต์ที่เรนเดอร์แล้ว
  */
 
-const ItemCard = ({ item, onSelect, onOpen, isSelected }: ItemCardProps) => {
+const ItemCard = ({ item, onSelect, onOpen, isSelected, hideCheckbox, showPath }: ItemCardProps) => {
     // คืนค่าไอคอนตามประเภทไฟล์
     const getFileIcon = () => {
         if (item.isDirectory()) {
@@ -82,23 +86,33 @@ const ItemCard = ({ item, onSelect, onOpen, isSelected }: ItemCardProps) => {
         {/* ส่วนแสดงไอคอนและชื่อไฟล์ */}
         <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', flex: 1}} onPress={() => onOpen(item)}>
             {getFileIcon()}
-            <Text style={{ fontSize: 15, marginHorizontal: 10}}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-            >{item.name}</Text>
+            <View style={{ marginHorizontal: 10, flex: 1 }}>
+                <Text style={{ fontSize: 15 }}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                >{item.name}</Text>
+                {showPath && (
+                    <Text style={{ fontSize: 12, color: '#777' }}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                    >{item.path.replace('/storage/emulated/0', 'Internal Storage')}</Text>
+                )}
+            </View>
         </TouchableOpacity>
         {/* ปุ่มเลือกไอเทม */}
-        <View style={{ flex: 1, alignItems: 'flex-end' }}>
-            <TouchableOpacity onPress={() => {
-                onSelect(!isSelected, item);
-            }} style={{ padding: 10 }}>
-                <MaterialCommunityIcons
-                    name={isSelected ? "checkbox-marked" : "checkbox-blank-outline"}
-                    size={25}
-                    color="black"
-                />
-            </TouchableOpacity>
-        </View>
+        {!hideCheckbox && (
+            <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                <TouchableOpacity onPress={() => {
+                    onSelect(!isSelected, item);
+                }} style={{ padding: 10 }}>
+                    <MaterialCommunityIcons
+                        name={isSelected ? "checkbox-marked" : "checkbox-blank-outline"}
+                        size={25}
+                        color="black"
+                    />
+                </TouchableOpacity>
+            </View>
+        )}
     </View>;
 };
 
