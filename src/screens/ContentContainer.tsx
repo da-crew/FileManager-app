@@ -1,16 +1,15 @@
-import { SafeAreaView, View, StatusBar, Text, TouchableOpacity, Modal, BackHandler, Alert, TextInput, Platform, PermissionsAndroid, Dimensions, ActivityIndicator } from "react-native";
+import { SafeAreaView, View, StatusBar, Text, TouchableOpacity, Modal, BackHandler, Alert, TextInput, Platform, PermissionsAndroid, Dimensions, ActivityIndicator, FlatList, Image } from "react-native";
 import { PathDisplayer } from '../components/PathDisplayer';
 import { Path } from "../FileSystem";
 import Toolbar from "../components/Toolbar";
 import SelectionToolBar from "../components/SelectionToolbar";
 import React, { useEffect, useRef, useState } from "react";
-import { AntDesign, Feather, Foundation, MaterialIcons, FontAwesome } from '@expo/vector-icons';
+import { AntDesign, Feather, FontAwesome, Foundation, MaterialIcons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as RNFS from 'react-native-fs';
 import { RootStackParamList } from "../App";
 import { getRecycleBinPath } from "../FileSystem";
-
 import BottomBarOptions from "../components/ContentContainer/BottomBarOptions";
 import { ContentList } from "../components/ContentContainer/ContentList";
 import SelectionBottomBar from "../components/ContentContainer/SelectionBottomBar";
@@ -21,13 +20,6 @@ import { getFileType, openWith } from "../utils/openWith";
 import { useProgress } from "../components/ProgressBar/ProgressContext";
 import ProgressBar from "../components/ProgressBar/ProgressBar";
 
-// นำเข้า Components ที่แยกออกมา
-import ImageGrid from "../components/ImageGrid";
-import AlbumsGrid, { AlbumItem } from "../components/AlbumsGrid";
-import VideoGrid from "../components/VideoGrid";
-import AudioList from "../components/AudioList";
-import DocumentList from "../components/DocumentList";
-
 // รายการนามสกุลไฟล์รูปภาพ
 const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
 const VIDEO_EXTENSIONS = ['.mp4', '.mov', '.avi', '.mkv', '.flv', '.wmv', '.3gp', '.webm'];
@@ -36,6 +28,390 @@ const DOCUMENT_EXTENSIONS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '
 
 // รวมทุกประเภทไฟล์ที่รองรับ
 const ALL_SUPPORTED_EXTENSIONS = [...IMAGE_EXTENSIONS, ...VIDEO_EXTENSIONS, ...AUDIO_EXTENSIONS, ...DOCUMENT_EXTENSIONS];
+
+// อินเตอร์เฟซสำหรับอัลบั้ม
+interface AlbumItem {
+    name: string;
+    path: string;
+    count: number;
+    thumbnail: string | null;
+}
+
+// ตัวแทนองค์ประกอบ ImageGrid เพื่อแก้ปัญหาเรื่องการนำเข้า
+const ImageGrid = ({ images, isLoading, onImagePress, onImageLongPress, selectedImages }: { 
+    images: RNFS.ReadDirItem[], 
+    isLoading: boolean,
+    onImagePress: (item: RNFS.ReadDirItem) => void,
+    onImageLongPress?: (item: RNFS.ReadDirItem) => void,
+    selectedImages: Set<RNFS.ReadDirItem>
+}) => {
+    const { width } = Dimensions.get('window');
+    const numColumns = 3;
+    const itemWidth = (width - 20) / numColumns;
+    
+    if (isLoading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color="#2196F3" />
+                <Text style={{ marginTop: 10, color: '#333' }}>Loading images...</Text>
+            </View>
+        );
+    }
+    
+    if (images.length === 0) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ fontSize: 16, color: '#333' }}>No images found</Text>
+            </View>
+        );
+    }
+    
+    return (
+        <FlatList
+            data={images}
+            numColumns={numColumns}
+            keyExtractor={item => item.path}
+            renderItem={({ item }) => (
+                <View style={{ width: itemWidth, height: itemWidth, padding: 1 }}>
+                    <TouchableOpacity
+                        onPress={() => onImagePress(item)}
+                        onLongPress={() => onImageLongPress && onImageLongPress(item)}
+                        style={{ flex: 1 }}
+                    >
+                        <Image
+                            source={{ uri: `file://${item.path}` }}
+                            style={{ 
+                                width: '100%', 
+                                height: '100%', 
+                                borderWidth: selectedImages.has(item) ? 3 : 0,
+                                borderColor: '#2196F3',
+                            }}
+                            resizeMode="cover"
+                        />
+                    </TouchableOpacity>
+                </View>
+            )}
+            initialNumToRender={20}
+            maxToRenderPerBatch={20}
+            windowSize={10}
+            removeClippedSubviews={true}
+        />
+    );
+};
+
+// ตัวแทนองค์ประกอบ AlbumsGrid เพื่อแก้ปัญหาเรื่องการนำเข้า
+const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: {
+    albums: AlbumItem[],
+    isLoading: boolean,
+    onAlbumPress: (album: AlbumItem) => void
+}) => {
+    const { width } = Dimensions.get('window');
+    const numColumns = 2;
+    const itemWidth = (width - 30) / numColumns;
+    
+    if (isLoading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color="#2196F3" />
+                <Text style={{ marginTop: 10, color: '#333' }}>กำลังโหลดอัลบั้ม...</Text>
+            </View>
+        );
+    }
+    
+    if (albums.length === 0) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ fontSize: 16, color: '#333' }}>ไม่พบอัลบั้ม</Text>
+            </View>
+        );
+    }
+    
+    console.log('Rendering albums:', albums.length);
+    
+    return (
+        <FlatList
+            data={albums}
+            numColumns={numColumns}
+            keyExtractor={(item) => item.path}
+            renderItem={({ item }) => (
+                <TouchableOpacity 
+                    style={{ 
+                        width: itemWidth, 
+                        height: itemWidth * 1.2, 
+                        margin: 5,
+                        borderRadius: 10,
+                        overflow: 'hidden',
+                        backgroundColor: '#ffffff',
+                        elevation: 3,
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 3,
+                    }}
+                    onPress={() => onAlbumPress(item)}
+                >
+                    {item.thumbnail ? (
+                        <Image 
+                            source={{ uri: `file://${item.thumbnail}` }} 
+                            style={{ width: '100%', height: '70%' }}
+                            resizeMode="cover"
+                        />
+                    ) : (
+                        <View style={{ 
+                            width: '100%', 
+                            height: '70%',
+                            backgroundColor: '#f0f0f0',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}>
+                            {item.name === 'Camera' ? (
+                                <Text style={{ fontSize: 40 }}>📷</Text>
+                            ) : item.name === 'Screenshots' ? (
+                                <Text style={{ fontSize: 40 }}>📱</Text>
+                            ) : item.name === 'Download' || item.name === 'Downloads' ? (
+                                <Text style={{ fontSize: 40 }}>📥</Text>
+                            ) : item.name === 'All Photos' ? (
+                                <Text style={{ fontSize: 40 }}>🖼️</Text>
+                            ) : (
+                                <Text style={{ fontSize: 40 }}>📁</Text>
+                            )}
+                        </View>
+                    )}
+                    <View style={{ padding: 10 }}>
+                        <Text style={{ fontWeight: 'bold', fontSize: 14 }} numberOfLines={1}>{item.name}</Text>
+                        <Text style={{ fontSize: 12, color: '#666' }}>{item.count} รูป</Text>
+                    </View>
+                </TouchableOpacity>
+            )}
+            contentContainerStyle={{ paddingHorizontal: 5, paddingVertical: 10 }}
+        />
+    );
+};
+
+const VideoGrid = ({ videos, isLoading, onVideoPress, onVideoLongPress, selectedVideos }: { 
+    videos: RNFS.ReadDirItem[], 
+    isLoading: boolean,
+    onVideoPress: (item: RNFS.ReadDirItem) => void,
+    onVideoLongPress?: (item: RNFS.ReadDirItem) => void,
+    selectedVideos: Set<RNFS.ReadDirItem>
+}) => {
+    const { width } = Dimensions.get('window');
+    const numColumns = 3;
+    const itemWidth = (width - 20) / numColumns;
+    
+    if (isLoading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color="#2196F3" />
+                <Text style={{ marginTop: 10, color: '#333' }}>Loading videos...</Text>
+            </View>
+        );
+    }
+    
+    if (videos.length === 0) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ fontSize: 16, color: '#333' }}>No videos found</Text>
+            </View>
+        );
+    }
+    
+    return (
+        <FlatList
+            data={videos}
+            numColumns={numColumns}
+            keyExtractor={item => item.path}
+            renderItem={({ item }) => (
+                <View style={{ width: itemWidth, height: itemWidth, padding: 1 }}>
+                    <TouchableOpacity
+                        onPress={() => onVideoPress(item)}
+                        onLongPress={() => onVideoLongPress && onVideoLongPress(item)}
+                        style={{ flex: 1 }}
+                    >
+                        <View style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            borderWidth: selectedVideos.has(item) ? 3 : 0,
+                            borderColor: '#2196F3',
+                            position: 'relative'
+                        }}>
+                            <Image
+                                source={{ uri: `file://${item.path}` }}
+                                style={{ 
+                                    width: '100%', 
+                                    height: '100%',
+                                    backgroundColor: '#f0f0f0'
+                                }}
+                                resizeMode="cover"
+                            />
+                            <View style={{
+                                position: 'absolute',
+                                bottom: 0,
+                                right: 0,
+                                padding: 5,
+                                backgroundColor: 'rgba(0,0,0,0.5)',
+                                borderTopLeftRadius: 5
+                            }}>
+                                <FontAwesome name="play-circle" size={20} color="white" />
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            )}
+            initialNumToRender={20}
+            maxToRenderPerBatch={20}
+            windowSize={10}
+            removeClippedSubviews={true}
+        />
+    );
+};
+
+// AudioList component สำหรับแสดงรายการไฟล์เสียง
+const AudioList = ({ audioFiles, isLoading, onAudioPress, onAudioLongPress, selectedAudio }: { 
+    audioFiles: RNFS.ReadDirItem[], 
+    isLoading: boolean,
+    onAudioPress: (item: RNFS.ReadDirItem) => void,
+    onAudioLongPress?: (item: RNFS.ReadDirItem) => void,
+    selectedAudio: Set<RNFS.ReadDirItem>
+}) => {
+    if (isLoading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color="#2196F3" />
+                <Text style={{ marginTop: 10, color: '#333' }}>กำลังโหลดไฟล์เสียง...</Text>
+            </View>
+        );
+    }
+    
+    if (audioFiles.length === 0) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ fontSize: 16, color: '#333' }}>ไม่พบไฟล์เสียง</Text>
+            </View>
+        );
+    }
+    
+    return (
+        <FlatList
+            data={audioFiles}
+            keyExtractor={(item) => item.path}
+            renderItem={({ item }) => (
+                <TouchableOpacity 
+                    style={{ 
+                        flexDirection: 'row',
+                        padding: 12,
+                        borderBottomWidth: 1,
+                        borderBottomColor: '#f0f0f0',
+                        backgroundColor: selectedAudio.has(item) ? '#e3f2fd' : 'white',
+                        alignItems: 'center'
+                    }}
+                    onPress={() => onAudioPress(item)}
+                    onLongPress={() => onAudioLongPress && onAudioLongPress(item)}
+                >
+                    <View style={{ 
+                        width: 40, 
+                        height: 40, 
+                        borderRadius: 20, 
+                        backgroundColor: '#f0f0f0',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 15
+                    }}>
+                        <FontAwesome name="music" size={20} color="#2196F3" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 16, fontWeight: '500' }} numberOfLines={1}>
+                            {item.name.substring(0, item.name.lastIndexOf('.'))}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: '#666', marginTop: 2 }}>
+                            {new Date(item.mtime?.getTime() || 0).toLocaleDateString()}
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+            )}
+        />
+    );
+};
+
+// DocumentList component สำหรับแสดงรายการเอกสาร
+const DocumentList = ({ documents, isLoading, onDocumentPress, onDocumentLongPress, selectedDocuments }: { 
+    documents: RNFS.ReadDirItem[], 
+    isLoading: boolean,
+    onDocumentPress: (item: RNFS.ReadDirItem) => void,
+    onDocumentLongPress?: (item: RNFS.ReadDirItem) => void,
+    selectedDocuments: Set<RNFS.ReadDirItem>
+}) => {
+    if (isLoading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color="#2196F3" />
+                <Text style={{ marginTop: 10, color: '#333' }}>กำลังโหลดเอกสาร...</Text>
+            </View>
+        );
+    }
+    
+    if (documents.length === 0) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ fontSize: 16, color: '#333' }}>ไม่พบเอกสาร</Text>
+            </View>
+        );
+    }
+    
+    // เลือกไอคอนตามประเภทเอกสาร
+    const getDocumentIcon = (fileName: string): any => {
+        const ext = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
+        
+        if (ext === '.pdf') return 'file-pdf-o';
+        if (['.doc', '.docx'].includes(ext)) return 'file-word-o';
+        if (['.xls', '.xlsx'].includes(ext)) return 'file-excel-o';
+        if (['.ppt', '.pptx'].includes(ext)) return 'file-powerpoint-o';
+        if (ext === '.txt') return 'file-text-o';
+        
+        return 'file-o';
+    };
+    
+    return (
+        <FlatList
+            data={documents}
+            keyExtractor={(item) => item.path}
+            renderItem={({ item }) => (
+                <TouchableOpacity 
+                    style={{ 
+                        flexDirection: 'row',
+                        padding: 12,
+                        borderBottomWidth: 1,
+                        borderBottomColor: '#f0f0f0',
+                        backgroundColor: selectedDocuments.has(item) ? '#e3f2fd' : 'white',
+                        alignItems: 'center'
+                    }}
+                    onPress={() => onDocumentPress(item)}
+                    onLongPress={() => onDocumentLongPress && onDocumentLongPress(item)}
+                >
+                    <View style={{ 
+                        width: 40, 
+                        height: 40, 
+                        borderRadius: 5, 
+                        backgroundColor: '#f0f0f0',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 15
+                    }}>
+                        <FontAwesome name={getDocumentIcon(item.name)} size={20} color="#2196F3" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 16, fontWeight: '500' }} numberOfLines={1}>
+                            {item.name}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: '#666', marginTop: 2 }}>
+                            {new Date(item.mtime?.getTime() || 0).toLocaleDateString()}
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+            )}
+        />
+    );
+};
 
 export function ContentContainer({ navigation }: NativeStackScreenProps<RootStackParamList>) {
 
@@ -1632,7 +2008,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             }
             
             // กรณีเอกสาร
-            if (storageName === "Documents" || storageName === "Files") {
+            if (storageName === "Documents") {
                 return (
                     <DocumentList 
                         documents={content || []} 
@@ -1970,7 +2346,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                         alignItems: 'center',
                                         borderRadius: 25,
                                         flexDirection: 'row',
-                                        justifyContent: 'center'
+                                        justifyContent: 'center',
                                     }}
                                     onPress={() => switchTab('Videos')}
                                 >
@@ -2012,24 +2388,24 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                     }}>Collections</Text>
                                 </TouchableOpacity>
                             </View>
-                        ) :
+                        ) : storageName === "Audio" || storageName === "Downloads" ? (
                             // ไม่แสดงแถบชื่อสำหรับหน้าเสียงและดาวน์โหลด
-                            storageName === "Audio" || storageName === "Downloads" || storageName === "Documents" || storageName === "Files" ? null
-                          : <ItemViewModeSelection 
-                                fileType={currentFileType}
-                                initialMode={currentViewMode}
-                                onChange={(mode) => {//Display Viewing Options
-                                    console.log('Changing view mode to:', mode);
-                                    setCurrentViewMode(mode);
-                                    if (mode === ViewMode.FOLDERS) {
-                                        setCurrentAlbum(null);
-                                        createAlbums();
-                                    } else {
-                                        loadAllImages();
-                                    }
-                                    unselectAll();
-                                }} 
-                            />
+                            null
+                        ) : <ItemViewModeSelection 
+                        fileType={currentFileType}
+                        initialMode={currentViewMode}
+                        onChange={(mode) => {//Display Viewing Options
+                            console.log('Changing view mode to:', mode);
+                            setCurrentViewMode(mode);
+                            if (mode === ViewMode.FOLDERS) {
+                                setCurrentAlbum(null);
+                                createAlbums();
+                            } else {
+                                loadAllImages();
+                            }
+                            unselectAll();
+                        }} 
+                      />
             }
 
             {/* Content is displayed here */}

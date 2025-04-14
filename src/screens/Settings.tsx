@@ -1,14 +1,5 @@
 import React, { useState } from "react";
-import {
-    SafeAreaView,
-    ScrollView,
-    View,
-    Text,
-    Switch,
-    StyleSheet,
-    TouchableOpacity,
-    StatusBar,
-} from "react-native";
+import {SafeAreaView,ScrollView,View,Text,Switch,StyleSheet,TouchableOpacity,StatusBar,} from "react-native";
 
 // Icons
 import { Ionicons } from "@expo/vector-icons/";
