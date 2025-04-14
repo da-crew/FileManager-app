@@ -35,53 +35,107 @@ interface ToolbarProps {
 
 export default function Toolbar({ navigation, containerName, path, goBackHandler, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
     return (
-        <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#d9d9d9' }}>
-            <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={goBackHandler}>
-                <MaterialIcons name="arrow-back-ios-new" size={20} />
-            </TouchableOpacity>
-            <Text style={{ fontSize: 20 }}>{containerName}</Text>
-            <TouchableOpacity
-                style={{ marginLeft: 'auto', marginRight: 15 }}
-                onPress={() => navigation.replace("Search", {
-                                containerName: containerName,
-                                path: path,
-                                containerType: ContainerType.DEFAULT
-                            })}
+        <View style={{ 
+            flexDirection: 'row', 
+            alignItems: 'center', 
+            backgroundColor: '#FFFFFF',
+            paddingVertical: 8,
+            paddingHorizontal: 10,
+            elevation: 4,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 3,
+            borderBottomWidth: 1,
+            borderBottomColor: '#f2f2f2'
+        }}>
+            <TouchableOpacity 
+                style={{ 
+                    padding: 10, 
+                    marginRight: 5, 
+                    borderRadius: 20,
+                    backgroundColor: 'rgba(242, 242, 242, 0.6)' 
+                }} 
+                onPress={goBackHandler}
             >
-                <Ionicons name="search" size={24} color="black" />
+                <MaterialIcons name="arrow-back-ios-new" size={20} color="#333" />
+            </TouchableOpacity>
+            <Text style={{ 
+                fontSize: 20, 
+                fontWeight: '500', 
+                color: '#333',
+                marginLeft: 5
+            }}>
+                {containerName}
+            </Text>
+            <TouchableOpacity
+                style={{ 
+                    marginLeft: 'auto', 
+                    marginRight: 10,
+                    padding: 8,
+                    borderRadius: 20,
+                    backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                }}
+                onPress={() => navigation.replace("Search", {
+                    containerName: containerName,
+                    path: path,
+                    containerType: ContainerType.DEFAULT
+                })}
+            >
+                <Ionicons name="search" size={22} color="#333" />
             </TouchableOpacity>
 
             {//View option, i.e., grid, detailed, simple
                 layoutChangeHandler ? <TouchableOpacity
-                    style={{ marginRight: 15 }}
+                    style={{ 
+                        marginRight: 10,
+                        padding: 8,
+                        borderRadius: 20,
+                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                    }}
                     onPress={layoutChangeHandler}
                 >
-                    <Ionicons name="grid-outline" size={24} color="black" />
+                    <Ionicons name="grid-outline" size={22} color="#333" />
                 </TouchableOpacity> : <></>}
 
             {//Sort by
                 sortByHandler ? <TouchableOpacity
-                    style={{ marginRight: 15 }}
+                    style={{ 
+                        marginRight: 10,
+                        padding: 8,
+                        borderRadius: 20,
+                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                    }}
                     onPress={sortByHandler}
                 >
-                    <FontAwesome5 name="sort" size={24} color="black" />
+                    <FontAwesome5 name="sort" size={22} color="#333" />
                 </TouchableOpacity> : <></>}
 
             {//Create item
                 createHandler ? <TouchableOpacity
-                    style={{ marginRight: 15 }}
+                    style={{ 
+                        marginRight: 10,
+                        padding: 8,
+                        borderRadius: 20,
+                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                    }}
                     onPress={createHandler}
                 >
-                    <AntDesign name="plus" size={24} color="black" />
+                    <AntDesign name="plus" size={22} color="#333" />
                 </TouchableOpacity>
                     : <></>}
                     
             {//Three-dot menu
                 menuHandler ? <TouchableOpacity
-                    style={{ marginRight: 15 }}
+                    style={{ 
+                        marginRight: 5,
+                        padding: 8,
+                        borderRadius: 20,
+                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                    }}
                     onPress={menuHandler}
                 >
-                    <MaterialIcons name="more-vert" size={24} color="black" />
+                    <MaterialIcons name="more-vert" size={22} color="#333" />
                 </TouchableOpacity> : <></>}
         </View>
     );

@@ -1,4 +1,5 @@
-import { SafeAreaView, View, StatusBar, Text, ScrollView, TouchableOpacity, Modal, GestureResponderEvent, Alert, BackHandler, FlatList } from "react-native";
+import React from "react";
+import { SafeAreaView, View, StatusBar, Text, ScrollView, TouchableOpacity, Modal, GestureResponderEvent, Alert, BackHandler, FlatList, StyleSheet, Dimensions, ActivityIndicator } from "react-native";
 import ItemCard from "../ItemCard";
 import * as RNFS from "react-native-fs"
 
@@ -9,8 +10,7 @@ interface ContentListProps {
     handleOpen: (item: RNFS.ReadDirItem) => void;
 }
 
-
-export default function ContentList({content, selectionSet, handleSelect, handleOpen}: ContentListProps) {
+export const ContentList = ({content, selectionSet, handleSelect, handleOpen}: ContentListProps) => {
     if (content) {
         if (content.length == 0) {
             return (<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -30,6 +30,13 @@ export default function ContentList({content, selectionSet, handleSelect, handle
                 }
             />
         );
+    } else if (content === null) {
+        return (
+            <View style={styles.loaderContainer}>
+                <ActivityIndicator size="large" color="#0000ff" />
+                <Text style={styles.loaderText}>Loading files...</Text>
+            </View>
+        );
     } else {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -38,3 +45,16 @@ export default function ContentList({content, selectionSet, handleSelect, handle
         );
     }
 }
+
+const styles = StyleSheet.create({
+    loaderContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loaderText: {
+        marginTop: 10,
+        fontSize: 16,
+        color: '#444',
+    },
+});
