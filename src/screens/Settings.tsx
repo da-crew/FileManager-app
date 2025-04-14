@@ -127,10 +127,9 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                             if (newValue) {
                                 await requestNotificationPermission();
                                 await checkStorageUsage(); // กดแล้วแจ้งทันที
-                            } else {
-                                
                             }
                         }}
+                        
                     >
                         <View style={styles.rowContent}>
                             <View style={[styles.iconCircle, { backgroundColor: '#FF370020' }]}>
@@ -145,13 +144,21 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         </View>
                         <Switch
                             value={storageFull}
-                            onValueChange={setStorageFull}
+                            onValueChange={async (newValue) => {
+                                setStorageFull(newValue);
+
+                                if (newValue) {
+                                    await requestNotificationPermission();
+                                    await checkStorageUsage();
+                                }
+                            }}
                             trackColor={{ false: "#E5E5EA", true: "#007AFF80" }}
                             thumbColor={storageFull ? "#007AFF" : "#fff"}
                             ios_backgroundColor="#E5E5EA"
                         />
                     </TouchableOpacity>
                 </View>
+
 
                 {/* 4. ถังขยะ */}
                 <Text style={styles.sectionHeader}>Trash</Text>
