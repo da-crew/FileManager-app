@@ -1,7 +1,8 @@
-import React from "react";
-import { SafeAreaView, View, StatusBar, Text, ScrollView, TouchableOpacity, Modal, GestureResponderEvent, Alert, BackHandler, FlatList, StyleSheet, Dimensions, ActivityIndicator } from "react-native";
+import { View, Text, FlatList, StyleSheet } from "react-native";
 import ItemCard from "../ItemCard";
 import * as RNFS from "react-native-fs"
+import { useTheme } from "../ThemeContext";
+import { ActivityIndicator } from "react-native";
 
 interface ContentListProps {
     content: RNFS.ReadDirItem[] | null;
@@ -10,37 +11,47 @@ interface ContentListProps {
     handleOpen: (item: RNFS.ReadDirItem) => void;
 }
 
-export const ContentList = ({content, selectionSet, handleSelect, handleOpen}: ContentListProps) => {
+
+export default function ContentList({ content, selectionSet, handleSelect, handleOpen }: ContentListProps) {
+    const { theme } = useTheme();
+
+    const styles = StyleSheet.create({
+        view: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+        text: { fontSize: 15, color: theme.text }
+    });
+
     if (content) {
         if (content.length == 0) {
-            return (<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 15 }}>Empty</Text>
+            return (<View style={styles.view}>
+                <Text style={styles.text}>Empty</Text>
             </View>);
         }
         return (
-            <FlatList
-                data={content}
-                keyExtractor={(item, i) => item + i.toString()}
-                renderItem={({ item }) =>
-                    <ItemCard item={item}
-                        onSelect={handleSelect}
-                        onOpen={handleOpen}
-                        isSelected={selectionSet.has(item)}
-                    />
-                }
-            />
+            <View style={{backgroundColor: theme.background}}>
+                <FlatList
+                    data={content}
+                    keyExtractor={(item, i) => item + i.toString()}
+                    renderItem={({ item }) =>
+                        <ItemCard item={item}
+                            onSelect={handleSelect}
+                            onOpen={handleOpen}
+                            isSelected={selectionSet.has(item)}
+                        />
+                    }
+                />
+            </View>
         );
     } else if (content === null) {
         return (
-            <View style={styles.loaderContainer}>
+            <View style={styles.view}>
                 <ActivityIndicator size="large" color="#0000ff" />
-                <Text style={styles.loaderText}>Loading files...</Text>
+                <Text style={styles.text}>Loading files...</Text>
             </View>
         );
     } else {
         return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 15 }}>Loading</Text>
+            <View style={styles.view}>
+                <Text style={styles.text}>Loading</Text>
             </View>
         );
     }

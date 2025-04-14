@@ -3,7 +3,8 @@ import { View, Text, TouchableOpacity, GestureResponderEvent } from 'react-nativ
 import { MaterialIcons, Ionicons, AntDesign } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import PropTypes from 'prop-types';
-
+import { useTheme } from './ThemeContext';
+import { invertHexColor } from './themes';
 
 interface ToolbarProps {
     navigation: any,
@@ -31,40 +32,13 @@ interface ToolbarProps {
  */
 
 export default function Toolbar({ navigation, containerName, goBackHandler, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
+    const { theme } = useTheme();
     return (
-        <View style={{ 
-            flexDirection: 'row', 
-            alignItems: 'center', 
-            backgroundColor: '#FFFFFF',
-            paddingVertical: 8,
-            paddingHorizontal: 10,
-            elevation: 4,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 3,
-            borderBottomWidth: 1,
-            borderBottomColor: '#f2f2f2'
-        }}>
-            <TouchableOpacity 
-                style={{ 
-                    padding: 10, 
-                    marginRight: 5, 
-                    borderRadius: 20,
-                    backgroundColor: 'rgba(242, 242, 242, 0.6)' 
-                }} 
-                onPress={goBackHandler}
-            >
-                <MaterialIcons name="arrow-back-ios-new" size={20} color="#333" />
+        <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: theme.toolbarColor }}>
+            <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={goBackHandler}>
+                <MaterialIcons name="arrow-back-ios-new" size={20} color={theme.text} />
             </TouchableOpacity>
-            <Text style={{ 
-                fontSize: 20, 
-                fontWeight: '500', 
-                color: '#333',
-                marginLeft: 5
-            }}>
-                {containerName}
-            </Text>
+            <Text style={{ fontSize: 20, color: theme.text }}>{containerName}</Text>
             <TouchableOpacity
                 style={{ 
                     marginLeft: 'auto', 
@@ -75,7 +49,7 @@ export default function Toolbar({ navigation, containerName, goBackHandler, layo
                 }}
                 onPress={() => navigation.navigate("Search")}
             >
-                <Ionicons name="search" size={22} color="#333" />
+                <Ionicons name="search" size={24} color={theme.text} />
             </TouchableOpacity>
 
             {//View option, i.e., grid, detailed, simple
@@ -88,7 +62,7 @@ export default function Toolbar({ navigation, containerName, goBackHandler, layo
                     }}
                     onPress={layoutChangeHandler}
                 >
-                    <Ionicons name="grid-outline" size={22} color="#333" />
+                    <Ionicons name="grid-outline" size={24} color={theme.text} />
                 </TouchableOpacity> : <></>}
 
             {//Sort by
@@ -101,7 +75,7 @@ export default function Toolbar({ navigation, containerName, goBackHandler, layo
                     }}
                     onPress={sortByHandler}
                 >
-                    <FontAwesome5 name="sort" size={22} color="#333" />
+                    <FontAwesome5 name="sort" size={24} color={theme.text} />
                 </TouchableOpacity> : <></>}
 
             {//Create item
@@ -114,7 +88,7 @@ export default function Toolbar({ navigation, containerName, goBackHandler, layo
                     }}
                     onPress={createHandler}
                 >
-                    <AntDesign name="plus" size={22} color="#333" />
+                    <AntDesign name="plus" size={24} color={theme.text} />
                 </TouchableOpacity>
                     : <></>}
                     
@@ -128,7 +102,7 @@ export default function Toolbar({ navigation, containerName, goBackHandler, layo
                     }}
                     onPress={menuHandler}
                 >
-                    <MaterialIcons name="more-vert" size={22} color="#333" />
+                    <MaterialIcons name="more-vert" size={24} color={theme.text} />
                 </TouchableOpacity> : <></>}
         </View>
     );

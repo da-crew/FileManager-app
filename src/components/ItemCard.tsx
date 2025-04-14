@@ -1,13 +1,13 @@
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { FontAwesome, AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
-import * as RNFS from 'react-native-fs';
+import { View, Text, TouchableOpacity } from "react-native";
+import { AntDesign, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
+import * as RNFS from "react-native-fs"
+import { useTheme } from "./ThemeContext";
 
-interface ItemCardProps {
-    item: RNFS.ReadDirItem;
-    onSelect: (selected: boolean, item: RNFS.ReadDirItem) => void;
-    onOpen: (item: RNFS.ReadDirItem) => void;
-    isSelected: boolean;
+export interface ItemCardProps {
+    item: RNFS.ReadDirItem,
+    onSelect: (selected: boolean, item: RNFS.ReadDirItem) => void,
+    onOpen: (item: RNFS.ReadDirItem) => void,
+    isSelected: boolean
 }
 
 // รายการนามสกุลไฟล์ต่างๆ
@@ -28,6 +28,7 @@ const DOCUMENT_EXTENSIONS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '
 
 const ItemCard = ({ item, onSelect, onOpen, isSelected }: ItemCardProps) => {
     // คืนค่าไอคอนตามประเภทไฟล์
+    const { theme } = useTheme();
     const getFileIcon = () => {
         if (item.isDirectory()) {
             return <AntDesign name="folder1" size={40} color="#FFC107" />;
@@ -74,10 +75,17 @@ const ItemCard = ({ item, onSelect, onOpen, isSelected }: ItemCardProps) => {
         return <FontAwesome name="question" size={40} color="#9E9E9E" />;
     };
     
+
     return <View style={{ marginVertical: 5, flexDirection: 'row', alignItems: 'center' }}>
         <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', flex: 1}} onPress={() => onOpen(item)}>{/* Icon and Name */}
-            {getFileIcon()}
-            <Text style={{ fontSize: 15, marginHorizontal: 10}}
+            {
+                item.isDirectory()
+                    ? <AntDesign name="folder1" size={40} color={theme.text} />
+                    : item.isFile()
+                        ? <AntDesign name="file1" size={40} color={theme.text}/>
+                        : <FontAwesome name="question" size={40} color={theme.text}/>
+            }
+            <Text style={{ fontSize: 15, marginHorizontal: 10, color: theme.text}}
                 numberOfLines={1}
                 ellipsizeMode="tail"
             >{item.name}</Text>
@@ -89,7 +97,7 @@ const ItemCard = ({ item, onSelect, onOpen, isSelected }: ItemCardProps) => {
                 <MaterialCommunityIcons
                     name={isSelected ? "checkbox-marked" : "checkbox-blank-outline"}
                     size={25}
-                    color="black"
+                    color={theme.text}
                 />
             </TouchableOpacity>
         </View>

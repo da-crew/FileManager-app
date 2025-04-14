@@ -4,9 +4,12 @@ import { Ionicons } from "@expo/vector-icons/";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import { requestNotificationPermission, checkStorageUsage } from "../services/NotificationService";
+import { useTheme } from "../components/ThemeContext";
 
 export default function SettingsScreen({ navigation }: NativeStackScreenProps<RootStackParamList>) {
-    // App settings
+
+    const { theme, changeTheme, isDarkMode } = useTheme();
+
     const [imageViewer, setImageViewer] = useState(true);
     const [videoPlayer, setVideoPlayer] = useState(true);
     const [musicPlayer, setMusicPlayer] = useState(true);
@@ -27,96 +30,103 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
     const version = "1.0.0";
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar backgroundColor="#fff" barStyle="dark-content" />
-
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity
+        <SafeAreaView style={[styles.container, {backgroundColor: theme.background}]}>
+            <StatusBar barStyle='default' backgroundColor={theme.background}/>
+            <View style={[styles.header, {backgroundColor: theme.toolbarColor}]}>
+                <TouchableOpacity 
                     onPress={() => navigation.goBack()}
                     style={styles.backButton}
                 >
-                    <Ionicons name="chevron-back" size={28} color="#007AFF" />
+                    <AntDesign name="left" size={24} color={theme.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>ตั้งค่า</Text>
+                <Text style={[styles.headerTitle, {color: theme.text}]}>Settings</Text>
                 <View style={{ width: 40 }} />
             </View>
 
-            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-                {/* 1. แอปพลิเคชันที่ติดตั้ง */}
-                <Text style={styles.sectionHeader}>แอปพลิเคชันที่ติดตั้ง</Text>
-                <View style={styles.sectionContainer}>
-                    {/* โปรแกรมดูรูปภาพ */}
-                    <SettingItem
-                        icon="image-outline"
-                        iconColor="#007AFF"
-                        iconBgColor="#007AFF20"
-                        label="โปรแกรมดูรูปภาพ"
-                        value={imageViewer}
-                        onValueChange={setImageViewer}
-                    />
-
-                    {/* โปรแกรมเล่นวิดีโอ */}
-                    <SettingItem
-                        icon="videocam-outline"
-                        iconColor="#FF2D55"
-                        iconBgColor="#FF2D5520"
-                        label="โปรแกรมเล่นวิดีโอ"
-                        value={videoPlayer}
-                        onValueChange={setVideoPlayer}
-                    />
-
-                    {/* โปรแกรมเล่นเพลง */}
-                    <SettingItem
-                        icon="musical-notes-outline"
-                        iconColor="#FF9500"
-                        iconBgColor="#FF950020"
-                        label="โปรแกรมเล่นเพลง"
-                        value={musicPlayer}
-                        onValueChange={setMusicPlayer}
-                    />
-
-                    {/* โปรแกรมแก้ไขข้อความ */}
-                    <SettingItem
-                        icon="document-text-outline"
-                        iconColor="#34C759"
-                        iconBgColor="#34C75920"
-                        label="โปรแกรมแก้ไขข้อความ"
-                        value={textEditor}
-                        onValueChange={setTextEditor}
-                        isLast={true}
-                    />
+            <ScrollView contentContainerStyle={[styles.content, {backgroundColor: theme.background}]}>
+                <Text style={[styles.sectionHeader, {color: theme.textSecondary}]}>Built-in apps</Text>
+                <View style={[styles.sectionContainer, {backgroundColor: theme.toolbarColor}]}>
+                    <TouchableOpacity
+                        style={styles.row}
+                        onPress={() => setImageViewer(!imageViewer)}
+                    >
+                        <View style={styles.rowContent}>
+                            <MaterialCommunityIcons name="image" size={24} color={theme.text} style={styles.rowIcon} />
+                            <Text style={[styles.label, {color: theme.text}]}>Image viewer</Text>
+                        </View>
+                        <MaterialCommunityIcons
+                            name={imageViewer ? "checkbox-marked" : "checkbox-blank-outline"}
+                            size={24}
+                            color={theme.iconColor}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.row}
+                        onPress={() => setVideoPlayer(!videoPlayer)}
+                    >
+                        <View style={styles.rowContent}>
+                            <MaterialCommunityIcons name="video" size={24} color={theme.text} style={styles.rowIcon} />
+                            <Text style={[styles.label, {color: theme.text}]}>Video player</Text>
+                        </View>
+                        <MaterialCommunityIcons
+                            name={videoPlayer ? "checkbox-marked" : "checkbox-blank-outline"}
+                            size={24}
+                            color={theme.iconColor}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.row}
+                        onPress={() => setMusicPlayer(!musicPlayer)}
+                    >
+                        <View style={styles.rowContent}>
+                            <MaterialCommunityIcons name="music" size={24} color={theme.text} style={styles.rowIcon} />
+                            <Text style={[styles.label, {color: theme.text}]}>Music player</Text>
+                        </View>
+                        <MaterialCommunityIcons
+                            name={musicPlayer ? "checkbox-marked" : "checkbox-blank-outline"}
+                            size={24}
+                            color={theme.iconColor}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.row, { borderBottomWidth: undefined }]}
+                        onPress={() => setTextEditor(!textEditor)}
+                    >
+                        <View style={styles.rowContent}>
+                            <MaterialCommunityIcons name="text-box" size={24} color={theme.text} style={styles.rowIcon} />
+                            <Text style={[styles.label, {color: theme.text}]}>Text editor</Text>
+                        </View>
+                        <MaterialCommunityIcons
+                            name={textEditor ? "checkbox-marked" : "checkbox-blank-outline"}
+                            size={24}
+                            color={theme.iconColor}
+                        />
+                    </TouchableOpacity>
                 </View>
 
-                {/* 2. ธีมและการแสดงผล */}
-                <Text style={styles.sectionHeader}>ธีมและการแสดงผล</Text>
-                <View style={styles.sectionContainer}>
-                    {/* โหมดกลางคืน */}
-                    <SettingItem
-                        icon="moon-outline"
-                        iconColor="#8E8E93"
-                        iconBgColor="#8E8E9320"
-                        label="โหมดกลางคืน"
-                        value={darkMode}
-                        onValueChange={setDarkMode}
-                    />
-
-                    {/* เรียงตามวันที่เป็นค่าเริ่มต้น */}
-                    <SettingItem
-                        icon="calendar-outline"
-                        iconColor="#5856D6"
-                        iconBgColor="#5856D620"
-                        label="เรียงตามวันที่เป็นค่าเริ่มต้น"
-                        value={sortByDate}
-                        onValueChange={setSortByDate}
-                        isLast={true}
-                    />
+                <Text style={styles.sectionHeader}>Appearance</Text>
+                <View style={[styles.sectionContainer, {backgroundColor: theme.toolbarColor}]}>
+                    <TouchableOpacity
+                        style={[styles.row, { borderBottomWidth: undefined }]}
+                    >
+                        <View style={styles.rowContent}>
+                            <MaterialCommunityIcons name="theme-light-dark" size={24} color={theme.text} style={styles.rowIcon} />
+                            <Text style={[styles.label, { color: theme.text }]}>Dark mode</Text>
+                        </View>
+                        <Switch
+                            value={isDarkMode}
+                            onValueChange={(value) => {
+                                changeTheme(!isDarkMode);
+                                setDarkMode(value);
+                            }}
+                            trackColor={{ false: "#767577", true: theme.text }}
+                            thumbColor={isDarkMode ? theme.text : "#f4f3f4"}
+                        />
+                    </TouchableOpacity>
                 </View>
 
-                {/* 3. การแจ้งเตือน */}
-                <Text style={styles.sectionHeader}>การแจ้งเตือน</Text>
-                <View style={styles.sectionContainer}>
-                    {/* พื้นที่เก็บข้อมูลเต็ม */}
+                <Text style={styles.sectionHeader}>Notification Setting</Text>
+                <View style={[styles.sectionContainer, { backgroundColor: theme.toolbarColor }]}>
                     <TouchableOpacity
                         style={styles.row}
                         onPress={async () => {
@@ -132,22 +142,18 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         }}
                     >
                         <View style={styles.rowContent}>
-                            <View style={[styles.iconCircle, { backgroundColor: '#FF370020' }]}>
-                                <Ionicons name="disc-outline" size={20} color="#FF3700" />
-                            </View>
+                            <MaterialCommunityIcons name="harddisk" size={24} color={theme.text} style={styles.rowIcon} />
                             <View>
-                                <Text style={styles.label}>พื้นที่เก็บข้อมูลเต็ม</Text>
-                                <Text style={styles.subLabel}>
-                                    แจ้งเตือนเมื่อพื้นที่เก็บข้อมูลเหลือน้อยกว่า 5%
+                                <Text style={[styles.label, {color: theme.text}]}>Storage is full</Text>
+                                <Text style={[styles.subLabel, {color: theme.textSecondary}]}>
+                                    Show when the storage is over 95% full
                                 </Text>
                             </View>
                         </View>
-                        <Switch
-                            value={storageFull}
-                            onValueChange={setStorageFull}
-                            trackColor={{ false: "#E5E5EA", true: "#007AFF80" }}
-                            thumbColor={storageFull ? "#007AFF" : "#fff"}
-                            ios_backgroundColor="#E5E5EA"
+                        <MaterialCommunityIcons
+                            name={storageFull ? "checkbox-marked" : "checkbox-blank-outline"}
+                            size={24}
+                            color={theme.iconColor}
                         />
                     </TouchableOpacity>
                 </View>
@@ -258,8 +264,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 12,
         backgroundColor: "#fff",
-        borderBottomWidth: 1,
-        borderBottomColor: "#E5E5EA",
+        // borderBottomWidth: 1,
+        // borderBottomColor: "#E5E5EA",
     },
     backButton: {
         padding: 4
