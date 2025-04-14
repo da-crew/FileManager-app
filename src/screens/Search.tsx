@@ -7,7 +7,7 @@ import * as RNFS from 'react-native-fs';
 import {MaterialIcons} from '@expo/vector-icons';
 
 import { ContainerType, ContentContainerRouteParams, MovingState, SortType } from "../components/ContentContainer/common";
-import ContentList from "../components/ContentContainer/ContentList";
+import {ContentList} from "../components/ContentContainer/ContentList";
 import { getFileType, openWith } from "../utils/openWith";
 
 

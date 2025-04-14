@@ -10,7 +10,7 @@ import { Path } from '../FileSystem';
 interface ToolbarProps {
     navigation: any,
     containerName: string,
-    path: Path,
+    path?: Path,
     goBackHandler: (event: GestureResponderEvent) => void,
     layoutChangeHandler?: (event: GestureResponderEvent) => void,
     sortByHandler?: (event: GestureResponderEvent) => void,
