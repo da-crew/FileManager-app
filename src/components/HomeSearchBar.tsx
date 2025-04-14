@@ -4,7 +4,15 @@ import { Octicons, Ionicons } from '@expo/vector-icons';
 
 import { NavigationProp } from '@react-navigation/native';
 
+/**
+ * คอมโพเนนต์แถบค้นหาสำหรับหน้าหลัก แสดงไอคอนค้นหาและไอคอนการตั้งค่า
+ * Home search bar component that displays search and settings icons
+ */
 export interface HomeSearchBarProps {
+    /**
+     * navigation prop สำหรับการนำทางไปยังหน้าอื่นๆ
+     * Navigation prop for navigating to other screens
+     */
     navigation: NavigationProp<any>;
 }
 

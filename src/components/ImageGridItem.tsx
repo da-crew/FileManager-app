@@ -3,18 +3,31 @@ import { View, Image, StyleSheet, TouchableOpacity, Text, Dimensions } from 'rea
 import * as RNFS from 'react-native-fs';
 import { FontAwesome5 } from '@expo/vector-icons';
 
+// กำหนด Props ที่จำเป็นสำหรับ ImageGridItem
 export interface ImageGridItemProps {
-    item: RNFS.ReadDirItem;
-    onSelect: (select: boolean, item: RNFS.ReadDirItem) => void;
-    onOpen: (item: RNFS.ReadDirItem) => void;
-    isSelected: boolean;
-    width?: number;
+    item: RNFS.ReadDirItem;            // ข้อมูลไฟล์รูปภาพ
+    onSelect: (select: boolean, item: RNFS.ReadDirItem) => void;  // ฟังก์ชันเรียกเมื่อเลือกหรือยกเลิกการเลือกรูปภาพ
+    onOpen: (item: RNFS.ReadDirItem) => void;  // ฟังก์ชันเรียกเมื่อเปิดรูปภาพ
+    isSelected: boolean;               // สถานะว่ารูปภาพถูกเลือกหรือไม่
+    width?: number;                    // ความกว้างของไอเทม (ตัวเลือก)
 }
 
-// Default width
+// ความกว้างเริ่มต้น
 const windowWidth = Dimensions.get('window').width;
 const defaultItemWidth = (windowWidth - 40) / 3; // หักช่องว่างด้านข้าง
 
+/**
+ * คอมโพเนนต์แสดงรูปภาพในรูปแบบกริดไอเทมเดี่ยว
+ * ใช้สำหรับแสดงรูปภาพพร้อมฟังก์ชันการเลือกในตารางกริด
+ * 
+ * @param {Object} props - คุณสมบัติของคอมโพเนนต์
+ * @param {RNFS.ReadDirItem} props.item - ข้อมูลไฟล์รูปภาพ
+ * @param {function(boolean, RNFS.ReadDirItem): void} props.onSelect - ฟังก์ชันจัดการการเลือกรูปภาพ
+ * @param {function(RNFS.ReadDirItem): void} props.onOpen - ฟังก์ชันจัดการการเปิดรูปภาพ
+ * @param {boolean} props.isSelected - สถานะการเลือกรูปภาพ
+ * @param {number} [props.width] - ความกว้างของไอเทม (ตัวเลือก)
+ * @returns {JSX.Element} คอมโพเนนต์ที่เรนเดอร์แล้ว
+ */
 const ImageGridItem: React.FC<ImageGridItemProps> = ({ item, onSelect, onOpen, isSelected, width }) => {
     // ใช้ค่า width ที่ได้รับหรือค่า default
     const itemSize = width || defaultItemWidth;
@@ -26,6 +39,7 @@ const ImageGridItem: React.FC<ImageGridItemProps> = ({ item, onSelect, onOpen, i
 
     return (
         <View style={[styles.container, { width: itemSize, height: itemSize }]}>
+            {/* ส่วนแสดงรูปภาพ */}
             <TouchableOpacity 
                 style={styles.touchable}
                 onPress={() => onOpen(item)}
@@ -49,6 +63,7 @@ const ImageGridItem: React.FC<ImageGridItemProps> = ({ item, onSelect, onOpen, i
     );
 };
 
+// สไตล์สำหรับคอมโพเนนต์
 const styles = StyleSheet.create({
     container: {
         margin: 1,

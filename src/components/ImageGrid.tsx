@@ -2,36 +2,45 @@ import React from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, FlatList, Image, Dimensions } from 'react-native';
 import * as RNFS from 'react-native-fs';
 
+// กำหนด Props ที่จำเป็นสำหรับ ImageGrid
 interface ImageGridProps {
-    images: RNFS.ReadDirItem[], 
-    isLoading: boolean,
-    onImagePress: (item: RNFS.ReadDirItem) => void,
-    onImageLongPress?: (item: RNFS.ReadDirItem) => void,
-    selectedImages: Set<RNFS.ReadDirItem>
+    images: RNFS.ReadDirItem[],        // รายการไฟล์รูปภาพ
+    isLoading: boolean,                // สถานะกำลังโหลดข้อมูล
+    onImagePress: (item: RNFS.ReadDirItem) => void,  // ฟังก์ชันเรียกเมื่อกดที่รูปภาพ
+    onImageLongPress?: (item: RNFS.ReadDirItem) => void,  // ฟังก์ชันเรียกเมื่อกดค้างที่รูปภาพ (ใช้ในการเลือก)
+    selectedImages: Set<RNFS.ReadDirItem>  // รายการรูปภาพที่ถูกเลือก
 }
 
+/**
+ * คอมโพเนนต์แสดงรูปภาพแบบตารางกริด
+ * ใช้สำหรับแสดงรายการรูปภาพในหน้ารูปภาพและอัลบั้ม
+ */
 const ImageGrid = ({ images, isLoading, onImagePress, onImageLongPress, selectedImages }: ImageGridProps) => {
+    // คำนวณขนาดของแต่ละไอเทมตามความกว้างหน้าจอ
     const { width } = Dimensions.get('window');
-    const numColumns = 3;
+    const numColumns = 3;  // แสดง 3 คอลัมน์
     const itemWidth = (width - 20) / numColumns;
     
+    // แสดงส่วนกำลังโหลดข้อมูล
     if (isLoading) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator size="large" color="#2196F3" />
-                <Text style={{ marginTop: 10, color: '#333' }}>Loading images...</Text>
+                <Text style={{ marginTop: 10, color: '#333' }}>กำลังโหลดรูปภาพ...</Text>
             </View>
         );
     }
     
+    // แสดงข้อความเมื่อไม่พบรูปภาพ
     if (images.length === 0) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 16, color: '#333' }}>No images found</Text>
+                <Text style={{ fontSize: 16, color: '#333' }}>ไม่พบรูปภาพ</Text>
             </View>
         );
     }
     
+    // แสดงรายการรูปภาพในรูปแบบตาราง
     return (
         <FlatList
             data={images}
@@ -49,7 +58,7 @@ const ImageGrid = ({ images, isLoading, onImagePress, onImageLongPress, selected
                             style={{ 
                                 width: '100%', 
                                 height: '100%', 
-                                borderWidth: selectedImages.has(item) ? 3 : 0,
+                                borderWidth: selectedImages.has(item) ? 3 : 0,  // แสดงขอบเมื่อถูกเลือก
                                 borderColor: '#2196F3',
                             }}
                             resizeMode="cover"

@@ -1,30 +1,42 @@
 import { View, Text, TouchableOpacity, GestureResponderEvent, StyleSheet } from "react-native";
 import { ReactNode} from "react";
 
+/**
+ * คอมโพเนนต์ปุ่มในแถบด้านล่าง
+ * ใช้สำหรับแสดงปุ่มพร้อมไอคอนและข้อความในแถบเครื่องมือด้านล่าง
+ * 
+ * @param {string} name - ชื่อของปุ่ม
+ * @param {ReactNode} icon - ไอคอนที่จะแสดง
+ * @param {Function} onPress - ฟังก์ชันที่จะเรียกเมื่อกดปุ่ม
+ * @param {boolean} [disabled] - สถานะการปิดใช้งานปุ่ม
+ */
 const BottomBarItem = ({ name, icon, onPress, disabled }: {
-    name: string,
-    icon: ReactNode,
-    onPress: (event: GestureResponderEvent) => void,
-    disabled?: boolean,
+    name: string,             // ชื่อปุ่ม
+    icon: ReactNode,          // ไอคอนของปุ่ม
+    onPress: (event: GestureResponderEvent) => void,  // ฟังก์ชันเรียกเมื่อกดปุ่ม
+    disabled?: boolean,       // สถานะการปิดใช้งานปุ่ม (ตัวเลือก)
 }) => {
     return (
         <TouchableOpacity 
             style={[
                 styles.container,
-                { opacity: disabled ? 0.5 : 1 }
+                { opacity: disabled ? 0.5 : 1 }  // ลดความทึบเมื่อปุ่มถูกปิดใช้งาน
             ]} 
             onPress={disabled ? undefined : onPress} 
             disabled={disabled}
             activeOpacity={0.7}
         >
+            {/* ส่วนแสดงไอคอน */}
             <View style={styles.iconContainer}>
                 {icon}
             </View>
+            {/* ส่วนแสดงชื่อปุ่ม */}
             <Text style={styles.text}>{name}</Text>
         </TouchableOpacity>
     );
 };
 
+// สไตล์สำหรับคอมโพเนนต์
 const styles = StyleSheet.create({
     container: {
         padding: 10,

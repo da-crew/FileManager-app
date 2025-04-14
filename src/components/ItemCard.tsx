@@ -3,11 +3,12 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { FontAwesome, AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as RNFS from 'react-native-fs';
 
+// กำหนด Props ที่จำเป็นสำหรับ ItemCard
 interface ItemCardProps {
-    item: RNFS.ReadDirItem;
-    onSelect: (selected: boolean, item: RNFS.ReadDirItem) => void;
-    onOpen: (item: RNFS.ReadDirItem) => void;
-    isSelected: boolean;
+    item: RNFS.ReadDirItem;            // ข้อมูลของไฟล์หรือโฟลเดอร์
+    onSelect: (selected: boolean, item: RNFS.ReadDirItem) => void;  // ฟังก์ชันเรียกเมื่อเลือกไอเทม
+    onOpen: (item: RNFS.ReadDirItem) => void;  // ฟังก์ชันเรียกเมื่อเปิดไอเทม
+    isSelected: boolean;               // สถานะว่าไอเทมถูกเลือกหรือไม่
 }
 
 // รายการนามสกุลไฟล์ต่างๆ
@@ -17,13 +18,15 @@ const AUDIO_EXTENSIONS = ['.mp3', '.wav', '.ogg', '.m4a', '.flac', '.aac'];
 const DOCUMENT_EXTENSIONS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt'];
 
 /**
- * ItemCard component to display a file or folder item.
+ * คอมโพเนนต์สำหรับแสดงไฟล์หรือโฟลเดอร์ในรูปแบบการ์ด
+ * ใช้สำหรับแสดงรายการไฟล์และโฟลเดอร์ในหน้าต่างๆ ของแอป
  * 
- * @param {Object} props - The component props.
- * @param {FolderItem|FileItem} props.item - The item to display, either a FolderItem or FileItem.
- * @param {function(boolean, FolderItem|FileItem): void} props.onSelect - Callback function to handle item selection.
- * @param {bool} props.isSelected - Indicates whether the item is selected.
- * @returns {JSX.Element} The rendered component.
+ * @param {Object} props - คุณสมบัติของคอมโพเนนต์
+ * @param {RNFS.ReadDirItem} props.item - ข้อมูลของไฟล์หรือโฟลเดอร์ที่จะแสดง
+ * @param {function(boolean, RNFS.ReadDirItem): void} props.onSelect - ฟังก์ชันเรียกเมื่อเลือกหรือยกเลิกการเลือกไอเทม
+ * @param {function(RNFS.ReadDirItem): void} props.onOpen - ฟังก์ชันเรียกเมื่อเปิดไอเทม
+ * @param {boolean} props.isSelected - สถานะว่าไอเทมถูกเลือกหรือไม่
+ * @returns {JSX.Element} คอมโพเนนต์ที่เรนเดอร์แล้ว
  */
 
 const ItemCard = ({ item, onSelect, onOpen, isSelected }: ItemCardProps) => {
@@ -74,14 +77,17 @@ const ItemCard = ({ item, onSelect, onOpen, isSelected }: ItemCardProps) => {
         return <FontAwesome name="question" size={40} color="#9E9E9E" />;
     };
     
+    // สร้างคอมโพเนนต์การ์ดแสดงไอเทม
     return <View style={{ marginVertical: 5, flexDirection: 'row', alignItems: 'center' }}>
-        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', flex: 1}} onPress={() => onOpen(item)}>{/* Icon and Name */}
+        {/* ส่วนแสดงไอคอนและชื่อไฟล์ */}
+        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', flex: 1}} onPress={() => onOpen(item)}>
             {getFileIcon()}
             <Text style={{ fontSize: 15, marginHorizontal: 10}}
                 numberOfLines={1}
                 ellipsizeMode="tail"
             >{item.name}</Text>
         </TouchableOpacity>
+        {/* ปุ่มเลือกไอเทม */}
         <View style={{ flex: 1, alignItems: 'flex-end' }}>
             <TouchableOpacity onPress={() => {
                 onSelect(!isSelected, item);

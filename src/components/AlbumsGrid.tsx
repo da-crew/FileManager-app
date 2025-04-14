@@ -1,25 +1,32 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, FlatList, Image, Dimensions } from 'react-native';
 
-// อินเตอร์เฟซสำหรับอัลบั้ม
+// อินเตอร์เฟซสำหรับอัลบั้ม - กำหนดโครงสร้างข้อมูลอัลบั้ม
 export interface AlbumItem {
-    name: string;
-    path: string;
-    count: number;
-    thumbnail: string | null;
+    name: string;         // ชื่ออัลบั้ม
+    path: string;         // พาธที่เก็บไฟล์ในอัลบั้ม
+    count: number;        // จำนวนไฟล์ในอัลบั้ม
+    thumbnail: string | null;  // พาธของรูปภาพตัวอย่าง
 }
 
+// กำหนด Props ที่จำเป็นสำหรับ AlbumsGrid
 interface AlbumsGridProps {
-    albums: AlbumItem[],
-    isLoading: boolean,
-    onAlbumPress: (album: AlbumItem) => void
+    albums: AlbumItem[],             // รายการอัลบั้ม
+    isLoading: boolean,              // สถานะกำลังโหลดข้อมูล
+    onAlbumPress: (album: AlbumItem) => void  // ฟังก์ชันเรียกเมื่อกดที่อัลบั้ม
 }
 
+/**
+ * คอมโพเนนต์แสดงอัลบั้มแบบตารางกริด
+ * ใช้สำหรับแสดงรายการอัลบั้มในหน้าต่างๆ เช่น หน้ารูปภาพ, วิดีโอ
+ */
 const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: AlbumsGridProps) => {
+    // คำนวณขนาดของแต่ละไอเทมตามความกว้างหน้าจอ
     const { width } = Dimensions.get('window');
-    const numColumns = 2;
+    const numColumns = 2;  // แสดง 2 คอลัมน์
     const itemWidth = (width - 30) / numColumns;
     
+    // แสดงส่วนกำลังโหลดข้อมูล
     if (isLoading) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -29,6 +36,7 @@ const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: AlbumsGridProps) => {
         );
     }
     
+    // แสดงข้อความเมื่อไม่พบอัลบั้ม
     if (albums.length === 0) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -39,6 +47,7 @@ const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: AlbumsGridProps) => {
     
     console.log('Rendering albums:', albums.length);
     
+    // แสดงรายการอัลบั้มในรูปแบบตาราง
     return (
         <FlatList
             data={albums}
@@ -61,6 +70,7 @@ const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: AlbumsGridProps) => {
                     }}
                     onPress={() => onAlbumPress(item)}
                 >
+                    {/* แสดงรูปตัวอย่างของอัลบั้ม หรือไอคอนเริ่มต้นถ้าไม่มีรูปตัวอย่าง */}
                     {item.thumbnail ? (
                         <Image 
                             source={{ uri: `file://${item.thumbnail}` }} 
@@ -75,6 +85,7 @@ const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: AlbumsGridProps) => {
                             justifyContent: 'center',
                             alignItems: 'center'
                         }}>
+                            {/* แสดงอิโมจิตามชื่ออัลบั้ม */}
                             {item.name === 'Camera' ? (
                                 <Text style={{ fontSize: 40 }}>📷</Text>
                             ) : item.name === 'Screenshots' ? (
@@ -88,6 +99,7 @@ const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: AlbumsGridProps) => {
                             )}
                         </View>
                     )}
+                    {/* แสดงชื่ออัลบั้มและจำนวนไฟล์ด้านล่าง */}
                     <View style={{ padding: 10 }}>
                         <Text style={{ fontWeight: 'bold', fontSize: 14 }} numberOfLines={1}>{item.name}</Text>
                         <Text style={{ fontSize: 12, color: '#666' }}>{item.count} รูป</Text>

@@ -1,10 +1,18 @@
 import { Text, TouchableOpacity, GestureResponderEvent, StyleSheet, View } from "react-native";
 import { ReactNode } from "react";
 
+/**
+ * คอมโพเนนต์ปุ่มตัวเลือกในแถบด้านล่าง
+ * ใช้แสดงตัวเลือกการทำงานต่างๆ ในแถบเครื่องมือด้านล่างของหน้าจอ
+ * 
+ * @param {string} name - ชื่อของตัวเลือก
+ * @param {ReactNode} icon - ไอคอนที่แสดงประกอบชื่อ
+ * @param {Function} onPress - ฟังก์ชันที่จะเรียกเมื่อกดที่ตัวเลือก
+ */
 const BottomBarOptions = ({ name, icon, onPress }: {
-    name: string,
-    icon: ReactNode,
-    onPress: (event: GestureResponderEvent) => void,
+    name: string,             // ชื่อตัวเลือก
+    icon: ReactNode,          // ไอคอนของตัวเลือก
+    onPress: (event: GestureResponderEvent) => void,  // ฟังก์ชันเรียกเมื่อกดที่ตัวเลือก
 }) => {
     return (
         <TouchableOpacity 
@@ -12,14 +20,17 @@ const BottomBarOptions = ({ name, icon, onPress }: {
             onPress={onPress}
             activeOpacity={0.7}
         >
+            {/* ส่วนแสดงไอคอน */}
             <View style={styles.iconContainer}>
                 {icon}
             </View>
+            {/* ส่วนแสดงชื่อตัวเลือก */}
             <Text style={styles.text}>{name}</Text>
         </TouchableOpacity>
     );
 };
 
+// สไตล์สำหรับคอมโพเนนต์
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',

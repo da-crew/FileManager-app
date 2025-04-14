@@ -5,29 +5,30 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import PropTypes from 'prop-types';
 
 
+// กำหนด Props ที่จำเป็นสำหรับ Toolbar
 interface ToolbarProps {
-    navigation: any,
-    containerName: string,
-    goBackHandler: (event: GestureResponderEvent) => void,
-    layoutChangeHandler?: (event: GestureResponderEvent) => void,
-    sortByHandler?: (event: GestureResponderEvent) => void,
-    createHandler?: (event: GestureResponderEvent) => void,
-    menuHandler?: (event: GestureResponderEvent) => void,
+    navigation: any,                   // Navigation object สำหรับการนำทาง
+    containerName: string,             // ชื่อของคอนเทนเนอร์ที่จะแสดง
+    goBackHandler: (event: GestureResponderEvent) => void,  // ฟังก์ชันกลับไปหน้าก่อนหน้า
+    layoutChangeHandler?: (event: GestureResponderEvent) => void,  // ฟังก์ชันสำหรับเปลี่ยนรูปแบบการแสดงผล (ตัวเลือก)
+    sortByHandler?: (event: GestureResponderEvent) => void,  // ฟังก์ชันสำหรับการเรียงลำดับ (ตัวเลือก)
+    createHandler?: (event: GestureResponderEvent) => void,  // ฟังก์ชันสำหรับสร้างรายการใหม่ (ตัวเลือก)
+    menuHandler?: (event: GestureResponderEvent) => void,  // ฟังก์ชันสำหรับเมนู (ตัวเลือก)
 }
 
 /**
- * Toolbar component that provides navigation and action buttons.
+ * คอมโพเนนต์แถบเครื่องมือสำหรับการนำทางและแสดงปุ่มการทำงานต่างๆ
  *
- * @param {Object} props - The properties object.
- * @param {Object} props.navigation - The navigation object.
- * @param {Function} props.navigation.goBack - Function to navigate back.
- * @param {Function} props.navigation.navigate - Function to navigate to a specific route.
- * @param {string} props.containerName - The name of the container to be displayed.
- * @param {Function} [props.layoutChangeHandler] - Optional handler function for layout change.
- * @param {Function} [props.sortByHandler] - Optional handler function for sorting items.
- * @param {Function} [props.createHandler] - Optional handler function for creating a new item.
- * @param {Function} [props.menuHandler] - Optional handler function for the three-dot menu.
- * @returns {JSX.Element} The rendered Toolbar component.
+ * @param {Object} props - คุณสมบัติของคอมโพเนนต์
+ * @param {Object} props.navigation - ออบเจ็กต์สำหรับการนำทาง
+ * @param {Function} props.navigation.goBack - ฟังก์ชันสำหรับนำทางกลับ
+ * @param {Function} props.navigation.navigate - ฟังก์ชันสำหรับนำทางไปยังเส้นทางที่ระบุ
+ * @param {string} props.containerName - ชื่อของคอนเทนเนอร์ที่จะแสดง
+ * @param {Function} [props.layoutChangeHandler] - ฟังก์ชันจัดการการเปลี่ยนรูปแบบการแสดงผล (ตัวเลือก)
+ * @param {Function} [props.sortByHandler] - ฟังก์ชันจัดการการเรียงลำดับรายการ (ตัวเลือก)
+ * @param {Function} [props.createHandler] - ฟังก์ชันจัดการการสร้างรายการใหม่ (ตัวเลือก)
+ * @param {Function} [props.menuHandler] - ฟังก์ชันจัดการเมนูสามจุด (ตัวเลือก)
+ * @returns {JSX.Element} คอมโพเนนต์ที่เรนเดอร์แล้ว
  */
 
 export default function Toolbar({ navigation, containerName, goBackHandler, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
@@ -46,6 +47,7 @@ export default function Toolbar({ navigation, containerName, goBackHandler, layo
             borderBottomWidth: 1,
             borderBottomColor: '#f2f2f2'
         }}>
+            {/* ปุ่มย้อนกลับ */}
             <TouchableOpacity 
                 style={{ 
                     padding: 10, 
@@ -57,6 +59,8 @@ export default function Toolbar({ navigation, containerName, goBackHandler, layo
             >
                 <MaterialIcons name="arrow-back-ios-new" size={20} color="#333" />
             </TouchableOpacity>
+            
+            {/* ชื่อคอนเทนเนอร์ */}
             <Text style={{ 
                 fontSize: 20, 
                 fontWeight: '500', 
@@ -65,6 +69,8 @@ export default function Toolbar({ navigation, containerName, goBackHandler, layo
             }}>
                 {containerName}
             </Text>
+            
+            {/* ปุ่มค้นหา */}
             <TouchableOpacity
                 style={{ 
                     marginLeft: 'auto', 
@@ -78,62 +84,63 @@ export default function Toolbar({ navigation, containerName, goBackHandler, layo
                 <Ionicons name="search" size={22} color="#333" />
             </TouchableOpacity>
 
-            {//View option, i.e., grid, detailed, simple
-                layoutChangeHandler ? <TouchableOpacity
-                    style={{ 
-                        marginRight: 10,
-                        padding: 8,
-                        borderRadius: 20,
-                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
-                    }}
-                    onPress={layoutChangeHandler}
-                >
-                    <Ionicons name="grid-outline" size={22} color="#333" />
-                </TouchableOpacity> : <></>}
+            {/* ปุ่มเปลี่ยนรูปแบบการแสดงผล - กริด, รายละเอียด, เรียบง่าย */}
+            {layoutChangeHandler ? <TouchableOpacity
+                style={{ 
+                    marginRight: 10,
+                    padding: 8,
+                    borderRadius: 20,
+                    backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                }}
+                onPress={layoutChangeHandler}
+            >
+                <Ionicons name="grid-outline" size={22} color="#333" />
+            </TouchableOpacity> : <></>}
 
-            {//Sort by
-                sortByHandler ? <TouchableOpacity
-                    style={{ 
-                        marginRight: 10,
-                        padding: 8,
-                        borderRadius: 20,
-                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
-                    }}
-                    onPress={sortByHandler}
-                >
-                    <FontAwesome5 name="sort" size={22} color="#333" />
-                </TouchableOpacity> : <></>}
+            {/* ปุ่มเรียงลำดับ */}
+            {sortByHandler ? <TouchableOpacity
+                style={{ 
+                    marginRight: 10,
+                    padding: 8,
+                    borderRadius: 20,
+                    backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                }}
+                onPress={sortByHandler}
+            >
+                <FontAwesome5 name="sort" size={22} color="#333" />
+            </TouchableOpacity> : <></>}
 
-            {//Create item
-                createHandler ? <TouchableOpacity
-                    style={{ 
-                        marginRight: 10,
-                        padding: 8,
-                        borderRadius: 20,
-                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
-                    }}
-                    onPress={createHandler}
-                >
-                    <AntDesign name="plus" size={22} color="#333" />
-                </TouchableOpacity>
-                    : <></>}
+            {/* ปุ่มสร้างรายการใหม่ */}
+            {createHandler ? <TouchableOpacity
+                style={{ 
+                    marginRight: 10,
+                    padding: 8,
+                    borderRadius: 20,
+                    backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                }}
+                onPress={createHandler}
+            >
+                <AntDesign name="plus" size={22} color="#333" />
+            </TouchableOpacity>
+                : <></>}
                     
-            {//Three-dot menu
-                menuHandler ? <TouchableOpacity
-                    style={{ 
-                        marginRight: 5,
-                        padding: 8,
-                        borderRadius: 20,
-                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
-                    }}
-                    onPress={menuHandler}
-                >
-                    <MaterialIcons name="more-vert" size={22} color="#333" />
-                </TouchableOpacity> : <></>}
+            {/* ปุ่มเมนูสามจุด */}
+            {menuHandler ? <TouchableOpacity
+                style={{ 
+                    marginRight: 5,
+                    padding: 8,
+                    borderRadius: 20,
+                    backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                }}
+                onPress={menuHandler}
+            >
+                <MaterialIcons name="more-vert" size={22} color="#333" />
+            </TouchableOpacity> : <></>}
         </View>
     );
 };
 
+// กำหนด PropTypes สำหรับการตรวจสอบประเภทข้อมูล
 Toolbar.propTypes = {
     navigation: PropTypes.shape({
         goBack: PropTypes.func.isRequired,
