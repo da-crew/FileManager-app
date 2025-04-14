@@ -5,10 +5,14 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import PropTypes from 'prop-types';
 import { useTheme } from './ThemeContext';
 import { invertHexColor } from './themes';
+import { ContainerType, ContentContainerRouteParams } from './ContentContainer/common';
+import { Path } from '../FileSystem';
+
 
 interface ToolbarProps {
     navigation: any,
     containerName: string,
+    path?: Path,
     goBackHandler: (event: GestureResponderEvent) => void,
     layoutChangeHandler?: (event: GestureResponderEvent) => void,
     sortByHandler?: (event: GestureResponderEvent) => void,
@@ -31,26 +35,40 @@ interface ToolbarProps {
  * @returns {JSX.Element} The rendered Toolbar component.
  */
 
-export default function Toolbar({ navigation, containerName, goBackHandler, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
-    const { theme } = useTheme();
+
+export default function Toolbar({ navigation, containerName, path, goBackHandler, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
+    const theme = useTheme();
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: theme.toolbarColor }}>
             <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={goBackHandler}>
                 <MaterialIcons name="arrow-back-ios-new" size={20} color={theme.text} />
             </TouchableOpacity>
-            <Text style={{ fontSize: 20, color: theme.text }}>{containerName}</Text>
-            <TouchableOpacity
-                style={{ 
-                    marginLeft: 'auto', 
-                    marginRight: 10,
-                    padding: 8,
-                    borderRadius: 20,
-                    backgroundColor: 'rgba(242, 242, 242, 0.6)'
-                }}
-                onPress={() => navigation.navigate("Search")}
-            >
-                <Ionicons name="search" size={24} color={theme.text} />
-            </TouchableOpacity>
+            <Text style={{ 
+                fontSize: 20, 
+                fontWeight: '500', 
+                color: '#333',
+                marginLeft: 5
+            }}>
+                {containerName}
+            </Text>
+            {path && containerName && (
+                <TouchableOpacity
+                    style={{ 
+                        marginLeft: 'auto', 
+                        marginRight: 10,
+                        padding: 8,
+                        borderRadius: 20,
+                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                    }}
+                    onPress={() => navigation.replace("Search", {
+                        containerName: containerName,
+                        path: path,
+                        containerType: ContainerType.DEFAULT
+                    })}
+                >
+                    <Ionicons name="search" size={22} color="#333" />
+                </TouchableOpacity>
+            )}
 
             {//View option, i.e., grid, detailed, simple
                 layoutChangeHandler ? <TouchableOpacity

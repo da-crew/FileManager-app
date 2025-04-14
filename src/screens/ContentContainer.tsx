@@ -591,7 +591,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
 
         return () => backHandler.remove();
-    }, []);
+    }, [navpath]);
 
     function updateSortType(type: SortType) {
         if (sortType !== type) {
