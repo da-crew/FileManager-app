@@ -20,6 +20,7 @@ import { getFileType, openWith } from "../utils/openWith";
 import { useProgress } from "../components/ProgressBar/ProgressContext";
 import ProgressBar from "../components/ProgressBar/ProgressBar";
 import SortOptionsBar from "../components/ContentContainer/SortOptionsBar";
+import { useTheme } from "../components/ThemeContext";
 
 // รายการนามสกุลไฟล์รูปภาพ
 const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
@@ -424,6 +425,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{ selectionSet: Set<RNFS.ReadDirItem>, isSelecting: boolean }>({ selectionSet: new Set(), isSelecting: false });
     const [movingState, setMovingState] = useState<MovingState | null>(null);
 
+    const { theme } = useTheme();
     const progress = useProgress();
 
     const deleteCancelledRef = useRef(false);
@@ -591,7 +593,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
 
         return () => backHandler.remove();
-    }, []);
+    }, [navpath]);
 
     function updateSortType(type: SortType) {
         if (sortType !== type) {
@@ -2425,9 +2427,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     ];
 
     // Return section
-    return (
-        <SafeAreaView style={{ flex: 1 }}>
-        <StatusBar />
+    return <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+        <StatusBar backgroundColor={theme.background}/>
+
         <View style={{ flex: 1 }}>
             {//Toolbar 1
                 !isSelecting
@@ -2548,8 +2550,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             }
 
             {/* Content is displayed here */}
-            <View style={{ margin: 10, flex: 1 }}>
-                {renderContent()}
+            <View style={{ margin: 10, flex: 1, backgroundColor: theme.background }}>
+                <ContentList content={content} handleOpen={handleOpen} handleSelect={handleSelect} selectionSet={selectionSet} />
+            </View>
         </View>
 
         <SelectionBottomBar 
@@ -2587,10 +2590,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 const itemToRename = Array.from(selectionSet)[0];
                 openRenameModal(itemToRename);
                 unselectAll();
-
-                    }} 
-                    deleteActionHandler={handleDeleteAction} 
-                    pasteCancelActionHandler={function (): void {
+            }} deleteActionHandler={
+                handleDeleteAction
+            } pasteCancelActionHandler={function (): void {
                 setMovingState(null);
                     }} 
                     pasteActionHandler={() => handlePasteAction().catch((reason) => { throw new Error(reason) })}

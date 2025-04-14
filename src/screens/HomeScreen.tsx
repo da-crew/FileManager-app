@@ -1,6 +1,7 @@
 import React, { ReactNode, useEffect, useState } from 'react';
 import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, ScrollView, GestureResponderEvent, StatusBar } from 'react-native';
-import { Feather, MaterialIcons, Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
+import HomeSearchBar from '../components/HomeSearchBar';
+import { Feather, MaterialIcons, Ionicons, MaterialCommunityIcons, createIconSet } from '@expo/vector-icons';
 import { Path } from '../FileSystem';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
@@ -8,6 +9,8 @@ import { checkManagePermission } from 'manage-external-storage';
 import RNFS from 'react-native-fs';
 import { openAppSettings, StorageCapacity, StorageDevice } from '../FileSystem';
 import { ContainerType } from '../components/ContentContainer/common';
+import { useTheme } from '../components/ThemeContext';
+
 
 // คอมโพเนนต์ปุ่มเมนูแบบรวดเร็ว (แสดงในส่วน File Types)
 const QuickAccessButton = ({ name, icon, onPress }: {
@@ -15,12 +18,13 @@ const QuickAccessButton = ({ name, icon, onPress }: {
     icon: ReactNode,          // ไอคอนของปุ่ม
     onPress: (event: GestureResponderEvent) => void  // ฟังก์ชันที่จะทำงานเมื่อกดปุ่ม
 }) => {
+    const { theme } = useTheme();
     return (
-        <TouchableOpacity style={styles.quickAccessButton} onPress={onPress}>
-            <View style={styles.iconContainer}>
+        <TouchableOpacity style={[styles.quickAccessButton, { backgroundColor: theme.card }]} onPress={onPress}>
+            <View style={[styles.iconContainer, { backgroundColor: theme.background }]}>
                 {icon}
             </View>
-            <Text style={styles.quickAccessText}>{name}</Text>
+            <Text style={[styles.quickAccessText, { color: theme.text }]}>{name}</Text>
         </TouchableOpacity>
     );
 };
@@ -33,6 +37,7 @@ const StorageCard = ({ device, icon, onPress }: {
 }) => {
     // สถานะสำหรับเก็บข้อมูลความจุพื้นที่จัดเก็บ
     const [storageSize, setStorageSize] = useState<StorageCapacity | null>(null);
+    const { theme } = useTheme();
 
     // ดึงข้อมูลความจุพื้นที่จัดเก็บเมื่อคอมโพเนนต์ถูกโหลด
     useEffect(() => {
@@ -54,15 +59,14 @@ const StorageCard = ({ device, icon, onPress }: {
     };
 
     return (
-        <TouchableOpacity style={styles.storageCard} onPress={onPress}>
-            <View style={styles.storageInfo}>
-                <View style={styles.storageIconContainer}>
-                    {icon}
-                </View>
+        <TouchableOpacity style={[styles.storageCard, { backgroundColor: theme.card }]} onPress={onPress}>
+            <View style={[styles.storageInfo, { backgroundColor: theme.card }]}>
+                {icon}
                 <View style={styles.storageTextContainer}>
-                    <Text style={styles.storageTitle}>{device.displayName}</Text>
-                    {storageSize && (
-                        <>
+                    <Text style={[styles.storageTitle, { color: theme.text }]}>{device.displayName}</Text>
+                    {
+                        storageSize
+                            ?
                             <View style={styles.storageBarContainer}>
                                 <View
                                     style={[
@@ -93,10 +97,17 @@ const UtilityButton = ({ title, desc, icon, onPress }: {
     icon: ReactNode,          // ไอคอน
     onPress: (event: GestureResponderEvent) => void  // ฟังก์ชันที่จะทำงานเมื่อกดปุ่ม
 }) => {
+
+    const { theme } = useTheme();
+
     return (
-        <TouchableOpacity style={styles.utilityButton} onPress={onPress}>
-            <View style={styles.utilityIconContainer}>
+        <TouchableOpacity style={[styles.utilityButton, { backgroundColor: theme.card }]} onPress={onPress}>
+            <View style={styles.utilityContent}>
                 {icon}
+                <View style={styles.utilityTextContainer}>
+                    <Text style={[styles.utilityTitle, { color: theme.text }]}>{title}</Text>
+                    <Text style={[styles.utilityDesc, { color: theme.textSecondary }]}>{desc}</Text>
+                </View>
             </View>
             <View style={styles.utilityTextContainer}>
                 <Text style={styles.utilityTitle}>{title}</Text>
@@ -109,13 +120,18 @@ const UtilityButton = ({ title, desc, icon, onPress }: {
 
 // คอมโพเนนต์ส่วนหัวของหน้าจอ
 const HeaderBar = ({ navigation }: { navigation: any }) => {
+    const internalStorage = new StorageDevice('Internal Storage', RNFS.ExternalStorageDirectoryPath);
     return (
         <View style={styles.headerBar}>
             <Text style={styles.headerTitle}>My Files</Text>
             <View style={styles.headerActions}>
                 <TouchableOpacity
                     style={styles.headerButton}
-                    onPress={() => navigation.navigate("Search")}
+                    onPress={() => navigation.navigate("Search", {
+                        containerName: internalStorage.displayName,
+                        path: new Path(internalStorage.displayName, internalStorage.devicePath, []),
+                        containerType: ContainerType.DEFAULT
+                    })}
                 >
                     <Ionicons name="search" size={24} color="#333" />
                 </TouchableOpacity>
@@ -134,6 +150,8 @@ const HeaderBar = ({ navigation }: { navigation: any }) => {
 export default function HomeScreen({ navigation }: NativeStackScreenProps<RootStackParamList>) {
 
     // ตรวจสอบสิทธิ์การจัดการไฟล์เมื่อเปิดแอป
+    const { theme } = useTheme();
+
     useEffect(() => {
         checkManagePermission().then((allowed) => {
             if (!allowed) {
@@ -164,26 +182,24 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
     const internalStorage = new StorageDevice('Device Storage', RNFS.ExternalStorageDirectoryPath);
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar backgroundColor="#fff" barStyle="dark-content" />
-            <HeaderBar navigation={navigation} />
-            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-                {/* ส่วนแสดงประเภทไฟล์ */}
-                <Text style={styles.sectionTitle}>File Types</Text>
-                <View style={styles.quickAccessGrid}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+            <StatusBar backgroundColor={theme.background} />
+            <HomeSearchBar navigation={navigation} />
+            <ScrollView style={styles.scrollView}>
+                <View style={[styles.quickAccessGrid, { backgroundColor: theme.card}]}>
                     <QuickAccessButton
                         name="Images"
-                        icon={<Feather name="image" size={24} color="#007AFF" />}
+                        icon={<Feather name="image" size={28} color={theme.text} />}
                         onPress={() => gotoCategory("Images")}
                     />
                     <QuickAccessButton
                         name="Videos"
-                        icon={<Feather name="video" size={24} color="#FF2D55" />}
+                        icon={<Feather name="video" size={28} color={theme.text} />}
                         onPress={() => gotoCategory("Videos")}
                     />
                     <QuickAccessButton
-                        name="Music"
-                        icon={<Feather name="music" size={24} color="#FF9500" />}
+                        name="Audio"
+                        icon={<Feather name="music" size={28} color={theme.text} />}
                         onPress={() => gotoCategory("Audio")}
                     />
                     <QuickAccessButton
@@ -203,22 +219,23 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
                     />
                 </View>
 
-                {/* ส่วนแสดงข้อมูลพื้นที่จัดเก็บ */}
-                <Text style={styles.sectionTitle}>Storage</Text>
-                <StorageCard
-                    device={internalStorage}
-                    icon={<Feather name="smartphone" size={24} color="#4CAF50" />}
-                    onPress={() => {
-                        gotoStorageDevice(internalStorage);
-                    }}
-                />
+                <Text style={[styles.storageTitle, { color: theme.text }]}>All storage</Text>
+                <View style={styles.storageSection}>
+                    <StorageCard
+                        device={internalStorage}
+                        icon={<Feather name="smartphone" size={24} color={theme.text} />}
+                        onPress={() => {
+                            gotoStorageDevice(internalStorage);
+                        }}
+                    />
+                </View>
 
-                <Text style={styles.sectionTitle}>Tools</Text>
+                <Text style={[styles.storageTitle, { color: theme.text }]}>Utilities</Text>
                 <View style={styles.utilitiesSection}>
                     <UtilityButton
-                        title="Large Files"
+                        title="Large File"
                         desc="Files larger than 200MB"
-                        icon={<FontAwesome5 name="file-archive" size={22} color="#007AFF" />}
+                        icon={<MaterialCommunityIcons name="file-document-outline" size={24} color={theme.text} />}
                         onPress={() => navigation.navigate("LargeFiles")}
                     />
                     <UtilityButton

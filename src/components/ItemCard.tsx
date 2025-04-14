@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { FontAwesome, AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
-import * as RNFS from 'react-native-fs';
+import { View, Text, TouchableOpacity } from "react-native";
+import { AntDesign, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
+import * as RNFS from "react-native-fs"
+import { useTheme } from "./ThemeContext";
 
 // กำหนด Props ที่จำเป็นสำหรับ ItemCard
 interface ItemCardProps {
@@ -31,6 +31,7 @@ const DOCUMENT_EXTENSIONS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '
 
 const ItemCard = ({ item, onSelect, onOpen, isSelected }: ItemCardProps) => {
     // คืนค่าไอคอนตามประเภทไฟล์
+    const { theme } = useTheme();
     const getFileIcon = () => {
         if (item.isDirectory()) {
             return <AntDesign name="folder1" size={40} color="#FFC107" />;
@@ -95,7 +96,7 @@ const ItemCard = ({ item, onSelect, onOpen, isSelected }: ItemCardProps) => {
                 <MaterialCommunityIcons
                     name={isSelected ? "checkbox-marked" : "checkbox-blank-outline"}
                     size={25}
-                    color="black"
+                    color={theme.text}
                 />
             </TouchableOpacity>
         </View>

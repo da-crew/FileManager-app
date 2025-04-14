@@ -1,6 +1,8 @@
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { View, Text, ScrollView } from "react-native";
 import { Path } from '../FileSystem';
+import { useTheme } from './ThemeContext';
+import { invertHexColor } from './themes';
 
 // กำหนด Props ที่จำเป็นสำหรับ PathDisplayer
 interface PathDisplayerProps {

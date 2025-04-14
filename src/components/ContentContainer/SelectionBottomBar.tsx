@@ -3,6 +3,7 @@ import { View, Alert} from "react-native";
 import { Feather, Foundation, MaterialIcons } from '@expo/vector-icons';
 import BottomBarItem from "./BottomBarItem";
 import * as RNFS from "react-native-fs";
+import { useTheme } from "../ThemeContext";
 
 // กำหนด Props ที่จำเป็นสำหรับ SelectionBottomBar
 declare interface SelectionBottomBarProps {
