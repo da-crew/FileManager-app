@@ -749,7 +749,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 console.log("Open Text editor", navpath.build());
                 const newPath = navpath.clone();
                 newPath.push(item.name);
-                navigation.navigate("Container", {
+                navigation.navigate("TextEditor", {
                     containerName: storageName,
                     path: newPath,
                     containerType: ContainerType.DEFAULT

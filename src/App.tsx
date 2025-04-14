@@ -54,6 +54,7 @@ export default function App() {
                     <Stack.Screen name="Settings" component={SettingsScreen} />
                     <Stack.Screen name="Test" component={TestScreen} />
                     <Stack.Screen name="ImageViewer" component={ImageViewer} />
+                    <Stack.Screen name="TextEditor" component={TextEditor}/>
                 </Stack.Navigator>
                 <ProgressBar />
             </NavigationContainer>
