@@ -5,6 +5,9 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import { requestNotificationPermission, checkStorageUsage } from "../services/NotificationService";
 import { useTheme } from "../components/ThemeContext";
+import { MaterialCommunityIcons,AntDesign, } from "@expo/vector-icons/";
+
+
 
 // หน้าจอการตั้งค่าแอปพลิเคชัน
 export default function SettingsScreen({ navigation }: NativeStackScreenProps<RootStackParamList>) {
@@ -422,5 +425,9 @@ const styles = StyleSheet.create({
     footerText: {
         fontSize: 13,
         color: "#8E8E93"
-    }
+    },
+
+    rowIcon: {
+        marginRight: 12
+    },
 });
