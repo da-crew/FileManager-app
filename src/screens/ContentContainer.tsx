@@ -12,7 +12,7 @@ import { RootStackParamList } from "../App";
 import { getRecycleBinPath } from "../FileSystem";
 
 import BottomBarOptions from "../components/ContentContainer/BottomBarOptions";
-import { ContentList } from "../components/ContentContainer/ContentList";
+import ContentList from "../components/ContentContainer/ContentList";
 import SelectionBottomBar from "../components/ContentContainer/SelectionBottomBar";
 import ItemCreator from "../components/ContentContainer/ItemCreator";
 import { ContainerType, ContentContainerRouteParams, MoveType, MovingState, SortType, ViewMode } from "../components/ContentContainer/common";

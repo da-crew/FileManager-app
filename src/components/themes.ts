@@ -14,6 +14,7 @@ export function invertHexColor(hex: string): string {
 }
 
 export type ThemeConfig = {
+    statusBarStyle: StatusBarStyle | null | undefined;
     background: string,               // Main background
     text: string,                     // Primary text color
     textSecondary: string,            // Secondary text color (for less important text)

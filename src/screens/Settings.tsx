@@ -202,6 +202,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+    content: {
+        paddingBottom: 20,
+    },
     header: {
         flexDirection: "row",
         alignItems: "center",
