@@ -73,8 +73,8 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 let files = items.filter((item) => item.isFile()).sort(sortHandler);
                 setContent(hiddenFolders.concat(folders).concat(files));
             })
-            .catch(() => {
-                console.log("An error occured");
+            .catch((e) => {
+                console.log("Error while reading content: ", e);
             });
     }
 
