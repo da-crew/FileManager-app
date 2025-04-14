@@ -1,14 +1,13 @@
-import React, { ReactNode, useEffect, useState } from 'react';
-import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, ScrollView, GestureResponderEvent, StatusBar } from 'react-native';
-import HomeSearchBar from '../components/HomeSearchBar';
-import { Feather, MaterialIcons, Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-import { Path } from '../FileSystem';
+import { Feather, FontAwesome5, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../App';
 import { checkManagePermission } from 'manage-external-storage';
+import React, { ReactNode, useEffect, useState } from 'react';
+import { GestureResponderEvent, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import RNFS from 'react-native-fs';
-import { openAppSettings, StorageCapacity, StorageDevice } from '../FileSystem';
+import { RootStackParamList } from '../App';
+import { openAppSettings, Path, StorageCapacity, StorageDevice } from '../FileSystem';
 import { ContainerType } from '../components/ContentContainer/common';
+import HomeSearchBar from '../components/HomeSearchBar';
 import { useTheme } from '../components/ThemeContext';
 
 const QuickAccessButton = ({ name, icon, onPress }: {
@@ -18,8 +17,8 @@ const QuickAccessButton = ({ name, icon, onPress }: {
 }) => {
     const { theme } = useTheme();
     return (
-        <TouchableOpacity style={[styles.quickAccessButton, { backgroundColor: theme.card }]} onPress={onPress}>
-            <View style={[styles.iconContainer, { backgroundColor: theme.background }]}>
+        <TouchableOpacity style={[styles.quickAccessButton, { backgroundColor: theme.background }]} onPress={onPress}>
+            <View style={[styles.iconContainer, { backgroundColor: theme.card }]}>
                 {icon}
             </View>
             <Text style={[styles.quickAccessText, { color: theme.text }]}>{name}</Text>
