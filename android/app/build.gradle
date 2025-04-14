@@ -115,16 +115,12 @@ android {
                 storePassword FILEMANAGER_STORE_PASSWORD 
             } else if (System.getenv("FILEMANAGER_STORE_PASSWORD")) {// env variable
                 storePassword System.getenv("FILEMANAGER_STORE_PASSWORD")
-            } else if (System.console()) {// console
-                storePassword new String(System.console().readPassword("Enter keystore password: "))
             }
             
             if (project.hasProperty('FILEMANAGER_KEY_PASSWORD')) {// ~/.gradle/gradle.properties
                 keyPassword FILEMANAGER_KEY_PASSWORD
             } else if (System.getenv("FILEMANAGER_KEY_PASSWORD")) {// env variable
                 keyPassword System.getenv("FILEMANAGER_KEY_PASSWORD")
-            } else if (System.console()) {// console
-                keyPassword new String(System.console().readPassword("Enter key password: "))
             }
         }
     }

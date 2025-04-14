@@ -1,8 +1,10 @@
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { Octicons, Ionicons } from '@expo/vector-icons';
-
 import { NavigationProp } from '@react-navigation/native';
+import { Path } from '../FileSystem';
+import { ContainerType } from './ContentContainer/common';
+import RNFS from 'react-native-fs';
 
 /**
  * คอมโพเนนต์แถบค้นหาสำหรับหน้าหลัก แสดงไอคอนค้นหาและไอคอนการตั้งค่า
@@ -17,12 +19,21 @@ export interface HomeSearchBarProps {
 }
 
 const HomeSearchBar: React.FC<HomeSearchBarProps> = ({ navigation }) => {
+    const handleSearch = () => {
+        const rootPath = new Path('Internal Storage', RNFS.ExternalStorageDirectoryPath, []);
+        navigation.navigate("Search", {
+            containerName: 'Internal Storage',
+            path: rootPath,
+            containerType: ContainerType.DEFAULT
+        });
+    };
+
     return (
         <View style={{ padding: 20, paddingBottom: 0 }}>
             <View style={{ flexDirection: 'row' }}>
                 <TouchableOpacity
                     style={{ marginLeft: 'auto' }}
-                    onPress={() => navigation.navigate("Search")}
+                    onPress={handleSearch}
                 >
                     <Ionicons name="search" size={24} color="black" />
                 </TouchableOpacity>

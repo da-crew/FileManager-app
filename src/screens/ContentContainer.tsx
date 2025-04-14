@@ -591,7 +591,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
 
         return () => backHandler.remove();
-    }, []);
+    }, [navpath]);
 
     function updateSortType(type: SortType) {
         if (sortType !== type) {
@@ -751,7 +751,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 console.log("Open Text editor", navpath.build());
                 const newPath = navpath.clone();
                 newPath.push(item.name);
-                navigation.navigate("Container", {
+                navigation.navigate("TextEditor", {
                     containerName: storageName,
                     path: newPath,
                     containerType: ContainerType.DEFAULT
@@ -1860,7 +1860,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         }
         
         if (navpath.nodes.length == 0) {
-            navigation.goBack();
+            navigation.navigate("Home");
             return;
         }
         navpath.nodes.pop();
@@ -2432,7 +2432,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             {//Toolbar 1
                 !isSelecting
                     //Default Mode
-                    ? <Toolbar navigation={navigation} containerName={storageName}
+                    ? <Toolbar navigation={navigation} containerName={storageName} path={navpath}
                         goBackHandler={() => handleGoBack()}
                         sortByHandler={() => setSortByOptionVisible(true)}
                         createHandler={containerType == ContainerType.DEFAULT ? () => setItemCreatorVisible(true) : undefined}

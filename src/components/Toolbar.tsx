@@ -3,17 +3,20 @@ import { View, Text, TouchableOpacity, GestureResponderEvent } from 'react-nativ
 import { MaterialIcons, Ionicons, AntDesign } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import PropTypes from 'prop-types';
+import { ContainerType, ContentContainerRouteParams } from './ContentContainer/common';
+import { Path } from '../FileSystem';
 
 
 // กำหนด Props ที่จำเป็นสำหรับ Toolbar
 interface ToolbarProps {
-    navigation: any,                   // Navigation object สำหรับการนำทาง
-    containerName: string,             // ชื่อของคอนเทนเนอร์ที่จะแสดง
-    goBackHandler: (event: GestureResponderEvent) => void,  // ฟังก์ชันกลับไปหน้าก่อนหน้า
-    layoutChangeHandler?: (event: GestureResponderEvent) => void,  // ฟังก์ชันสำหรับเปลี่ยนรูปแบบการแสดงผล (ตัวเลือก)
-    sortByHandler?: (event: GestureResponderEvent) => void,  // ฟังก์ชันสำหรับการเรียงลำดับ (ตัวเลือก)
-    createHandler?: (event: GestureResponderEvent) => void,  // ฟังก์ชันสำหรับสร้างรายการใหม่ (ตัวเลือก)
-    menuHandler?: (event: GestureResponderEvent) => void,  // ฟังก์ชันสำหรับเมนู (ตัวเลือก)
+    navigation: any,
+    containerName: string,
+    path?: Path,
+    goBackHandler: (event: GestureResponderEvent) => void,
+    layoutChangeHandler?: (event: GestureResponderEvent) => void,
+    sortByHandler?: (event: GestureResponderEvent) => void,
+    createHandler?: (event: GestureResponderEvent) => void,
+    menuHandler?: (event: GestureResponderEvent) => void,
 }
 
 /**
@@ -31,7 +34,8 @@ interface ToolbarProps {
  * @returns {JSX.Element} คอมโพเนนต์ที่เรนเดอร์แล้ว
  */
 
-export default function Toolbar({ navigation, containerName, goBackHandler, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
+
+export default function Toolbar({ navigation, containerName, path, goBackHandler, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
     return (
         <View style={{ 
             flexDirection: 'row', 
@@ -69,20 +73,24 @@ export default function Toolbar({ navigation, containerName, goBackHandler, layo
             }}>
                 {containerName}
             </Text>
-            
-            {/* ปุ่มค้นหา */}
-            <TouchableOpacity
-                style={{ 
-                    marginLeft: 'auto', 
-                    marginRight: 10,
-                    padding: 8,
-                    borderRadius: 20,
-                    backgroundColor: 'rgba(242, 242, 242, 0.6)'
-                }}
-                onPress={() => navigation.navigate("Search")}
-            >
-                <Ionicons name="search" size={22} color="#333" />
-            </TouchableOpacity>
+            {path && containerName && (
+                <TouchableOpacity
+                    style={{ 
+                        marginLeft: 'auto', 
+                        marginRight: 10,
+                        padding: 8,
+                        borderRadius: 20,
+                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                    }}
+                    onPress={() => navigation.replace("Search", {
+                        containerName: containerName,
+                        path: path,
+                        containerType: ContainerType.DEFAULT
+                    })}
+                >
+                    <Ionicons name="search" size={22} color="#333" />
+                </TouchableOpacity>
+            )}
 
             {/* ปุ่มเปลี่ยนรูปแบบการแสดงผล - กริด, รายละเอียด, เรียบง่าย */}
             {layoutChangeHandler ? <TouchableOpacity
