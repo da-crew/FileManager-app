@@ -4,14 +4,14 @@ import { LIGHT_THEME, DARK_THEME, ThemeConfig } from './themes';
 
 export interface ThemeContextType {
     isDarkMode: boolean;
-    toggleDarkMode: () => void;
+    changeTheme: (darkmode: boolean) => void;
     theme: ThemeConfig;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [isDarkMode, setIsDarkMode] = useState(true);
+    const [isDarkMode, setIsDarkMode] = useState(false);
     const theme = isDarkMode ? DARK_THEME : LIGHT_THEME;
 
     useEffect(() => {
@@ -28,18 +28,17 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         loadTheme();
     }, []);
 
-    const toggleDarkMode = async () => {
+    const changeTheme = async (darkmode: boolean) => {
         try {
-            const newMode = !isDarkMode;
-            setIsDarkMode(newMode);
-            await AsyncStorage.setItem('isDarkMode', JSON.stringify(newMode));
+            setIsDarkMode(darkmode);
+            await AsyncStorage.setItem('isDarkMode', JSON.stringify(darkmode));
         } catch (error) {
             console.error('Error saving theme:', error);
         }
     };
 
     return (
-        <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode, theme }}>
+        <ThemeContext.Provider value={{ isDarkMode, changeTheme, theme }}>
             {children}
         </ThemeContext.Provider>
     );

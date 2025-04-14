@@ -360,8 +360,8 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         }
     }
 
-    return <SafeAreaView style={{ flex: 1 }}>
-        <StatusBar />
+    return <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+        <StatusBar backgroundColor={theme.background}/>
         <View style={{ flex: 1 }}>
             {//Toolbar 1
                 !isSelecting
@@ -401,7 +401,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             }
 
             {/* Content is displayed here */}
-            <View style={{ margin: 10, flex: 1 }}>
+            <View style={{ margin: 10, flex: 1, backgroundColor: theme.background }}>
                 <ContentList content={content} handleOpen={handleOpen} handleSelect={handleSelect} selectionSet={selectionSet} />
             </View>
         </View>
@@ -439,7 +439,6 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 const itemToRename = Array.from(selectionSet)[0];
                 openRenameModal(itemToRename);
                 unselectAll();
-
             }} deleteActionHandler={
                 handleDeleteAction
             } pasteCancelActionHandler={function (): void {

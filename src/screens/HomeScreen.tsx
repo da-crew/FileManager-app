@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect, useState } from 'react';
-import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, ScrollView, GestureResponderEvent } from 'react-native';
+import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, ScrollView, GestureResponderEvent, StatusBar } from 'react-native';
 import HomeSearchBar from '../components/HomeSearchBar';
 import { Feather, MaterialIcons, Ionicons, MaterialCommunityIcons, createIconSet } from '@expo/vector-icons';
 import { Path } from '../FileSystem';
@@ -126,6 +126,7 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+            <StatusBar backgroundColor={theme.background} />
             <HomeSearchBar navigation={navigation} />
             <ScrollView style={styles.scrollView}>
                 <View style={[styles.quickAccessGrid, { backgroundColor: theme.card}]}>

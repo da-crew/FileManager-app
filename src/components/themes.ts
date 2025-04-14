@@ -1,4 +1,18 @@
 
+export function invertHexColor(hex: string): string {
+    // Remove the '#' if it exists
+    hex = hex.replace('#', '');
+
+    // Parse the hex color to an integer
+    const intColor = parseInt(hex, 16);
+
+    // Invert the color by XORing with 0xFFFFFF
+    const invertedColor = 0xFFFFFF ^ intColor;
+
+    // Convert the inverted color back to hex and pad with leading zeros if necessary
+    return `#${invertedColor.toString(16).padStart(6, '0')}`;
+}
+
 export type ThemeConfig = {
     background: string,               // Main background
     text: string,                     // Primary text color
@@ -12,7 +26,15 @@ export type ThemeConfig = {
     buttonText: string,               // Button text color
     inputBackground: string,          // Input field background color
     inputText: string,                // Input text color
+    toolbarColor: string,
 }
+
+export enum ThemeName {
+    LIGHT,
+    DARK
+}
+
+
 
 export const LIGHT_THEME: ThemeConfig = {
     background: "#F2F2F7",               // Main background
@@ -27,7 +49,7 @@ export const LIGHT_THEME: ThemeConfig = {
     buttonText: "#FFFFFF",               // Button text color
     inputBackground: "#FFFFFF",          // Input field background color
     inputText: "#000000",                // Input text color
-        
+    toolbarColor: "#d9d9d9",
 };
 
 
@@ -44,4 +66,10 @@ export const DARK_THEME: ThemeConfig = {
     buttonText: "#FFFFFF",               // Button text color
     inputBackground: "#2C2C2E",          // Input field background color
     inputText: "#FFFFFF",                // Input text color
+    toolbarColor: "#4D4D4D"
 };
+
+export const GLOBAL_THEME: Map<ThemeName, ThemeConfig> = new Map([
+    [ThemeName.LIGHT, LIGHT_THEME],
+    [ThemeName.DARK, DARK_THEME],
+]);

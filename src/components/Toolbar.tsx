@@ -4,6 +4,7 @@ import { MaterialIcons, Ionicons, AntDesign } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import PropTypes from 'prop-types';
 import { useTheme } from './ThemeContext';
+import { invertHexColor } from './themes';
 
 interface ToolbarProps {
     navigation: any,
@@ -33,16 +34,16 @@ interface ToolbarProps {
 export default function Toolbar({ navigation, containerName, goBackHandler, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
     const { theme } = useTheme();
     return (
-        <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#d9d9d9' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: theme.toolbarColor }}>
             <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={goBackHandler}>
-                <MaterialIcons name="arrow-back-ios-new" size={20} />
+                <MaterialIcons name="arrow-back-ios-new" size={20} color={theme.text} />
             </TouchableOpacity>
-            <Text style={{ fontSize: 20 }}>{containerName}</Text>
+            <Text style={{ fontSize: 20, color: theme.text }}>{containerName}</Text>
             <TouchableOpacity
                 style={{ marginLeft: 'auto', marginRight: 15 }}
                 onPress={() => navigation.navigate("Search")}
             >
-                <Ionicons name="search" size={24} color="black" />
+                <Ionicons name="search" size={24} color={theme.text} />
             </TouchableOpacity>
 
             {//View option, i.e., grid, detailed, simple
@@ -50,7 +51,7 @@ export default function Toolbar({ navigation, containerName, goBackHandler, layo
                     style={{ marginRight: 15 }}
                     onPress={layoutChangeHandler}
                 >
-                    <Ionicons name="grid-outline" size={24} color="black" />
+                    <Ionicons name="grid-outline" size={24} color={theme.text} />
                 </TouchableOpacity> : <></>}
 
             {//Sort by
@@ -58,7 +59,7 @@ export default function Toolbar({ navigation, containerName, goBackHandler, layo
                     style={{ marginRight: 15 }}
                     onPress={sortByHandler}
                 >
-                    <FontAwesome5 name="sort" size={24} color="black" />
+                    <FontAwesome5 name="sort" size={24} color={theme.text} />
                 </TouchableOpacity> : <></>}
 
             {//Create item
@@ -66,7 +67,7 @@ export default function Toolbar({ navigation, containerName, goBackHandler, layo
                     style={{ marginRight: 15 }}
                     onPress={createHandler}
                 >
-                    <AntDesign name="plus" size={24} color="black" />
+                    <AntDesign name="plus" size={24} color={theme.text} />
                 </TouchableOpacity>
                     : <></>}
                     
@@ -75,7 +76,7 @@ export default function Toolbar({ navigation, containerName, goBackHandler, layo
                     style={{ marginRight: 15 }}
                     onPress={menuHandler}
                 >
-                    <MaterialIcons name="more-vert" size={24} color="black" />
+                    <MaterialIcons name="more-vert" size={24} color={theme.text} />
                 </TouchableOpacity> : <></>}
         </View>
     );

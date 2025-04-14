@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import { AntDesign, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as RNFS from "react-native-fs"
+import { useTheme } from "./ThemeContext";
 
 export interface ItemCardProps {
     item: RNFS.ReadDirItem,
@@ -20,16 +21,18 @@ export interface ItemCardProps {
  */
 
 const ItemCard = ({ item, onSelect, onOpen, isSelected }: ItemCardProps) => {
+    const { theme } = useTheme();
+
     return <View style={{ marginVertical: 5, flexDirection: 'row', alignItems: 'center' }}>
         <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', flex: 1}} onPress={() => onOpen(item)}>{/* Icon and Name */}
             {
                 item.isDirectory()
-                    ? <AntDesign name="folder1" size={40} />
+                    ? <AntDesign name="folder1" size={40} color={theme.text} />
                     : item.isFile()
-                        ? <AntDesign name="file1" size={40} />
-                        : <FontAwesome name="question" size={40} />
+                        ? <AntDesign name="file1" size={40} color={theme.text}/>
+                        : <FontAwesome name="question" size={40} color={theme.text}/>
             }
-            <Text style={{ fontSize: 15, marginHorizontal: 10}}
+            <Text style={{ fontSize: 15, marginHorizontal: 10, color: theme.text}}
                 numberOfLines={1}
                 ellipsizeMode="tail"
             >{item.name}</Text>
@@ -41,7 +44,7 @@ const ItemCard = ({ item, onSelect, onOpen, isSelected }: ItemCardProps) => {
                 <MaterialCommunityIcons
                     name={isSelected ? "checkbox-marked" : "checkbox-blank-outline"}
                     size={25}
-                    color="black"
+                    color={theme.text}
                 />
             </TouchableOpacity>
         </View>
