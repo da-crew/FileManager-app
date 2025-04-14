@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, View, Text, FlatList, StyleSheet, StatusBar, Alert, TouchableOpacity, ActivityIndicator, Modal } from "react-native";
+import { SafeAreaView, View, Text, FlatList, StyleSheet, StatusBar, Alert, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import Toolbar from "./Toolbar";
 import SelectionToolBar from './SelectionToolbar';
 import ItemCard from './ItemCard';
 import * as RNFS from "react-native-fs";
-import { Feather, Foundation, MaterialIcons, FontAwesome5, AntDesign } from '@expo/vector-icons';
+import { Feather, Foundation, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import BottomBarItem from "./ContentContainer/BottomBarItem";
 import { Platform, PermissionsAndroid } from "react-native";
 import { getFileType, openWith } from "../utils/openWith";
@@ -32,8 +32,6 @@ export default function DuplicateFiles() {
     const [processedFiles, setProcessedFiles] = useState(0);
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
     const [isSelecting, setIsSelecting] = useState(false);
-    const [sortByOptionVisible, setSortByOptionVisible] = useState(false);
-    const [sortType, setSortType] = useState<string>('size'); // Default sort by size
 
     // ฟังก์ชันแปลงชื่อไฟล์ เอาส่วนขยายออก
     const getBaseName = (filename: string): string => {
@@ -112,33 +110,33 @@ export default function DuplicateFiles() {
                     const requestImages = await PermissionsAndroid.request(
                         PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
                         {
-                            title: "Request access to images",
-                            message: "This app needs access to your images to find duplicate files",
-                            buttonNeutral: "Ask me later",
-                            buttonNegative: "Cancel",
-                            buttonPositive: "Allow"
+                            title: "ขออนุญาตเข้าถึงรูปภาพ",
+                            message: "แอปนี้ต้องการเข้าถึงรูปภาพของคุณเพื่อค้นหาไฟล์ซ้ำ",
+                            buttonNeutral: "ถามภายหลัง",
+                            buttonNegative: "ยกเลิก",
+                            buttonPositive: "ตกลง"
                         }
                     );
 
                     const requestVideos = await PermissionsAndroid.request(
                         PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
                         {
-                            title: "Request access to videos",
-                            message: "This app needs access to your videos to find duplicate files",
-                            buttonNeutral: "Ask me later",
-                            buttonNegative: "Cancel",
-                            buttonPositive: "Allow"
+                            title: "ขออนุญาตเข้าถึงวิดีโอ",
+                            message: "แอปนี้ต้องการเข้าถึงวิดีโอของคุณเพื่อค้นหาไฟล์ซ้ำ",
+                            buttonNeutral: "ถามภายหลัง",
+                            buttonNegative: "ยกเลิก",
+                            buttonPositive: "ตกลง"
                         }
                     );
 
                     const requestAudio = await PermissionsAndroid.request(
                         PermissionsAndroid.PERMISSIONS.READ_MEDIA_AUDIO,
                         {
-                            title: "Request access to audio files",
-                            message: "This app needs access to your audio files to find duplicate files",
-                            buttonNeutral: "Ask me later",
-                            buttonNegative: "Cancel",
-                            buttonPositive: "Allow"
+                            title: "ขออนุญาตเข้าถึงไฟล์เสียง",
+                            message: "แอปนี้ต้องการเข้าถึงไฟล์เสียงของคุณเพื่อค้นหาไฟล์ซ้ำ",
+                            buttonNeutral: "ถามภายหลัง",
+                            buttonNegative: "ยกเลิก",
+                            buttonPositive: "ตกลง"
                         }
                     );
 
@@ -152,11 +150,11 @@ export default function DuplicateFiles() {
                     const granted = await PermissionsAndroid.request(
                         PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
                         {
-                            title: "Request access to storage",
-                            message: "This app needs access to your storage to find duplicate files",
-                            buttonNeutral: "Ask me later",
-                            buttonNegative: "Cancel",
-                            buttonPositive: "Allow"
+                            title: "ขออนุญาตเข้าถึงพื้นที่จัดเก็บ",
+                            message: "แอปนี้ต้องการเข้าถึงพื้นที่จัดเก็บของคุณเพื่อค้นหาไฟล์ซ้ำ",
+                            buttonNeutral: "ถามภายหลัง",
+                            buttonNegative: "ยกเลิก",
+                            buttonPositive: "ตกลง"
                         }
                     );
                     return granted === PermissionsAndroid.RESULTS.GRANTED;
@@ -198,9 +196,9 @@ export default function DuplicateFiles() {
 
             if (!hasPermission) {
                 Alert.alert(
-                    "Cannot Access Files",
-                    "Please grant storage access permission to search for duplicate files",
-                    [{ text: "OK" }]
+                    "ไม่สามารถเข้าถึงไฟล์ได้",
+                    "โปรดให้สิทธิ์การเข้าถึงพื้นที่จัดเก็บเพื่อค้นหาไฟล์ซ้ำ",
+                    [{ text: "ตกลง" }]
                 );
                 setIsLoading(false);
                 return;
@@ -478,59 +476,60 @@ export default function DuplicateFiles() {
         if (selectedItems.length === 0) return;
 
         Alert.alert(
-            "Delete Files",
-            `Do you want to delete the selected ${selectedItems.length} files?`,
+            "ลบไฟล์",
+            `ต้องการลบไฟล์ที่เลือกจำนวน ${selectedItems.length} ไฟล์หรือไม่?`,
             [
-                { text: "Cancel", style: "cancel" },
-                { 
-                    text: "Delete", 
+                { text: "ยกเลิก", style: "cancel" },
+                {
+                    text: "ลบ",
                     style: "destructive",
                     onPress: async () => {
                         setIsLoading(true);
-                        
-                        let deleteCount = 0;
+                        let deletedCount = 0;
                         let errorCount = 0;
-                        
+
                         for (const filePath of selectedItems) {
                             try {
                                 await RNFS.unlink(filePath);
-                                deleteCount++;
+                                deletedCount++;
                             } catch (error) {
-                                console.error(`Error deleting file: ${filePath}`, error);
+                                console.error(`เกิดข้อผิดพลาดในการลบไฟล์: ${filePath}`, error);
                                 errorCount++;
                             }
                         }
-                        
-                        // Update the duplicate groups after deletion
-                        findDuplicateFiles();
+
                         resetSelection();
-                        
+
+                        // แสดงข้อความแจ้งเตือนเมื่อลบเสร็จ
                         if (errorCount > 0) {
                             Alert.alert(
-                                "Delete Complete",
-                                `Successfully deleted: ${deleteCount} files\nFailed to delete: ${errorCount} files`,
-                                [{ text: "OK" }]
+                                "ลบไฟล์เสร็จสิ้น",
+                                `ลบไฟล์สำเร็จ: ${deletedCount} ไฟล์\nลบไฟล์ไม่สำเร็จ: ${errorCount} ไฟล์`,
+                                [{ text: "ตกลง" }]
                             );
                         } else {
                             Alert.alert(
-                                "Delete Complete",
-                                `Successfully deleted ${deleteCount} files`,
-                                [{ text: "OK" }]
+                                "สำเร็จ",
+                                `ลบไฟล์จำนวน ${deletedCount} ไฟล์เรียบร้อยแล้ว`,
+                                [{ text: "ตกลง" }]
                             );
                         }
-                    } 
+
+                        // อัพเดทรายการไฟล์หลังลบ
+                        findDuplicateFiles();
+                    }
                 }
             ]
         );
     };
 
-    // Show message when loading or no files found
+    // แสดงข้อความเมื่อกำลังโหลดหรือไม่พบไฟล์
     const renderEmptyContent = () => {
         if (isLoading) {
             return (
                 <View style={styles.emptyContainer}>
                     <ActivityIndicator size="large" color="#2196F3" />
-                    <Text style={styles.emptyText}>Searching for duplicate files... ({processedFiles}/{totalFiles})</Text>
+                    <Text style={styles.emptyText}>กำลังค้นหาไฟล์ซ้ำ... ({processedFiles}/{totalFiles})</Text>
                     <View style={styles.progressBarContainer}>
                         <View style={[styles.progressBar, { width: `${scanProgress}%` }]} />
                     </View>
@@ -541,73 +540,15 @@ export default function DuplicateFiles() {
         return (
             <View style={styles.emptyContainer}>
                 <MaterialIcons name="find-replace" size={80} color="#cccccc" />
-                <Text style={styles.emptyText}>No duplicate files found on your device</Text>
+                <Text style={styles.emptyText}>ไม่พบไฟล์ซ้ำในอุปกรณ์ของคุณ</Text>
                 <TouchableOpacity
                     style={styles.refreshButton}
                     onPress={findDuplicateFiles}
                 >
-                    <Text style={styles.refreshButtonText}>Search Again</Text>
+                    <Text style={styles.refreshButtonText}>ค้นหาอีกครั้ง</Text>
                 </TouchableOpacity>
             </View>
         );
-    };
-
-    // Sort types: 'name', 'date', 'size', 'name_desc', 'date_asc', 'size_asc'
-    const sortItems = (items: DuplicateGroup[], sortType: string): DuplicateGroup[] => {
-        const sortedItems = [...items];
-        
-        switch (sortType) {
-            case 'size': // Sort by file size (largest first)
-                return sortedItems.sort((a, b) => b.fileSize - a.fileSize);
-            case 'size_asc': // Sort by file size (smallest first)
-                return sortedItems.sort((a, b) => a.fileSize - b.fileSize);
-            case 'name': // Sort by name (A-Z)
-                return sortedItems.sort((a, b) => {
-                    const nameA = a.files[0]?.name || '';
-                    const nameB = b.files[0]?.name || '';
-                    return nameA.localeCompare(nameB);
-                });
-            case 'name_desc': // Sort by name (Z-A)
-                return sortedItems.sort((a, b) => {
-                    const nameA = a.files[0]?.name || '';
-                    const nameB = b.files[0]?.name || '';
-                    return nameB.localeCompare(nameA);
-                });
-            case 'date': // Sort by date (newest first)
-                return sortedItems.sort((a, b) => {
-                    const timeA = a.files[0]?.mtime ? a.files[0].mtime.getTime() : 0;
-                    const timeB = b.files[0]?.mtime ? b.files[0].mtime.getTime() : 0;
-                    return timeB - timeA;
-                });
-            case 'date_asc': // Sort by date (oldest first)
-                return sortedItems.sort((a, b) => {
-                    const timeA = a.files[0]?.mtime ? a.files[0].mtime.getTime() : 0;
-                    const timeB = b.files[0]?.mtime ? b.files[0].mtime.getTime() : 0;
-                    return timeA - timeB;
-                });
-            default:
-                return sortedItems;
-        }
-    };
-
-    // Handle sort type change
-    const handleSortChange = (type: string) => {
-        setSortType(type);
-        setDuplicateGroups(sortItems(duplicateGroups, type));
-        setSortByOptionVisible(false);
-    };
-
-    // Convert sort type to display label
-    const getSortByLabel = (type: string): string => {
-        switch (type) {
-            case 'size': return 'File Size (Large-Small)';
-            case 'size_asc': return 'File Size (Small-Large)';
-            case 'name': return 'Filename (A-Z)';
-            case 'name_desc': return 'Filename (Z-A)';
-            case 'date': return 'Date Modified (Latest)';
-            case 'date_asc': return 'Date Modified (Oldest)';
-            default: return 'Unknown';
-        }
     };
 
     return (
@@ -619,7 +560,6 @@ export default function DuplicateFiles() {
                     goBackHandler={() => navigation.goBack()}
                     navigation={navigation}
                     containerName="Duplicate Files"
-                    sortByHandler={() => setSortByOptionVisible(true)}
                 />
             ) : (
                 <SelectionToolBar
@@ -641,13 +581,16 @@ export default function DuplicateFiles() {
             <View style={styles.contentContainer}>
                 {duplicateGroups.length > 0 ? (
                     <FlatList
-                        data={sortItems(duplicateGroups, sortType)}
+                        data={duplicateGroups.sort((a, b) => {
+                            // เรียงกลุ่มตามขนาดไฟล์จากใหญ่ไปเล็ก
+                            return b.fileSize - a.fileSize;
+                        })}
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
                             <View style={styles.duplicateGroup}>
                                 <View style={styles.groupHeaderContainer}>
                                     <Text style={styles.groupHeaderText}>
-                                        Duplicate Files: {item.files.length} files ({formatFileSize(item.fileSize)})
+                                        ไฟล์ซ้ำ: {item.files.length} ไฟล์ ({formatFileSize(item.fileSize)})
                                     </Text>
                                 </View>
                                 {item.files.sort((a, b) => (b.mtime?.getTime() || 0) - (a.mtime?.getTime() || 0)).map(file => (
@@ -677,131 +620,9 @@ export default function DuplicateFiles() {
 
             {isSelecting && (
                 <View style={styles.bottomBar}>
-                    <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} color="#FF3B30" />} onPress={handleDeleteFiles} />
+                    <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} />} onPress={handleDeleteFiles} />
                 </View>
             )}
-
-            {/* Sort options modal */}
-            <Modal visible={sortByOptionVisible} transparent={true} 
-                onRequestClose={() => setSortByOptionVisible(false)} 
-                animationType="fade">
-                <TouchableOpacity 
-                    style={styles.menuModalOverlay} 
-                    activeOpacity={1} 
-                    onPress={() => setSortByOptionVisible(false)}
-                >
-                    <View style={styles.sortOptionsContainer}>
-                        <View style={styles.sortHeader}>
-                            <Text style={styles.sortTitle}>Sort by</Text>
-                            <TouchableOpacity onPress={() => setSortByOptionVisible(false)}>
-                                <MaterialIcons name="close" size={24} color="#666" />
-                            </TouchableOpacity>
-                        </View>
-
-                        <TouchableOpacity
-                            style={[styles.sortOption, sortType === 'size' && styles.activeSortOption]}
-                            onPress={() => handleSortChange('size')}
-                        >
-                            <FontAwesome5
-                                name="sort-amount-down"
-                                size={22}
-                                color={sortType === 'size' ? '#2196F3' : '#666'}
-                            />
-                            <Text style={[styles.sortOptionText, sortType === 'size' && styles.activeSortText]}>
-                                File Size (Large-Small)
-                            </Text>
-                            {sortType === 'size' && (
-                                <MaterialIcons name="check" size={22} color="#2196F3" />
-                            )}
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[styles.sortOption, sortType === 'size_asc' && styles.activeSortOption]}
-                            onPress={() => handleSortChange('size_asc')}
-                        >
-                            <FontAwesome5
-                                name="sort-amount-up"
-                                size={22}
-                                color={sortType === 'size_asc' ? '#2196F3' : '#666'}
-                            />
-                            <Text style={[styles.sortOptionText, sortType === 'size_asc' && styles.activeSortText]}>
-                                File Size (Small-Large)
-                            </Text>
-                            {sortType === 'size_asc' && (
-                                <MaterialIcons name="check" size={22} color="#2196F3" />
-                            )}
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[styles.sortOption, sortType === 'name' && styles.activeSortOption]}
-                            onPress={() => handleSortChange('name')}
-                        >
-                            <MaterialIcons
-                                name="sort-by-alpha"
-                                size={22}
-                                color={sortType === 'name' ? '#2196F3' : '#666'}
-                            />
-                            <Text style={[styles.sortOptionText, sortType === 'name' && styles.activeSortText]}>
-                                Filename (A-Z)
-                            </Text>
-                            {sortType === 'name' && (
-                                <MaterialIcons name="check" size={22} color="#2196F3" />
-                            )}
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[styles.sortOption, sortType === 'name_desc' && styles.activeSortOption]}
-                            onPress={() => handleSortChange('name_desc')}
-                        >
-                            <AntDesign
-                                name="swap"
-                                size={22}
-                                color={sortType === 'name_desc' ? '#2196F3' : '#666'}
-                            />
-                            <Text style={[styles.sortOptionText, sortType === 'name_desc' && styles.activeSortText]}>
-                                Filename (Z-A)
-                            </Text>
-                            {sortType === 'name_desc' && (
-                                <MaterialIcons name="check" size={22} color="#2196F3" />
-                            )}
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[styles.sortOption, sortType === 'date' && styles.activeSortOption]}
-                            onPress={() => handleSortChange('date')}
-                        >
-                            <MaterialIcons
-                                name="arrow-downward"
-                                size={22}
-                                color={sortType === 'date' ? '#2196F3' : '#666'}
-                            />
-                            <Text style={[styles.sortOptionText, sortType === 'date' && styles.activeSortText]}>
-                                Date Modified (Latest)
-                            </Text>
-                            {sortType === 'date' && (
-                                <MaterialIcons name="check" size={22} color="#2196F3" />
-                            )}
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[styles.sortOption, sortType === 'date_asc' && styles.activeSortOption]}
-                            onPress={() => handleSortChange('date_asc')}
-                        >
-                            <MaterialIcons
-                                name="arrow-upward"
-                                size={22}
-                                color={sortType === 'date_asc' ? '#2196F3' : '#666'}
-                            />
-                            <Text style={[styles.sortOptionText, sortType === 'date_asc' && styles.activeSortText]}>
-                                Date Modified (Oldest)
-                            </Text>
-                            {sortType === 'date_asc' && (
-                                <MaterialIcons name="check" size={22} color="#2196F3" />
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                </TouchableOpacity>
-            </Modal>
         </SafeAreaView>
     );
 }
@@ -926,44 +747,5 @@ const styles = StyleSheet.create({
     progressBar: {
         height: '100%',
         backgroundColor: '#2196F3',
-    },
-    menuModalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    sortOptionsContainer: {
-        backgroundColor: '#fff',
-        padding: 20,
-        borderRadius: 20,
-        width: '80%',
-        maxHeight: '80%'
-    },
-    sortHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-    },
-    sortTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#666'
-    },
-    sortOption: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 10
-    },
-    sortOptionText: {
-        fontSize: 16,
-        color: '#666',
-        marginLeft: 10
-    },
-    activeSortOption: {
-        backgroundColor: '#f0f0f0'
-    },
-    activeSortText: {
-        fontWeight: 'bold'
     }
 }); 

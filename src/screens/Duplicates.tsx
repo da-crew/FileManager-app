@@ -376,7 +376,7 @@ export default function Duplicates() {
             return (
                 <View style={styles.emptyContainer}>
                     <ActivityIndicator size="large" color="#2196F3" />
-                    <Text style={styles.emptyText}>Searching for duplicate files...</Text>
+                    <Text style={styles.emptyText}>กำลังค้นหาไฟล์ซ้ำ...</Text>
                 </View>
             );
         }
@@ -384,12 +384,12 @@ export default function Duplicates() {
         return (
             <View style={styles.emptyContainer}>
                 <MaterialIcons name="find-replace" size={80} color="#cccccc" />
-                <Text style={styles.emptyText}>No duplicate files found on your device</Text>
+                <Text style={styles.emptyText}>ไม่พบไฟล์ซ้ำในอุปกรณ์ของคุณ</Text>
                 <TouchableOpacity 
                     style={styles.refreshButton}
                     onPress={findDuplicateFiles}
                 >
-                    <Text style={styles.refreshButtonText}>Search Again</Text>
+                    <Text style={styles.refreshButtonText}>ค้นหาอีกครั้ง</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -445,90 +445,27 @@ export default function Duplicates() {
 
             {isSelecting && (
                 <View style={styles.bottomBar}>
-                    <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} color="#FF3B30" />} onPress={handleDeleteFiles} />
+                    <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} />} onPress={handleDeleteFiles} />
                 </View>
             )}
 
-            <Modal visible={sortByOptionVisible} transparent={true} onRequestClose={() => setSortByOptionVisible(false)} animationType="slide">
-                <TouchableOpacity 
-                    style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}
-                    activeOpacity={1} 
-                    onPress={() => setSortByOptionVisible(false)}
-                >
-                    <View 
-                        style={{ 
-                            backgroundColor: 'white', 
-                            borderTopLeftRadius: 20, 
-                            borderTopRightRadius: 20,
-                            paddingVertical: 20
-                        }}
-                    >
-                        <View style={{ alignItems: 'center', marginBottom: 15 }}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#333' }}>Sort by</Text>
-                            <View style={{ width: 40, height: 4, backgroundColor: '#ccc', borderRadius: 2, marginTop: 10 }} />
-                        </View>
-                        
-                        <TouchableOpacity
-                            style={{ 
-                                flexDirection: 'row', 
-                                alignItems: 'center', 
-                                paddingVertical: 12, 
-                                paddingHorizontal: 20,
-                                backgroundColor: sortType === SortType.ALPHABETICAL ? '#f0f0f0' : 'transparent'
-                            }}
-                            onPress={() => {
-                                updateSortType(SortType.ALPHABETICAL);
-                                setSortByOptionVisible(false);
-                            }}
-                        >
-                            <FontAwesome name="sort-alpha-asc" size={24} color="#007AFF" style={{ marginRight: 20 }} />
-                            <Text style={{ fontSize: 16, color: '#333' }}>Filename (A-Z)</Text>
-                            {sortType === SortType.ALPHABETICAL && (
-                                <MaterialIcons name="check" size={24} color="#007AFF" style={{ marginLeft: 'auto' }} />
-                            )}
-                        </TouchableOpacity>
-                        
-                        <TouchableOpacity
-                            style={{ 
-                                flexDirection: 'row', 
-                                alignItems: 'center',
-                                paddingVertical: 12, 
-                                paddingHorizontal: 20,
-                                backgroundColor: sortType === SortType.DATE ? '#f0f0f0' : 'transparent'
-                            }}
-                            onPress={() => {
-                                updateSortType(SortType.DATE);
-                                setSortByOptionVisible(false);
-                            }}
-                        >
-                            <MaterialIcons name="access-time" size={24} color="#FF9500" style={{ marginRight: 20 }} />
-                            <Text style={{ fontSize: 16, color: '#333' }}>Date Modified (Latest)</Text>
-                            {sortType === SortType.DATE && (
-                                <MaterialIcons name="check" size={24} color="#007AFF" style={{ marginLeft: 'auto' }} />
-                            )}
-                        </TouchableOpacity>
-                        
-                        <TouchableOpacity
-                            style={{ 
-                                flexDirection: 'row', 
-                                alignItems: 'center',
-                                paddingVertical: 12, 
-                                paddingHorizontal: 20,
-                                backgroundColor: sortType === SortType.SIZE ? '#f0f0f0' : 'transparent'
-                            }}
-                            onPress={() => {
-                                updateSortType(SortType.SIZE);
-                                setSortByOptionVisible(false);
-                            }}
-                        >
-                            <MaterialIcons name="format-size" size={24} color="#5856D6" style={{ marginRight: 20 }} />
-                            <Text style={{ fontSize: 16, color: '#333' }}>File Size (Large-Small)</Text>
-                            {sortType === SortType.SIZE && (
-                                <MaterialIcons name="check" size={24} color="#007AFF" style={{ marginLeft: 'auto' }} />
-                            )}
-                        </TouchableOpacity>
+            <Modal visible={sortByOptionVisible} transparent={true} onRequestClose={() => setSortByOptionVisible(false)} >
+                <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <View style={{ backgroundColor: 'white', justifyContent: 'space-between', paddingBottom: 5 }}>
+                        <BottomBarOptions name='Alphabetical' icon={<FontAwesome name="sort-alpha-asc" size={30} style={{ padding: 15 }} />} onPress={() => {
+                            updateSortType(SortType.ALPHABETICAL);
+                            setSortByOptionVisible(false);
+                        }} />
+                        <BottomBarOptions name='Date' icon={<FontAwesome name="sort-numeric-asc" size={30} style={{ padding: 15 }} />} onPress={() => {
+                            updateSortType(SortType.DATE);
+                            setSortByOptionVisible(false);
+                        }} />
+                        <BottomBarOptions name='Size' icon={<MaterialIcons name="format-size" size={30} style={{ padding: 15 }} />} onPress={() => {
+                            updateSortType(SortType.SIZE);
+                            setSortByOptionVisible(false);
+                        }} />
                     </View>
-                </TouchableOpacity>
+                </View>
             </Modal>
         </SafeAreaView>
     );

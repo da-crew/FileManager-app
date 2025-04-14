@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, GestureResponderEvent, StyleSheet, View } from "react-native";
+import { Text, TouchableOpacity, GestureResponderEvent, StyleSheet } from "react-native";
 import { ReactNode } from "react";
 
 /**
@@ -20,11 +20,15 @@ const BottomBarOptions = ({ name, icon, onPress }: {
             onPress={onPress}
             activeOpacity={0.7}
         >
+<<<<<<< HEAD
             {/* ส่วนแสดงไอคอน */}
             <View style={styles.iconContainer}>
                 {icon}
             </View>
             {/* ส่วนแสดงชื่อตัวเลือก */}
+=======
+            {icon}
+>>>>>>> parent of 771c477 (-0- แก้ไขหลายอย่างโครตเยอะ)
             <Text style={styles.text}>{name}</Text>
         </TouchableOpacity>
     );
@@ -35,35 +39,18 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 12,
-        paddingHorizontal: 16,
-        borderRadius: 10,
-        backgroundColor: 'white',
-        marginVertical: 6,
-        marginHorizontal: 10,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 3,
-        borderColor: '#f0f0f0',
-        borderWidth: 1,
-    },
-    iconContainer: {
-        backgroundColor: '#f8f9fa',
+        padding: 8,
+        paddingHorizontal: 12,
         borderRadius: 8,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 12,
+        backgroundColor: 'rgba(242, 242, 242, 0.6)',
+        marginRight: 10,
     },
     text: {
-        fontSize: 16,
+        textAlignVertical: 'center',
+        fontSize: 14,
+        marginLeft: 6,
         fontWeight: '500',
-        color: '#333',
-        flex: 1,
+        color: '#333'
     }
 });
 

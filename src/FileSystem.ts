@@ -60,15 +60,10 @@ export class StorageDevice {
 
     async getCapacity(): Promise<StorageCapacity> {
         let capacity = await RNFS.getFSInfo();
-        
-        // Calculate free and total space with more precision and correctly formatted numbers
-        // Convert bytes to GB with better precision (3 decimal places)
-        const totalSpaceGB = capacity.totalSpace / (1024 * 1024 * 1024);
-        const freeSpaceGB = capacity.freeSpace / (1024 * 1024 * 1024);
 
         return {
-            totalSpace: parseFloat(totalSpaceGB.toFixed(2)),
-            freeSpace: parseFloat(freeSpaceGB.toFixed(2)),
+            totalSpace: parseFloat((capacity.totalSpace / (1024 ** 3)).toPrecision(3)),
+            freeSpace: parseFloat((capacity.freeSpace / (1024 ** 3)).toPrecision(3)),
         }
     }
 }

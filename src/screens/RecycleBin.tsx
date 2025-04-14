@@ -43,14 +43,14 @@ export default function RecycleBin() {
     const [hasPermission, setHasPermission] = useState<boolean>(false);
     const [currentSortBy, setCurrentSortBy] = useState<string>('date_desc');
 
-    // Load data when entering the screen
+    // โหลดข้อมูลเมื่อเข้าหน้า
     useFocusEffect(
         React.useCallback(() => {
             checkAndLoadItems();
         }, [])
     );
 
-    // Check permissions and load data
+    // ตรวจสอบสิทธิ์และโหลดข้อมูล
     const checkAndLoadItems = async () => {
         const hasPermission = await checkStoragePermission();
         if (hasPermission) {
@@ -62,18 +62,18 @@ export default function RecycleBin() {
             } else {
                 setLoading(false);
                 Alert.alert(
-                    "Need Permission",
-                    "The app needs permission to access storage to show files in trash",
+                    "ต้องการสิทธิ์การเข้าถึง",
+                    "แอปต้องการสิทธิ์ในการเข้าถึงพื้นที่จัดเก็บข้อมูลเพื่อแสดงไฟล์ในถังขยะ",
                     [
-                        { text: "Cancel", style: "cancel" },
-                        { text: "Settings", onPress: () => Linking.openSettings() }
+                        { text: "ยกเลิก", style: "cancel" },
+                        { text: "ตั้งค่าแอป", onPress: () => Linking.openSettings() }
                     ]
                 );
             }
         }
     };
 
-    // ตรวจสอบสิทธิ์และโหลดข้อมูล
+    // ตรวจสอบการขออนุญาตเข้าถึงพื้นที่จัดเก็บข้อมูล
     const checkStoragePermission = async () => {
         try {
             if (Platform.OS === 'android') {
@@ -116,33 +116,33 @@ export default function RecycleBin() {
                     const grantedImages = await PermissionsAndroid.request(
                         PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
                         {
-                            title: "Request access to images",
-                            message: "The app needs access to images to show files in trash",
-                            buttonNeutral: "Ask me later",
-                            buttonNegative: "Cancel",
-                            buttonPositive: "Allow"
+                            title: "ขออนุญาตเข้าถึงรูปภาพ",
+                            message: "แอปนี้ต้องการเข้าถึงรูปภาพเพื่อแสดงไฟล์ในถังขยะ",
+                            buttonNeutral: "ถามภายหลัง",
+                            buttonNegative: "ยกเลิก",
+                            buttonPositive: "ตกลง"
                         }
                     );
                     
                     const grantedVideos = await PermissionsAndroid.request(
                         PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
                         {
-                            title: "Request access to videos",
-                            message: "The app needs access to videos to show files in trash",
-                            buttonNeutral: "Ask me later",
-                            buttonNegative: "Cancel",
-                            buttonPositive: "Allow"
+                            title: "ขออนุญาตเข้าถึงวิดีโอ",
+                            message: "แอปนี้ต้องการเข้าถึงวิดีโอเพื่อแสดงไฟล์ในถังขยะ",
+                            buttonNeutral: "ถามภายหลัง",
+                            buttonNegative: "ยกเลิก",
+                            buttonPositive: "ตกลง"
                         }
                     );
                     
                     const grantedAudio = await PermissionsAndroid.request(
                         PermissionsAndroid.PERMISSIONS.READ_MEDIA_AUDIO,
                         {
-                            title: "Request access to audio",
-                            message: "The app needs access to audio files to show files in trash",
-                            buttonNeutral: "Ask me later",
-                            buttonNegative: "Cancel",
-                            buttonPositive: "Allow"
+                            title: "ขออนุญาตเข้าถึงไฟล์เสียง",
+                            message: "แอปนี้ต้องการเข้าถึงไฟล์เสียงเพื่อแสดงไฟล์ในถังขยะ",
+                            buttonNeutral: "ถามภายหลัง",
+                            buttonNegative: "ยกเลิก",
+                            buttonPositive: "ตกลง"
                         }
                     );
                     
@@ -158,11 +158,11 @@ export default function RecycleBin() {
                     const granted = await PermissionsAndroid.request(
                         PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
                         {
-                            title: "Request access to storage",
-                            message: "The app needs access to storage to show files in trash",
-                            buttonNeutral: "Ask me later",
-                            buttonNegative: "Cancel",
-                            buttonPositive: "Allow"
+                            title: "ขออนุญาตเข้าถึงพื้นที่จัดเก็บ",
+                            message: "แอปนี้ต้องการเข้าถึงพื้นที่จัดเก็บเพื่อแสดงไฟล์ในถังขยะ",
+                            buttonNeutral: "ถามภายหลัง",
+                            buttonNegative: "ยกเลิก",
+                            buttonPositive: "ตกลง"
                         }
                     );
                     
@@ -178,28 +178,28 @@ export default function RecycleBin() {
         }
     };
 
-    // Read files from trash
+    // อ่านไฟล์จากถังขยะ
     const loadRecycleBinItems = async () => {
         setLoading(true);
         try {
-            // Use getRecycleBinPath function to find trash path
+            // ใช้ฟังก์ชัน getRecycleBinPath เพื่อหาเส้นทางถังขยะ
             const recycleBinPath = await getRecycleBinPath();
             
             if (!recycleBinPath) {
-                console.error("Cannot access or create trash bin");
+                console.error("ไม่สามารถเข้าถึงหรือสร้างถังขยะได้");
                 Alert.alert("Error", "Could not access or create recycle bin directory");
                 setFiles([]);
                 setLoading(false);
                 return;
             }
             
-            // Read files from trash
+            // อ่านไฟล์จากถังขยะ
             let items;
             try {
                 items = await RNFS.readDir(recycleBinPath);
-                console.log(`Found ${items.length} items in trash`);
+                console.log(`พบรายการ ${items.length} รายการในถังขยะ`);
             } catch (readError) {
-                console.error("Error reading trash:", readError);
+                console.error("เกิดข้อผิดพลาดในการอ่านถังขยะ:", readError);
                 Alert.alert("Error", "Could not read recycle bin directory: " + readError.message);
                 setLoading(false);
                 return;
@@ -208,17 +208,17 @@ export default function RecycleBin() {
             const recycleBinItems: RecycleBinItem[] = [];
             
             for (const item of items) {
-                // Skip .meta files as we'll read them separately
+                // ข้ามไฟล์ .meta เพราะเราจะอ่านแยก
                 if (item.name.endsWith('.meta')) continue;
                 
                 try {
-                    // Read related .meta file
+                    // อ่านไฟล์ .meta ที่เกี่ยวข้อง
                     const metaPath = `${recycleBinPath}/${item.name}.meta`;
                     const metaExists = await RNFS.exists(metaPath);
                     
                     if (!metaExists) {
-                        console.log(`Meta file for ${item.name} not found, skipping this item`);
-                        continue; // Skip if no meta file
+                        console.log(`ไม่พบไฟล์ meta สำหรับ ${item.name} ข้ามรายการนี้`);
+                        continue; // ข้ามถ้าไม่มีไฟล์ meta
                     }
                     
                     try {
@@ -269,9 +269,9 @@ export default function RecycleBin() {
         }
     };
     
-    // Date formatting function
+    // ฟังก์ชันฟอร์แมตวันที่
     const formatDate = (date: Date | number): string => {
-        if (!date) return "Not specified";
+        if (!date) return "ไม่ระบุวันที่";
         
         try {
             // แปลงให้เป็น Date object ถ้าเป็น timestamp (number)
@@ -282,22 +282,22 @@ export default function RecycleBin() {
             const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
             
             if (diffDays === 0) {
-                // Today
-                return `Today ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
+                // วันนี้
+                return `วันนี้ ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
             } else if (diffDays === 1) {
-                // Yesterday
-                return `Yesterday ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
+                // เมื่อวาน
+                return `เมื่อวาน ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
             } else if (diffDays < 7) {
-                // Within a week
-                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                return `${days[dateObj.getDay()]} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
+                // ภายใน 1 สัปดาห์
+                const days = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+                return `วัน${days[dateObj.getDay()]} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
             } else {
-                // More than a week
+                // เกิน 1 สัปดาห์
                 return `${dateObj.getDate()}/${dateObj.getMonth()+1}/${dateObj.getFullYear()} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
             }
         } catch (error) {
             console.error("Error formatting date:", error, date);
-            return "Invalid date";
+            return "วันที่ไม่ถูกต้อง";
         }
     };
     
@@ -311,7 +311,6 @@ export default function RecycleBin() {
         return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
     };
     
-    // Toggle item selection
     const toggleSelect = (id: string) => {
         if (!isSelecting) setIsSelecting(true);
         setSelectedItems(prev => {
@@ -319,7 +318,7 @@ export default function RecycleBin() {
                 ? prev.filter(item => item !== id) 
                 : [...prev, id];
             
-            // If no files are selected, exit selection mode
+            // ถ้าไม่มีไฟล์ที่เลือกแล้ว ให้ปิดโหมดการเลือก
             if (newSelection.length === 0) {
                 setIsSelecting(false);
             }
@@ -328,7 +327,7 @@ export default function RecycleBin() {
         });
     };
     
-    // Permanently delete files function
+    // ฟังก์ชันลบไฟล์อย่างถาวร
     const permanentlyDeleteSelected = async () => {
         try {
             // หาไฟล์ที่ตรงกับ id ที่เลือก
@@ -379,15 +378,15 @@ export default function RecycleBin() {
             
             if (errorCount > 0) {
                 Alert.alert(
-                    "Delete Complete",
-                    `Successfully deleted: ${deleteCount} items\nFailed to delete: ${errorCount} items`,
-                    [{ text: "OK" }]
+                    "ลบเสร็จสิ้น",
+                    `ลบสำเร็จ: ${deleteCount} รายการ\nลบไม่สำเร็จ: ${errorCount} รายการ`,
+                    [{ text: "ตกลง" }]
                 );
             } else {
                 Alert.alert(
-                    "Delete Complete",
-                    `Successfully deleted ${deleteCount} items`,
-                    [{ text: "OK" }]
+                    "ลบเรียบร้อย",
+                    `ลบไฟล์จำนวน ${deleteCount} รายการเรียบร้อยแล้ว`,
+                    [{ text: "ตกลง" }]
                 );
             }
         } catch (error) {
@@ -397,7 +396,7 @@ export default function RecycleBin() {
         }
     };
     
-    // Restore files function
+    // ฟังก์ชันกู้คืนไฟล์
     const restoreSelected = async () => {
         try {
             // หาไฟล์ที่ตรงกับ id ที่เลือก
@@ -487,15 +486,15 @@ export default function RecycleBin() {
             
             if (errorCount > 0) {
                 Alert.alert(
-                    "Restore Complete",
-                    `Successfully restored: ${restoredCount} items\nFailed to restore: ${errorCount} items`,
-                    [{ text: "OK" }]
+                    "กู้คืนเสร็จสิ้น",
+                    `กู้คืนสำเร็จ: ${restoredCount} รายการ\nกู้คืนไม่สำเร็จ: ${errorCount} รายการ`,
+                    [{ text: "ตกลง" }]
                 );
             } else {
                 Alert.alert(
-                    "Restore Complete",
-                    `Successfully restored ${restoredCount} items`,
-                    [{ text: "OK" }]
+                    "กู้คืนเรียบร้อย",
+                    `กู้คืนไฟล์จำนวน ${restoredCount} รายการเรียบร้อยแล้ว`,
+                    [{ text: "ตกลง" }]
                 );
             }
         } catch (error) {
@@ -505,7 +504,7 @@ export default function RecycleBin() {
         }
     };
     
-    // Empty trash function
+    // ฟังก์ชันล้างถังขยะทั้งหมด
     const emptyRecycleBin = async () => {
         try {
             // ใช้ฟังก์ชัน getRecycleBinPath เพื่อหาเส้นทางถังขยะ
@@ -546,15 +545,15 @@ export default function RecycleBin() {
             
             if (errorCount > 0) {
                 Alert.alert(
-                    "Empty Trash Complete",
-                    `Successfully deleted: ${deleteCount} items\nFailed to delete: ${errorCount} items`,
-                    [{ text: "OK" }]
+                    "ล้างถังขยะเสร็จสิ้น",
+                    `ลบสำเร็จ: ${deleteCount} รายการ\nลบไม่สำเร็จ: ${errorCount} รายการ`,
+                    [{ text: "ตกลง" }]
                 );
             } else {
                 Alert.alert(
-                    "Empty Trash Complete",
-                    `Successfully deleted all ${deleteCount} items in trash`,
-                    [{ text: "OK" }]
+                    "ล้างถังขยะเรียบร้อย",
+                    `ลบไฟล์ทั้งหมด ${deleteCount} รายการในถังขยะเรียบร้อยแล้ว`,
+                    [{ text: "ตกลง" }]
                 );
             }
         } catch (error) {
@@ -565,7 +564,7 @@ export default function RecycleBin() {
         }
     };
 
-    // Sort items function
+    // ฟังก์ชันเรียงลำดับข้อมูล
     const sortItems = (items: RecycleBinItem[], sortType: string): RecycleBinItem[] => {
         const sortedItems = [...items];
 
@@ -589,24 +588,24 @@ export default function RecycleBin() {
         }
     };
 
-    // Handle sort type change
+    // ฟังก์ชันจัดการเมื่อเลือกวิธีเรียงลำดับ
     const handleSortChange = (sortType: string) => {
         setCurrentSortBy(sortType);
         setFiles(sortItems(files, sortType));
         setSortByOptionVisible(false);
     };
 
-    // Convert sort type to display label
+    // ฟังก์ชันแปลงชื่อการเรียงลำดับเป็นภาษาไทย
     const getSortByLabel = (sortType: string): string => {
         switch (sortType) {
-            case 'date_desc': return 'Most Recently Deleted';
-            case 'date_asc': return 'Oldest Deleted First';
-            case 'name_asc': return 'Filename (A-Z)';
-            case 'name_desc': return 'Filename (Z-A)';
-            case 'size_desc': return 'File Size (Large-Small)';
-            case 'size_asc': return 'File Size (Small-Large)';
-            case 'expire_asc': return 'Expiring Soon';
-            default: return 'Unknown';
+            case 'date_desc': return 'วันที่ลบล่าสุด';
+            case 'date_asc': return 'วันที่ลบเก่าสุด';
+            case 'name_asc': return 'ชื่อไฟล์ (A-Z)';
+            case 'name_desc': return 'ชื่อไฟล์ (Z-A)';
+            case 'size_desc': return 'ขนาดไฟล์ (ใหญ่-เล็ก)';
+            case 'size_asc': return 'ขนาดไฟล์ (เล็ก-ใหญ่)';
+            case 'expire_asc': return 'วันหมดอายุใกล้สุด';
+            default: return 'ไม่ระบุ';
         }
     };
 
@@ -619,12 +618,12 @@ export default function RecycleBin() {
                     styles.itemContainer,
                     isSelected && styles.selectedItem,
                 ]}
-                onPress={() => toggleSelect(item.id)}
+                onPress={() => (isSelecting ? toggleSelect(item.id) : null)}
                 onLongPress={() => toggleSelect(item.id)}
             >
                 <View style={styles.fileIconContainer}>
                     {item.isDirectory ? (
-                        <MaterialIcons name="folder" size={36} color="#FFC107" />
+                        <MaterialIcons name="folder" size={40} color="#FFC107" />
                     ) : (
                         getFileIcon(item.originalName || item.name)
                     )}
@@ -634,14 +633,19 @@ export default function RecycleBin() {
                         {item.originalName || item.name}
                     </Text>
                     <Text style={styles.fileDetails}>
-                        {formatFileSize(item.size)}
+                        {formatFileSize(item.size)} • {formatDate(item.dateTimestamp)}
+                    </Text>
+                    <Text style={styles.expireText}>
+                        Expires: {formatDate(item.expireTimestamp)}
                     </Text>
                 </View>
                 <View style={styles.selectIconContainer}>
-                    {isSelected ? (
-                        <MaterialCommunityIcons name="checkbox-marked" size={24} color="#000000" />
-                    ) : (
-                        <MaterialCommunityIcons name="checkbox-blank-outline" size={24} color="#000000" />
+                    {isSelecting && (
+                        <MaterialIcons
+                            name={isSelected ? "check-circle" : "radio-button-unchecked"}
+                            size={24}
+                            color={isSelected ? "#4CAF50" : "#9E9E9E"}
+                        />
                     )}
                 </View>
             </TouchableOpacity>
@@ -654,7 +658,7 @@ export default function RecycleBin() {
             return (
                 <View style={styles.emptyContainer}>
                     <ActivityIndicator size="large" color="#2196F3" />
-                    <Text style={styles.emptyText}>Loading...</Text>
+                    <Text style={styles.emptyText}>กำลังโหลดข้อมูล...</Text>
                 </View>
             );
         }
@@ -662,7 +666,7 @@ export default function RecycleBin() {
         return (
             <View style={styles.emptyContainer}>
                 <MaterialIcons name="delete-outline" size={80} color="#cccccc" />
-                <Text style={styles.emptyText}>No files in trash</Text>
+                <Text style={styles.emptyText}>ไม่มีไฟล์ในถังขยะ</Text>
             </View>
         );
     };
@@ -676,7 +680,15 @@ export default function RecycleBin() {
                     <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                         <MaterialIcons name="arrow-back-ios-new" size={20} />
                     </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Trash</Text>
+                    <Text style={styles.headerTitle}>ถังขยะ</Text>
+                    
+                    {/* ปุ่มค้นหาที่ลิงก์ไปยังหน้าค้นหา */}
+                    <TouchableOpacity
+                        style={styles.headerButton}
+                        onPress={() => navigation.navigate("Search")}
+                    >
+                        <Ionicons name="search" size={24} color="black" />
+                    </TouchableOpacity>
                     
                     <TouchableOpacity
                         style={styles.headerButton}
@@ -708,7 +720,7 @@ export default function RecycleBin() {
                 />
             )}
 
-            <Text style={styles.subHeader}>Files will be permanently deleted after 30 days</Text>
+            <Text style={styles.subHeader}>ไฟล์จะถูกลบแบบถาวรหลังจาก 30 วัน</Text>
 
             <FlatList
                 data={files}
@@ -726,7 +738,7 @@ export default function RecycleBin() {
                         onPress={() => setConfirmRestoreVisible(true)}
                     >
                         <Feather name="refresh-cw" size={24} color="#2196F3" />
-                        <Text style={[styles.bottomButtonText, { color: '#2196F3' }]}>Restore</Text>
+                        <Text style={[styles.bottomButtonText, { color: '#2196F3' }]}>กู้คืน</Text>
                     </TouchableOpacity>
                     
                     <TouchableOpacity 
@@ -734,12 +746,12 @@ export default function RecycleBin() {
                         onPress={() => setConfirmDeleteVisible(true)}
                     >
                         <MaterialIcons name="delete-forever" size={24} color="#FF3B30" />
-                        <Text style={[styles.bottomButtonText, { color: '#FF3B30' }]}>Delete</Text>
+                        <Text style={[styles.bottomButtonText, { color: '#FF3B30' }]}>ลบถาวร</Text>
                     </TouchableOpacity>
                 </View>
             )}
 
-            {/* Modal confirmation for permanent delete */}
+            {/* Modal ยืนยันการลบ */}
             <Modal
                 transparent
                 visible={isConfirmDeleteVisible}
@@ -749,30 +761,30 @@ export default function RecycleBin() {
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContainer}>
                         <MaterialIcons name="delete-forever" size={50} color="#FF3B30" style={{ marginBottom: 15 }} />
-                        <Text style={styles.modalTitle}>Delete Permanently</Text>
+                        <Text style={styles.modalTitle}>ลบถาวร</Text>
                         <Text style={styles.modalMessage}>
-                            Are you sure you want to permanently delete the selected files ({selectedItems.length} items)? 
-                            This action cannot be undone.
+                            คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์ที่เลือกแบบถาวร ({selectedItems.length} รายการ)? 
+                            การกระทำนี้ไม่สามารถยกเลิกได้
                         </Text>
                         <View style={styles.modalButtonRow}>
                             <TouchableOpacity
                                 style={[styles.modalButton, { backgroundColor: '#f0f0f0' }]}
                                 onPress={() => setConfirmDeleteVisible(false)}
                             >
-                                <Text style={[styles.modalButtonText, styles.cancelText]}>Cancel</Text>
+                                <Text style={[styles.modalButtonText, styles.cancelText]}>ยกเลิก</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[styles.modalButton, { backgroundColor: '#ffeded' }]}
                                 onPress={permanentlyDeleteSelected}
                             >
-                                <Text style={[styles.modalButtonText, styles.deleteText]}>Delete</Text>
+                                <Text style={[styles.modalButtonText, styles.deleteText]}>ลบถาวร</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
                 </View>
             </Modal>
 
-            {/* Modal confirmation for restore */}
+            {/* Modal ยืนยันการกู้คืน */}
             <Modal
                 transparent
                 visible={isConfirmRestoreVisible}
@@ -782,29 +794,29 @@ export default function RecycleBin() {
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContainer}>
                         <Feather name="refresh-cw" size={50} color="#2196F3" style={{ marginBottom: 15 }} />
-                        <Text style={styles.modalTitle}>Restore Files</Text>
+                        <Text style={styles.modalTitle}>กู้คืนไฟล์</Text>
                         <Text style={styles.modalMessage}>
-                            Do you want to restore the selected files ({selectedItems.length} items) to their original location?
+                            คุณต้องการกู้คืนไฟล์ที่เลือก ({selectedItems.length} รายการ) กลับไปยังตำแหน่งเดิมหรือไม่?
                         </Text>
                         <View style={styles.modalButtonRow}>
                             <TouchableOpacity
                                 style={[styles.modalButton, { backgroundColor: '#f0f0f0' }]}
                                 onPress={() => setConfirmRestoreVisible(false)}
                             >
-                                <Text style={[styles.modalButtonText, styles.cancelText]}>Cancel</Text>
+                                <Text style={[styles.modalButtonText, styles.cancelText]}>ยกเลิก</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[styles.modalButton, { backgroundColor: '#e3f2fd' }]}
                                 onPress={restoreSelected}
                             >
-                                <Text style={[styles.modalButtonText, { color: '#2196F3' }]}>Restore</Text>
+                                <Text style={[styles.modalButtonText, { color: '#2196F3' }]}>กู้คืน</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
                 </View>
             </Modal>
 
-            {/* Three dots menu */}
+            {/* เมนูสามจุด */}
             <Modal
                 transparent
                 visible={menuVisible}
@@ -821,18 +833,30 @@ export default function RecycleBin() {
                             style={styles.menuItem} 
                             onPress={() => {
                                 setMenuVisible(false);
+                                setSelectedItems(files.map(file => file.id));
+                                setIsSelecting(true);
+                            }}
+                        >
+                            <MaterialCommunityIcons name="select-all" size={24} color="black" />
+                            <Text style={styles.menuItemText}>เลือกทั้งหมด</Text>
+                        </TouchableOpacity>
+                        
+                        <TouchableOpacity 
+                            style={styles.menuItem} 
+                            onPress={() => {
+                                setMenuVisible(false);
                                 Alert.alert(
-                                    "Empty Trash",
-                                    "Are you sure you want to permanently delete all files in trash? This action cannot be undone.",
+                                    "ล้างถังขยะ",
+                                    "คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์ทั้งหมดในถังขยะแบบถาวร? การกระทำนี้ไม่สามารถยกเลิกได้",
                                     [
-                                        { text: "Cancel", style: "cancel" },
-                                        { text: "Empty Trash", style: "destructive", onPress: emptyRecycleBin }
+                                        { text: "ยกเลิก", style: "cancel" },
+                                        { text: "ล้างถังขยะ", style: "destructive", onPress: emptyRecycleBin }
                                     ]
                                 );
                             }}
                         >
                             <Ionicons name="trash-bin" size={24} color="#FF3B30" />
-                            <Text style={[styles.menuItemText, { color: '#FF3B30' }]}>Empty Trash</Text>
+                            <Text style={[styles.menuItemText, { color: '#FF3B30' }]}>ล้างถังขยะ</Text>
                         </TouchableOpacity>
                         
                         <TouchableOpacity 
@@ -843,85 +867,148 @@ export default function RecycleBin() {
                             }}
                         >
                             <MaterialIcons name="refresh" size={24} color="black" />
-                            <Text style={styles.menuItemText}>Refresh</Text>
+                            <Text style={styles.menuItemText}>รีเฟรช</Text>
                         </TouchableOpacity>
                     </View>
                 </TouchableOpacity>
             </Modal>
 
-            {/* Sort options modal */}
+            {/* Modal ตัวเลือกการเรียงลำดับ */}
             <Modal
                 transparent
                 visible={sortByOptionVisible}
-                animationType="slide"
+                animationType="fade"
                 onRequestClose={() => setSortByOptionVisible(false)}
             >
                 <TouchableOpacity
-                    style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}
+                    style={styles.menuModalOverlay}
                     activeOpacity={1}
                     onPress={() => setSortByOptionVisible(false)}
                 >
-                    <View 
-                        style={{ 
-                            backgroundColor: 'white', 
-                            borderTopLeftRadius: 20, 
-                            borderTopRightRadius: 20,
-                            paddingVertical: 20
-                        }}
-                    >
-                        <View style={{ alignItems: 'center', marginBottom: 15 }}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#333' }}>Sort by</Text>
-                            <View style={{ width: 40, height: 4, backgroundColor: '#ccc', borderRadius: 2, marginTop: 10 }} />
+                    <View style={styles.sortOptionsContainer}>
+                        <View style={styles.sortHeader}>
+                            <Text style={styles.sortTitle}>เรียงตาม</Text>
+                            <TouchableOpacity onPress={() => setSortByOptionVisible(false)}>
+                                <MaterialIcons name="close" size={24} color="#666" />
+                            </TouchableOpacity>
                         </View>
-                        
+
                         <TouchableOpacity
-                            style={{ 
-                                flexDirection: 'row', 
-                                alignItems: 'center', 
-                                paddingVertical: 12, 
-                                paddingHorizontal: 20,
-                                backgroundColor: currentSortBy === 'name_asc' ? '#f0f0f0' : 'transparent'
-                            }}
-                            onPress={() => handleSortChange('name_asc')}
-                        >
-                            <MaterialIcons name="sort-by-alpha" size={24} color="#007AFF" style={{ marginRight: 20 }} />
-                            <Text style={{ fontSize: 16, color: '#333' }}>Filename (A-Z)</Text>
-                            {currentSortBy === 'name_asc' && (
-                                <MaterialIcons name="check" size={24} color="#007AFF" style={{ marginLeft: 'auto' }} />
-                            )}
-                        </TouchableOpacity>
-                        
-                        <TouchableOpacity
-                            style={{ 
-                                flexDirection: 'row', 
-                                alignItems: 'center',
-                                paddingVertical: 12, 
-                                paddingHorizontal: 20,
-                                backgroundColor: currentSortBy === 'date_desc' ? '#f0f0f0' : 'transparent'
-                            }}
+                            style={[styles.sortOption, currentSortBy === 'date_desc' && styles.activeSortOption]}
                             onPress={() => handleSortChange('date_desc')}
                         >
-                            <MaterialIcons name="access-time" size={24} color="#FF9500" style={{ marginRight: 20 }} />
-                            <Text style={{ fontSize: 16, color: '#333' }}>Date Modified (Latest)</Text>
+                            <MaterialIcons
+                                name="arrow-downward"
+                                size={22}
+                                color={currentSortBy === 'date_desc' ? '#2196F3' : '#666'}
+                            />
+                            <Text style={[styles.sortOptionText, currentSortBy === 'date_desc' && styles.activeSortText]}>
+                                วันที่ลบล่าสุด
+                            </Text>
                             {currentSortBy === 'date_desc' && (
-                                <MaterialIcons name="check" size={24} color="#007AFF" style={{ marginLeft: 'auto' }} />
+                                <MaterialIcons name="check" size={22} color="#2196F3" />
                             )}
                         </TouchableOpacity>
-                        
+
                         <TouchableOpacity
-                            style={{ 
-                                flexDirection: 'row', 
-                                alignItems: 'center',
-                                paddingVertical: 12, 
-                                paddingHorizontal: 20,
-                                backgroundColor: currentSortBy === 'size_desc' ? '#f0f0f0' : 'transparent'
-                            }}
+                            style={[styles.sortOption, currentSortBy === 'date_asc' && styles.activeSortOption]}
+                            onPress={() => handleSortChange('date_asc')}
+                        >
+                            <MaterialIcons
+                                name="arrow-upward"
+                                size={22}
+                                color={currentSortBy === 'date_asc' ? '#2196F3' : '#666'}
+                            />
+                            <Text style={[styles.sortOptionText, currentSortBy === 'date_asc' && styles.activeSortText]}>
+                                วันที่ลบเก่าสุด
+                            </Text>
+                            {currentSortBy === 'date_asc' && (
+                                <MaterialIcons name="check" size={22} color="#2196F3" />
+                            )}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.sortOption, currentSortBy === 'name_asc' && styles.activeSortOption]}
+                            onPress={() => handleSortChange('name_asc')}
+                        >
+                            <MaterialIcons
+                                name="sort-by-alpha"
+                                size={22}
+                                color={currentSortBy === 'name_asc' ? '#2196F3' : '#666'}
+                            />
+                            <Text style={[styles.sortOptionText, currentSortBy === 'name_asc' && styles.activeSortText]}>
+                                ชื่อไฟล์ (A-Z)
+                            </Text>
+                            {currentSortBy === 'name_asc' && (
+                                <MaterialIcons name="check" size={22} color="#2196F3" />
+                            )}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.sortOption, currentSortBy === 'name_desc' && styles.activeSortOption]}
+                            onPress={() => handleSortChange('name_desc')}
+                        >
+                            <AntDesign
+                                name="swap"
+                                size={22}
+                                color={currentSortBy === 'name_desc' ? '#2196F3' : '#666'}
+                            />
+                            <Text style={[styles.sortOptionText, currentSortBy === 'name_desc' && styles.activeSortText]}>
+                                ชื่อไฟล์ (Z-A)
+                            </Text>
+                            {currentSortBy === 'name_desc' && (
+                                <MaterialIcons name="check" size={22} color="#2196F3" />
+                            )}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.sortOption, currentSortBy === 'size_desc' && styles.activeSortOption]}
                             onPress={() => handleSortChange('size_desc')}
                         >
-                            <FontAwesome5 name="sort-amount-down" size={24} color="#5856D6" style={{ marginRight: 20 }} />
-                            <Text style={{ fontSize: 16, color: '#333' }}>File Size (Large-Small)</Text>
+                            <FontAwesome5
+                                name="sort-amount-down"
+                                size={22}
+                                color={currentSortBy === 'size_desc' ? '#2196F3' : '#666'}
+                            />
+                            <Text style={[styles.sortOptionText, currentSortBy === 'size_desc' && styles.activeSortText]}>
+                                ขนาดไฟล์ (ใหญ่-เล็ก)
+                            </Text>
                             {currentSortBy === 'size_desc' && (
-                                <MaterialIcons name="check" size={24} color="#007AFF" style={{ marginLeft: 'auto' }} />
+                                <MaterialIcons name="check" size={22} color="#2196F3" />
+                            )}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.sortOption, currentSortBy === 'size_asc' && styles.activeSortOption]}
+                            onPress={() => handleSortChange('size_asc')}
+                        >
+                            <FontAwesome5
+                                name="sort-amount-up"
+                                size={22}
+                                color={currentSortBy === 'size_asc' ? '#2196F3' : '#666'}
+                            />
+                            <Text style={[styles.sortOptionText, currentSortBy === 'size_asc' && styles.activeSortText]}>
+                                ขนาดไฟล์ (เล็ก-ใหญ่)
+                            </Text>
+                            {currentSortBy === 'size_asc' && (
+                                <MaterialIcons name="check" size={22} color="#2196F3" />
+                            )}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.sortOption, currentSortBy === 'expire_asc' && styles.activeSortOption]}
+                            onPress={() => handleSortChange('expire_asc')}
+                        >
+                            <MaterialIcons
+                                name="timelapse"
+                                size={22}
+                                color={currentSortBy === 'expire_asc' ? '#2196F3' : '#666'}
+                            />
+                            <Text style={[styles.sortOptionText, currentSortBy === 'expire_asc' && styles.activeSortText]}>
+                                วันหมดอายุใกล้สุด
+                            </Text>
+                            {currentSortBy === 'expire_asc' && (
+                                <MaterialIcons name="check" size={22} color="#2196F3" />
                             )}
                         </TouchableOpacity>
                     </View>
@@ -935,7 +1022,7 @@ export default function RecycleBin() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#F5F5F5',
     },
     header: {
         flexDirection: "row",
@@ -1006,26 +1093,31 @@ const styles = StyleSheet.create({
         fontWeight: "600",
     },
     listContainer: {
-        padding: 0,
-        flexGrow: 1,
-        backgroundColor: 'white'
+        padding: 8,
+        flexGrow: 1
     },
     itemContainer: {
         flexDirection: 'row',
-        padding: 8,
-        backgroundColor: 'transparent',
-        marginHorizontal: 8,
-        marginVertical: 4,
+        padding: 16,
+        backgroundColor: 'white',
+        borderRadius: 8,
+        marginHorizontal: 16,
+        marginVertical: 8,
         alignItems: 'center',
-        borderBottomWidth: 0,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 1.41,
     },
     selectedItem: {
-        backgroundColor: 'rgba(255, 59, 48, 0.05)',
+        backgroundColor: '#E3F2FD',
+        borderWidth: 1,
+        borderColor: '#2196F3',
     },
     fileIconContainer: {
-        marginLeft: 12,
-        marginRight: 12,
-        width: 36,
+        marginRight: 16,
+        width: 50,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -1035,13 +1127,14 @@ const styles = StyleSheet.create({
     },
     fileName: {
         fontSize: 16,
-        fontWeight: '400',
+        fontWeight: '500',
         color: '#212121',
         marginBottom: 4,
     },
     fileDetails: {
         fontSize: 12,
         color: '#757575',
+        marginBottom: 2,
     },
     expireText: {
         fontSize: 11,
@@ -1049,7 +1142,7 @@ const styles = StyleSheet.create({
         fontStyle: 'italic',
     },
     selectIconContainer: {
-        width: 36,
+        width: 30,
         alignItems: 'center',
     },
     bottomBar: {
@@ -1146,9 +1239,7 @@ const styles = StyleSheet.create({
     },
     menuModalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'center',
-        alignItems: 'center'
+        backgroundColor: 'rgba(0,0,0,0.3)',
     },
     menuContainer: {
         position: 'absolute',
@@ -1175,41 +1266,54 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     sortOptionsContainer: {
-        backgroundColor: '#fff',
+        position: 'absolute',
+        top: '15%',
+        left: '10%',
+        right: '10%',
+        backgroundColor: 'white',
+        borderRadius: 12,
         padding: 20,
-        borderRadius: 20,
-        width: '80%',
-        maxHeight: '80%'
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
     },
     sortHeader: {
         flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        width: '100%',
+        marginBottom: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+        paddingBottom: 10
     },
     sortTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#666'
+        color: "#333"
     },
     sortOption: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 10
+        padding: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+        width: '100%'
+    },
+    activeSortOption: {
+        backgroundColor: '#E3F2FD',
+        borderRadius: 8,
     },
     sortOptionText: {
         fontSize: 16,
-        color: '#666',
-        marginLeft: 10
-    },
-    activeSortOption: {
-        backgroundColor: '#f0f0f0'
+        color: '#333',
+        flex: 1,
+        marginLeft: 12
     },
     activeSortText: {
-        fontWeight: 'bold'
-    },
-    selectCheckbox: {
-        width: 36,
-        alignItems: 'center',
-        marginRight: 0,
+        fontWeight: 'bold',
+        color: '#2196F3'
     },
 });

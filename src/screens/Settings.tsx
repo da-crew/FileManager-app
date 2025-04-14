@@ -9,15 +9,19 @@ import { MaterialCommunityIcons,AntDesign, } from "@expo/vector-icons/";
 
 
 
-// หน้าจอการตั้งค่าแอปพลิเคชัน
 export default function SettingsScreen({ navigation }: NativeStackScreenProps<RootStackParamList>) {
+<<<<<<< HEAD
 
     const { theme, changeTheme, isDarkMode } = useTheme();
 
+=======
+    // App settings
+>>>>>>> parent of 771c477 (-0- แก้ไขหลายอย่างโครตเยอะ)
     const [imageViewer, setImageViewer] = useState(true);
     const [videoPlayer, setVideoPlayer] = useState(true);
     const [musicPlayer, setMusicPlayer] = useState(true);
     const [textEditor, setTextEditor] = useState(true);
+<<<<<<< HEAD
 
     // Display settings
     const [darkMode, setDarkMode] = useState(false);
@@ -30,33 +34,55 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
     const [recycleBin, setRecycleBin] = useState(true);
     const [recycleConfirm, setRecycleConfirm] = useState(true);
 
+=======
+    
+    // Display settings
+    const [darkMode, setDarkMode] = useState(false);
+    const [sortByDate, setSortByDate] = useState(true);
+    
+    // Notification settings
+    const [storageFull, setStorageFull] = useState(true);
+    
+    // Recycle bin settings
+    const [recycleBin, setRecycleBin] = useState(true);
+    const [recycleConfirm, setRecycleConfirm] = useState(true);
+    
+>>>>>>> parent of 771c477 (-0- แก้ไขหลายอย่างโครตเยอะ)
     // App info
     const version = "1.0.0";
 
     return (
+<<<<<<< HEAD
         <SafeAreaView style={[styles.container, {backgroundColor: theme.background}]}>
             <StatusBar barStyle='default' backgroundColor={theme.background}/>
             <View style={[styles.header, {backgroundColor: theme.toolbarColor}]}>
+=======
+        <SafeAreaView style={styles.container}>
+            <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+            
+            {/* Header */}
+            <View style={styles.header}>
+>>>>>>> parent of 771c477 (-0- แก้ไขหลายอย่างโครตเยอะ)
                 <TouchableOpacity 
                     onPress={() => navigation.goBack()}
                     style={styles.backButton}
                 >
                     <AntDesign name="left" size={24} color={theme.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Settings</Text>
+                <Text style={styles.headerTitle}>ตั้งค่า</Text>
                 <View style={{ width: 40 }} />
             </View>
 
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-                {/* 1. แอปพลิเคชันเริ่มต้น */}
-                <Text style={styles.sectionHeader}>Default Applications</Text>
+                {/* 1. แอปพลิเคชันที่ติดตั้ง */}
+                <Text style={styles.sectionHeader}>แอปพลิเคชันที่ติดตั้ง</Text>
                 <View style={styles.sectionContainer}>
                     {/* โปรแกรมดูรูปภาพ */}
                     <SettingItem 
                         icon="image-outline"
                         iconColor="#007AFF"
                         iconBgColor="#007AFF20"
-                        label="Image Viewer"
+                        label="โปรแกรมดูรูปภาพ"
                         value={imageViewer}
                         onValueChange={setImageViewer}
                     />
@@ -66,7 +92,7 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         icon="videocam-outline"
                         iconColor="#FF2D55"
                         iconBgColor="#FF2D5520"
-                        label="Video Player"
+                        label="โปรแกรมเล่นวิดีโอ"
                         value={videoPlayer}
                         onValueChange={setVideoPlayer}
                     />
@@ -76,7 +102,7 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         icon="musical-notes-outline"
                         iconColor="#FF9500"
                         iconBgColor="#FF950020"
-                        label="Music Player"
+                        label="โปรแกรมเล่นเพลง"
                         value={musicPlayer}
                         onValueChange={setMusicPlayer}
                     />
@@ -86,7 +112,7 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         icon="document-text-outline"
                         iconColor="#34C759"
                         iconBgColor="#34C75920"
-                        label="Text Editor"
+                        label="โปรแกรมแก้ไขข้อความ"
                         value={textEditor}
                         onValueChange={setTextEditor}
                         isLast={true}
@@ -94,14 +120,14 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                 </View>
 
                 {/* 2. ธีมและการแสดงผล */}
-                <Text style={styles.sectionHeader}>Theme and Display</Text>
+                <Text style={styles.sectionHeader}>ธีมและการแสดงผล</Text>
                 <View style={styles.sectionContainer}>
                     {/* โหมดกลางคืน */}
                     <SettingItem 
                         icon="moon-outline"
                         iconColor="#8E8E93"
                         iconBgColor="#8E8E9320"
-                        label="Night Mode"
+                        label="โหมดกลางคืน"
                         value={darkMode}
                         onValueChange={setDarkMode}
                     />
@@ -111,7 +137,7 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         icon="calendar-outline"
                         iconColor="#5856D6"
                         iconBgColor="#5856D620"
-                        label="Sort by date as default"
+                        label="เรียงตามวันที่เป็นค่าเริ่มต้น"
                         value={sortByDate}
                         onValueChange={setSortByDate}
                         isLast={true}
@@ -119,9 +145,9 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                 </View>
 
                 {/* 3. การแจ้งเตือน */}
-                <Text style={styles.sectionHeader}>Notifications</Text>
+                <Text style={styles.sectionHeader}>การแจ้งเตือน</Text>
                 <View style={styles.sectionContainer}>
-                    {/* แจ้งเตือนเมื่อพื้นที่เก็บข้อมูลเต็ม */}
+                    {/* พื้นที่เก็บข้อมูลเต็ม */}
                     <TouchableOpacity
                         style={styles.row}
                         onPress={() => setImageViewer(!imageViewer)}
@@ -220,9 +246,15 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         <View style={styles.rowContent}>
                             <MaterialCommunityIcons name="harddisk" size={24} color={theme.text} style={styles.rowIcon} />
                             <View>
+<<<<<<< HEAD
                                 <Text style={[styles.label, {color: theme.text}]}>Storage is full</Text>
                                 <Text style={[styles.subLabel, {color: theme.textSecondary}]}>
                                     Show when the storage is over 95% full
+=======
+                                <Text style={styles.label}>พื้นที่เก็บข้อมูลเต็ม</Text>
+                                <Text style={styles.subLabel}>
+                                    แจ้งเตือนเมื่อพื้นที่เก็บข้อมูลเหลือน้อยกว่า 2%
+>>>>>>> parent of 771c477 (-0- แก้ไขหลายอย่างโครตเยอะ)
                                 </Text>
                             </View>
                         </View>
@@ -235,14 +267,14 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                 </View>
 
                 {/* 4. ถังขยะ */}
-                <Text style={styles.sectionHeader}>Trash</Text>
+                <Text style={styles.sectionHeader}>ถังขยะ</Text>
                 <View style={styles.sectionContainer}>
                     {/* ใช้ถังขยะเป็นค่าเริ่มต้น */}
                     <SettingItem
                         icon="trash-outline"
                         iconColor="#8E8E93"
                         iconBgColor="#8E8E9320"
-                        label="Use Trash by default"
+                        label="ใช้ถังขยะเป็นค่าเริ่มต้น"
                         value={recycleBin}
                         onValueChange={setRecycleBin}
                     />
@@ -252,7 +284,7 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         icon="alert-circle-outline"
                         iconColor="#FF9500"
                         iconBgColor="#FF950020"
-                        label="Show confirmation before delete"
+                        label="แสดงการยืนยันก่อนลบ"
                         value={recycleConfirm}
                         onValueChange={setRecycleConfirm}
                         isLast={true}
@@ -260,37 +292,37 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                 </View>
 
                 {/* 5. เกี่ยวกับแอป */}
-                <Text style={styles.sectionHeader}>About App</Text>
+                <Text style={styles.sectionHeader}>เกี่ยวกับแอป</Text>
                 <View style={styles.sectionContainer}>
                     <View style={[styles.row, { borderBottomWidth: 0 }]}>
                         <View style={styles.rowContent}>
                             <View style={[styles.iconCircle, { backgroundColor: '#5856D620' }]}>
                                 <Ionicons name="information-circle-outline" size={20} color="#5856D6" />
                             </View>
-                            <Text style={styles.label}>Version</Text>
+                            <Text style={styles.label}>เวอร์ชั่น</Text>
                         </View>
                         <Text style={styles.versionText}>{version}</Text>
                     </View>
                 </View>
                 
-                {/* ส่วนท้าย */}
+                {/* Footer */}
                 <View style={styles.footer}>
-                    <Text style={styles.footerText}>File Manager App © 2023-2024</Text>
+                    <Text style={styles.footerText}>แอปจัดการไฟล์ © 2023-2024</Text>
                 </View>
             </ScrollView>
         </SafeAreaView>
     );
 }
 
-// คอมโพเนนต์สำหรับรายการตั้งค่าแบบสวิตช์ทั่วไป
+// Component สำหรับรายการตั้งค่าแบบ Switch ทั่วไป
 function SettingItem({ 
-    icon,                 // ชื่อไอคอน
-    iconColor,            // สีของไอคอน 
-    iconBgColor,          // สีพื้นหลังของไอคอน
-    label,                // ข้อความที่แสดง
-    value,                // ค่าสถานะของสวิตช์
-    onValueChange,        // ฟังก์ชันเมื่อค่าเปลี่ยน
-    isLast = false        // เป็นรายการสุดท้ายหรือไม่
+    icon, 
+    iconColor, 
+    iconBgColor, 
+    label, 
+    value, 
+    onValueChange,
+    isLast = false
 }: { 
     icon: any; 
     iconColor: string; 
