@@ -10,28 +10,32 @@ import BottomBarItem from "../components/ContentContainer/BottomBarItem";
 import BottomBarOptions from "../components/ContentContainer/BottomBarOptions";
 import { Platform, PermissionsAndroid } from "react-native";
 import { getFileType, openWith } from "../utils/openWith";
+import SortOptionsBar from '../components/ContentContainer/SortOptionsBar';
 
 // เปลี่ยนขนาดไฟล์ขั้นต่ำเป็น 200MB
 const LARGE_FILE_SIZE_THRESHOLD = 200 * 1024 * 1024; // 200MB ในหน่วย bytes
 
 // เพิ่ม enum สำหรับประเภทการเรียงลำดับ
 enum SortType {
-    SIZE_DESC, // ขนาดใหญ่ไปเล็ก (default)
+    SIZE_DESC, // ขนาดใหญ่ไปเล็ก (ค่าเริ่มต้น)
     SIZE_ASC,  // ขนาดเล็กไปใหญ่
     NAME_ASC,  // ชื่อไฟล์ A-Z
     NAME_DESC, // ชื่อไฟล์ Z-A
-    DATE_DESC, // วันที่ล่าสุดไปเก่าสุด 
+    DATE_DESC, // วันที่ล่าสุดไปเก่าสุด
     DATE_ASC,  // วันที่เก่าสุดไปล่าสุด
 }
 
+// คอมโพเนนต์หน้าจอค้นหาไฟล์ขนาดใหญ่
 export default function LargeFiles() {
     const navigation = useNavigation();
-    const [largeFiles, setLargeFiles] = useState<RNFS.ReadDirItem[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [selectedItems, setSelectedItems] = useState<string[]>([]);
-    const [isSelecting, setIsSelecting] = useState(false);
-    const [sortByOptionVisible, setSortByOptionVisible] = useState(false);
-    const [sortType, setSortType] = useState<SortType>(SortType.SIZE_DESC); // เริ่มต้นที่เรียงตามขนาดใหญ่ไปเล็ก
+    
+    // สถานะต่างๆ ของหน้าจอ
+    const [largeFiles, setLargeFiles] = useState<RNFS.ReadDirItem[]>([]); // เก็บรายการไฟล์ขนาดใหญ่ที่พบ
+    const [isLoading, setIsLoading] = useState(true);                     // สถานะกำลังโหลดข้อมูล
+    const [selectedItems, setSelectedItems] = useState<string[]>([]);     // รายการไฟล์ที่ถูกเลือก
+    const [isSelecting, setIsSelecting] = useState(false);                // สถานะโหมดการเลือกไฟล์
+    const [sortByOptionVisible, setSortByOptionVisible] = useState(false); // สถานะการแสดงตัวเลือกการเรียงลำดับ
+    const [sortType, setSortType] = useState<SortType>(SortType.SIZE_DESC); // ประเภทการเรียงลำดับปัจจุบัน (เริ่มต้นที่เรียงตามขนาดใหญ่ไปเล็ก)
     
     // ตรวจสอบการขออนุญาตเข้าถึงพื้นที่จัดเก็บข้อมูล
     async function checkStoragePermission() {
@@ -72,33 +76,33 @@ export default function LargeFiles() {
                     const requestImages = await PermissionsAndroid.request(
                         PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
                         {
-                            title: "ขออนุญาตเข้าถึงรูปภาพ",
-                            message: "แอปนี้ต้องการเข้าถึงรูปภาพของคุณเพื่อค้นหาไฟล์ขนาดใหญ่",
-                            buttonNeutral: "ถามภายหลัง",
-                            buttonNegative: "ยกเลิก",
-                            buttonPositive: "ตกลง"
+                            title: "Request Photo Access",
+                            message: "This app needs access to your photos to find large files",
+                            buttonNeutral: "Ask Me Later",
+                            buttonNegative: "Cancel",
+                            buttonPositive: "OK"
                         }
                     );
                     
                     const requestVideos = await PermissionsAndroid.request(
                         PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
                         {
-                            title: "ขออนุญาตเข้าถึงวิดีโอ",
-                            message: "แอปนี้ต้องการเข้าถึงวิดีโอของคุณเพื่อค้นหาไฟล์ขนาดใหญ่",
-                            buttonNeutral: "ถามภายหลัง",
-                            buttonNegative: "ยกเลิก",
-                            buttonPositive: "ตกลง"
+                            title: "Request Video Access",
+                            message: "This app needs access to your videos to find large files",
+                            buttonNeutral: "Ask Me Later",
+                            buttonNegative: "Cancel",
+                            buttonPositive: "OK"
                         }
                     );
                     
                     const requestAudio = await PermissionsAndroid.request(
                         PermissionsAndroid.PERMISSIONS.READ_MEDIA_AUDIO,
                         {
-                            title: "ขออนุญาตเข้าถึงไฟล์เสียง",
-                            message: "แอปนี้ต้องการเข้าถึงไฟล์เสียงของคุณเพื่อค้นหาไฟล์ขนาดใหญ่",
-                            buttonNeutral: "ถามภายหลัง",
-                            buttonNegative: "ยกเลิก",
-                            buttonPositive: "ตกลง"
+                            title: "Request Audio Access",
+                            message: "This app needs access to your audio files to find large files",
+                            buttonNeutral: "Ask Me Later",
+                            buttonNegative: "Cancel",
+                            buttonPositive: "OK"
                         }
                     );
                     
@@ -112,11 +116,11 @@ export default function LargeFiles() {
                     const granted = await PermissionsAndroid.request(
                         PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
                         {
-                            title: "ขออนุญาตเข้าถึงพื้นที่จัดเก็บ",
-                            message: "แอปนี้ต้องการเข้าถึงพื้นที่จัดเก็บของคุณเพื่อค้นหาไฟล์ขนาดใหญ่",
-                            buttonNeutral: "ถามภายหลัง",
-                            buttonNegative: "ยกเลิก",
-                            buttonPositive: "ตกลง"
+                            title: "Request Storage Access",
+                            message: "This app needs access to your storage to find large files",
+                            buttonNeutral: "Ask Me Later",
+                            buttonNegative: "Cancel",
+                            buttonPositive: "OK"
                         }
                     );
                     return granted === PermissionsAndroid.RESULTS.GRANTED;
@@ -176,16 +180,16 @@ export default function LargeFiles() {
         setSortByOptionVisible(false);
     };
 
-    // ฟังก์ชันแปลงชื่อการเรียงลำดับเป็นภาษาไทย
+    // ฟังก์ชันแปลงชื่อการเรียงลำดับเป็นข้อความที่แสดงบนหน้าจอ
     const getSortByLabel = (type: SortType): string => {
         switch (type) {
-            case SortType.SIZE_DESC: return 'ขนาดไฟล์ (ใหญ่-เล็ก)';
-            case SortType.SIZE_ASC: return 'ขนาดไฟล์ (เล็ก-ใหญ่)';
-            case SortType.NAME_ASC: return 'ชื่อไฟล์ (A-Z)';
-            case SortType.NAME_DESC: return 'ชื่อไฟล์ (Z-A)';
-            case SortType.DATE_DESC: return 'วันที่แก้ไข (ล่าสุด)';
-            case SortType.DATE_ASC: return 'วันที่แก้ไข (เก่าสุด)';
-            default: return 'ไม่ระบุ';
+            case SortType.SIZE_DESC: return 'File Size (Large-Small)';
+            case SortType.SIZE_ASC: return 'File Size (Small-Large)';
+            case SortType.NAME_ASC: return 'Filename (A-Z)';
+            case SortType.NAME_DESC: return 'Filename (Z-A)';
+            case SortType.DATE_DESC: return 'Date Modified (Latest)';
+            case SortType.DATE_ASC: return 'Date Modified (Oldest)';
+            default: return 'Not specified';
         }
     };
 
@@ -205,9 +209,9 @@ export default function LargeFiles() {
             
             if (!hasPermission) {
                 Alert.alert(
-                    "ไม่สามารถเข้าถึงไฟล์ได้",
-                    "โปรดให้สิทธิ์การเข้าถึงพื้นที่จัดเก็บเพื่อค้นหาไฟล์ขนาดใหญ่",
-                    [{ text: "ตกลง" }]
+                    "Cannot access files",
+                    "Please grant storage permission to find large files",
+                    [{ text: "OK" }]
                 );
                 setIsLoading(false);
                 return;
@@ -233,13 +237,13 @@ export default function LargeFiles() {
                     const exists = await RNFS.exists(baseDir);
                     if (!exists) continue;
                     
-                    console.log(`กำลังสแกนไดเร็กทอรี: ${baseDir}`);
+                    console.log(`Scanning directory: ${baseDir}`);
                     const items = await RNFS.readDir(baseDir);
                     
                     // หาไฟล์ขนาดใหญ่ในระดับบนสุด
                     for (const item of items) {
                         if (item.isFile() && item.size && item.size > LARGE_FILE_SIZE_THRESHOLD) {
-                            console.log(`พบไฟล์ขนาดใหญ่: ${item.name} (${formatFileSize(item.size)})`);
+                            console.log(`Found large file: ${item.name} (${formatFileSize(item.size)})`);
                             foundFiles.push(item);
                         }
                     }
@@ -251,17 +255,17 @@ export default function LargeFiles() {
                                 const subItems = await RNFS.readDir(item.path);
                                 for (const subItem of subItems) {
                                     if (subItem.isFile() && subItem.size && subItem.size > LARGE_FILE_SIZE_THRESHOLD) {
-                                        console.log(`พบไฟล์ขนาดใหญ่ในโฟลเดอร์ย่อย: ${subItem.name} (${formatFileSize(subItem.size)})`);
+                                        console.log(`Found large file in subfolder: ${subItem.name} (${formatFileSize(subItem.size)})`);
                                         foundFiles.push(subItem);
                                     }
                                 }
                             } catch (error) {
-                                console.log(`เกิดข้อผิดพลาดในการอ่านโฟลเดอร์ย่อย: ${item.path}`, error);
+                                console.log(`Error reading subfolder: ${item.path}`, error);
                             }
                         }
                     }
                 } catch (error) {
-                    console.log(`เกิดข้อผิดพลาดในการสแกนไดเร็กทอรี ${baseDir}:`, error);
+                    console.log(`Error scanning directory ${baseDir}:`, error);
                 }
             }
             
@@ -271,7 +275,7 @@ export default function LargeFiles() {
             
         } catch (error) {
             console.error("Error finding large files:", error);
-            Alert.alert("เกิดข้อผิดพลาด", "ไม่สามารถค้นหาไฟล์ขนาดใหญ่ได้");
+            Alert.alert("Error", "Cannot find large files");
         } finally {
             setIsLoading(false);
         }
@@ -319,12 +323,12 @@ export default function LargeFiles() {
             // แสดงข้อความเตือนเมื่อไฟล์มีขนาดใหญ่มาก (>100MB)
             if (fileSizeInMB > 100) {
                 Alert.alert(
-                    "ไฟล์ขนาดใหญ่มาก",
-                    `ไฟล์นี้มีขนาด ${formatFileSize(item.size)} ต้องการเปิดหรือไม่?`,
+                    "Very Large File",
+                    `This file is ${formatFileSize(item.size)} in size. Do you want to open it?`,
                     [
-                        { text: "ยกเลิก", style: "cancel" },
+                        { text: "Cancel", style: "cancel" },
                         { 
-                            text: "เปิด", 
+                            text: "Open", 
                             onPress: () => openFile(item)
                         }
                     ]
@@ -336,9 +340,9 @@ export default function LargeFiles() {
         } catch (error) {
             console.error("Error opening file:", error);
             Alert.alert(
-                "ไม่สามารถเปิดไฟล์ได้",
-                "เกิดข้อผิดพลาดในการเปิดไฟล์",
-                [{ text: "ตกลง" }]
+                "Cannot Open File",
+                "Error opening file",
+                [{ text: "OK" }]
             );
         }
     };
@@ -346,14 +350,14 @@ export default function LargeFiles() {
     // เปิดไฟล์ด้วยแอพที่เหมาะสม
     const openFile = (item: RNFS.ReadDirItem) => {
         try {
-            console.log("กำลังเปิดไฟล์:", item.path);
+            console.log("Opening file:", item.path);
             openWith(item.path, getFileType(item));
         } catch (error) {
             console.error("Error opening file:", error);
             Alert.alert(
-                "ไม่สามารถเปิดไฟล์ได้",
-                "ไม่พบแอพที่เหมาะสมสำหรับเปิดไฟล์นี้หรือไฟล์อาจเสียหาย",
-                [{ text: "ตกลง" }]
+                "Cannot Open File",
+                "No appropriate app found for this file type or the file may be corrupted",
+                [{ text: "OK" }]
             );
         }
     };
@@ -377,12 +381,12 @@ export default function LargeFiles() {
         if (selectedItems.length === 0) return;
         
         Alert.alert(
-            "ลบไฟล์",
-            `ต้องการลบไฟล์ที่เลือกจำนวน ${selectedItems.length} ไฟล์หรือไม่?`,
+            "Delete Files",
+            `Do you want to delete ${selectedItems.length} selected files?`,
             [
-                { text: "ยกเลิก", style: "cancel" },
+                { text: "Cancel", style: "cancel" },
                 { 
-                    text: "ลบ", 
+                    text: "Delete", 
                     style: "destructive",
                     onPress: async () => {
                         setIsLoading(true);
@@ -391,17 +395,17 @@ export default function LargeFiles() {
                             try {
                                 await RNFS.unlink(filePath);
                             } catch (error) {
-                                console.error(`เกิดข้อผิดพลาดในการลบไฟล์: ${filePath}`, error);
+                                console.error(`Error deleting file: ${filePath}`, error);
                             }
                         }
                         
                         resetSelection();
                         
-                        // แสดงข้อความแจ้งเตือนเมื่อลบเสร็จ
+                        // Show confirmation when deletion is complete
                         Alert.alert(
-                            "สำเร็จ",
-                            `ลบไฟล์จำนวน ${selectedItems.length} ไฟล์เรียบร้อยแล้ว`,
-                            [{ text: "ตกลง" }]
+                            "Success",
+                            `${selectedItems.length} files have been deleted`,
+                            [{ text: "OK" }]
                         );
                         
                         // อัพเดทรายการไฟล์หลังลบ
@@ -418,7 +422,7 @@ export default function LargeFiles() {
             return (
                 <View style={styles.emptyContainer}>
                     <ActivityIndicator size="large" color="#2196F3" />
-                    <Text style={styles.emptyText}>กำลังค้นหาไฟล์ขนาดใหญ่...</Text>
+                    <Text style={styles.emptyText}>Searching for large files...</Text>
                 </View>
             );
         }
@@ -426,16 +430,50 @@ export default function LargeFiles() {
         return (
             <View style={styles.emptyContainer}>
                 <MaterialIcons name="find-in-page" size={80} color="#cccccc" />
-                <Text style={styles.emptyText}>ไม่พบไฟล์ขนาดใหญ่</Text>
+                <Text style={styles.emptyText}>No large files found</Text>
                 <TouchableOpacity 
                     style={styles.refreshButton}
                     onPress={findLargeFiles}
                 >
-                    <Text style={styles.refreshButtonText}>ค้นหาอีกครั้ง</Text>
+                    <Text style={styles.refreshButtonText}>Search Again</Text>
                 </TouchableOpacity>
             </View>
         );
     };
+
+    // สร้างตัวเลือกการเรียงลำดับสำหรับ SortOptionsBar
+    const sortOptions = [
+        {
+            id: SortType.SIZE_DESC,
+            label: 'File Size (Large-Small)',
+            icon: <FontAwesome5 name="sort-amount-down" size={24} color="#007AFF" />
+        },
+        {
+            id: SortType.SIZE_ASC,
+            label: 'File Size (Small-Large)',
+            icon: <FontAwesome5 name="sort-amount-up" size={24} color="#FF9500" />
+        },
+        {
+            id: SortType.NAME_ASC,
+            label: 'Filename (A-Z)',
+            icon: <MaterialIcons name="sort-by-alpha" size={24} color="#34C759" />
+        },
+        {
+            id: SortType.NAME_DESC,
+            label: 'Filename (Z-A)',
+            icon: <AntDesign name="swap" size={24} color="#FF2D55" />
+        },
+        {
+            id: SortType.DATE_DESC,
+            label: 'Date Modified (Latest)',
+            icon: <MaterialIcons name="access-time" size={24} color="#5856D6" />
+        },
+        {
+            id: SortType.DATE_ASC,
+            label: 'Date Modified (Oldest)',
+            icon: <MaterialIcons name="history" size={24} color="#8E8E93" />
+        }
+    ];
 
     return (
         <SafeAreaView style={styles.container}>
@@ -489,131 +527,18 @@ export default function LargeFiles() {
 
             {isSelecting && (
                 <View style={styles.bottomBar}>
-                    <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} />} onPress={handleDeleteFiles} />
+                    <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} color="#FF3B30" />} onPress={handleDeleteFiles} />
                 </View>
             )}
 
-            {/* Modal ตัวเลือกการเรียงลำดับ */}
-            <Modal visible={sortByOptionVisible} transparent={true} 
-                onRequestClose={() => setSortByOptionVisible(false)} 
-                animationType="fade">
-                <TouchableOpacity 
-                    style={styles.menuModalOverlay} 
-                    activeOpacity={1} 
-                    onPress={() => setSortByOptionVisible(false)}
-                >
-                    <View style={styles.sortOptionsContainer}>
-                        <View style={styles.sortHeader}>
-                            <Text style={styles.sortTitle}>เรียงตาม</Text>
-                            <TouchableOpacity onPress={() => setSortByOptionVisible(false)}>
-                                <MaterialIcons name="close" size={24} color="#666" />
-                            </TouchableOpacity>
-                        </View>
-
-                        <TouchableOpacity
-                            style={[styles.sortOption, sortType === SortType.SIZE_DESC && styles.activeSortOption]}
-                            onPress={() => handleSortChange(SortType.SIZE_DESC)}
-                        >
-                            <FontAwesome5
-                                name="sort-amount-down"
-                                size={22}
-                                color={sortType === SortType.SIZE_DESC ? '#2196F3' : '#666'}
-                            />
-                            <Text style={[styles.sortOptionText, sortType === SortType.SIZE_DESC && styles.activeSortText]}>
-                                ขนาดไฟล์ (ใหญ่-เล็ก)
-                            </Text>
-                            {sortType === SortType.SIZE_DESC && (
-                                <MaterialIcons name="check" size={22} color="#2196F3" />
-                            )}
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[styles.sortOption, sortType === SortType.SIZE_ASC && styles.activeSortOption]}
-                            onPress={() => handleSortChange(SortType.SIZE_ASC)}
-                        >
-                            <FontAwesome5
-                                name="sort-amount-up"
-                                size={22}
-                                color={sortType === SortType.SIZE_ASC ? '#2196F3' : '#666'}
-                            />
-                            <Text style={[styles.sortOptionText, sortType === SortType.SIZE_ASC && styles.activeSortText]}>
-                                ขนาดไฟล์ (เล็ก-ใหญ่)
-                            </Text>
-                            {sortType === SortType.SIZE_ASC && (
-                                <MaterialIcons name="check" size={22} color="#2196F3" />
-                            )}
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[styles.sortOption, sortType === SortType.NAME_ASC && styles.activeSortOption]}
-                            onPress={() => handleSortChange(SortType.NAME_ASC)}
-                        >
-                            <MaterialIcons
-                                name="sort-by-alpha"
-                                size={22}
-                                color={sortType === SortType.NAME_ASC ? '#2196F3' : '#666'}
-                            />
-                            <Text style={[styles.sortOptionText, sortType === SortType.NAME_ASC && styles.activeSortText]}>
-                                ชื่อไฟล์ (A-Z)
-                            </Text>
-                            {sortType === SortType.NAME_ASC && (
-                                <MaterialIcons name="check" size={22} color="#2196F3" />
-                            )}
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[styles.sortOption, sortType === SortType.NAME_DESC && styles.activeSortOption]}
-                            onPress={() => handleSortChange(SortType.NAME_DESC)}
-                        >
-                            <AntDesign
-                                name="swap"
-                                size={22}
-                                color={sortType === SortType.NAME_DESC ? '#2196F3' : '#666'}
-                            />
-                            <Text style={[styles.sortOptionText, sortType === SortType.NAME_DESC && styles.activeSortText]}>
-                                ชื่อไฟล์ (Z-A)
-                            </Text>
-                            {sortType === SortType.NAME_DESC && (
-                                <MaterialIcons name="check" size={22} color="#2196F3" />
-                            )}
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[styles.sortOption, sortType === SortType.DATE_DESC && styles.activeSortOption]}
-                            onPress={() => handleSortChange(SortType.DATE_DESC)}
-                        >
-                            <MaterialIcons
-                                name="arrow-downward"
-                                size={22}
-                                color={sortType === SortType.DATE_DESC ? '#2196F3' : '#666'}
-                            />
-                            <Text style={[styles.sortOptionText, sortType === SortType.DATE_DESC && styles.activeSortText]}>
-                                วันที่แก้ไข (ล่าสุด)
-                            </Text>
-                            {sortType === SortType.DATE_DESC && (
-                                <MaterialIcons name="check" size={22} color="#2196F3" />
-                            )}
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[styles.sortOption, sortType === SortType.DATE_ASC && styles.activeSortOption]}
-                            onPress={() => handleSortChange(SortType.DATE_ASC)}
-                        >
-                            <MaterialIcons
-                                name="arrow-upward"
-                                size={22}
-                                color={sortType === SortType.DATE_ASC ? '#2196F3' : '#666'}
-                            />
-                            <Text style={[styles.sortOptionText, sortType === SortType.DATE_ASC && styles.activeSortText]}>
-                                วันที่แก้ไข (เก่าสุด)
-                            </Text>
-                            {sortType === SortType.DATE_ASC && (
-                                <MaterialIcons name="check" size={22} color="#2196F3" />
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                </TouchableOpacity>
-            </Modal>
+            {/* ใช้ SortOptionsBar แทน Modal เดิม */}
+            <SortOptionsBar
+                visible={sortByOptionVisible}
+                onClose={() => setSortByOptionVisible(false)}
+                options={sortOptions}
+                selectedOption={sortType}
+                onSelectOption={(option) => handleSortChange(option as SortType)}
+            />
         </SafeAreaView>
     );
 }
@@ -691,13 +616,15 @@ const styles = StyleSheet.create({
     menuModalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'flex-end'
+        justifyContent: 'center',
+        alignItems: 'center'
     },
     sortOptionsContainer: {
         backgroundColor: '#fff',
         padding: 20,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20
+        borderRadius: 20,
+        width: '80%',
+        maxHeight: '80%'
     },
     sortHeader: {
         flexDirection: 'row',

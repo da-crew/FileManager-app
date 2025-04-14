@@ -9,10 +9,11 @@ import RNFS from 'react-native-fs';
 import { openAppSettings, StorageCapacity, StorageDevice } from '../FileSystem';
 import { ContainerType } from '../components/ContentContainer/common';
 
+// คอมโพเนนต์ปุ่มเมนูแบบรวดเร็ว (แสดงในส่วน File Types)
 const QuickAccessButton = ({ name, icon, onPress }: {
-    name: string,
-    icon: ReactNode,
-    onPress: (event: GestureResponderEvent) => void
+    name: string,             // ชื่อปุ่ม
+    icon: ReactNode,          // ไอคอนของปุ่ม
+    onPress: (event: GestureResponderEvent) => void  // ฟังก์ชันที่จะทำงานเมื่อกดปุ่ม
 }) => {
     return (
         <TouchableOpacity style={styles.quickAccessButton} onPress={onPress}>
@@ -24,27 +25,32 @@ const QuickAccessButton = ({ name, icon, onPress }: {
     );
 };
 
+// คอมโพเนนต์แสดงข้อมูลพื้นที่จัดเก็บ (อุปกรณ์จัดเก็บข้อมูล)
 const StorageCard = ({ device, icon, onPress }: {
-    device: StorageDevice,
-    icon: ReactNode,
-    onPress: (event: GestureResponderEvent) => void,
+    device: StorageDevice,    // ข้อมูลอุปกรณ์จัดเก็บ
+    icon: ReactNode,          // ไอคอนอุปกรณ์
+    onPress: (event: GestureResponderEvent) => void,  // ฟังก์ชันที่จะทำงานเมื่อกดปุ่ม
 }) => {
+    // สถานะสำหรับเก็บข้อมูลความจุพื้นที่จัดเก็บ
     const [storageSize, setStorageSize] = useState<StorageCapacity | null>(null);
 
+    // ดึงข้อมูลความจุพื้นที่จัดเก็บเมื่อคอมโพเนนต์ถูกโหลด
     useEffect(() => {
         device.getCapacity().then((result) => {
             setStorageSize(result);
         })
     }, []);
 
+    // คำนวณเปอร์เซ็นต์พื้นที่ที่ใช้ไป
     const usedPercentage = storageSize 
         ? ((storageSize.totalSpace - storageSize.freeSpace) / storageSize.totalSpace) * 100 
         : 0;
     
+    // กำหนดสีของแถบแสดงพื้นที่ตามปริมาณการใช้งาน
     const getBarColor = () => {
-        if (usedPercentage > 90) return '#FF3B30'; // สีแดงถ้าใช้งานเกิน 90%
-        if (usedPercentage > 70) return '#FF9500'; // สีส้มถ้าใช้งานเกิน 70%
-        return '#34C759'; // สีเขียวถ้าใช้งานน้อยกว่า 70%
+        if (usedPercentage > 90) return '#FF3B30'; // แดง ถ้าใช้เกิน 90%
+        if (usedPercentage > 70) return '#FF9500'; // ส้ม ถ้าใช้เกิน 70%
+        return '#34C759'; // เขียว ถ้าใช้น้อยกว่า 70%
     };
 
     return (
@@ -66,13 +72,13 @@ const StorageCard = ({ device, icon, onPress }: {
                                 />
                             </View>
                             <Text style={styles.storageText}>
-                                {`${(storageSize.totalSpace - storageSize.freeSpace).toPrecision(3)} / ${storageSize.totalSpace.toPrecision(3)} ${device.unit}`}
-                                <Text style={styles.storagePercentage}>{` (${Math.round(usedPercentage)}% ใช้งานแล้ว)`}</Text>
+                                {`${(storageSize.totalSpace - storageSize.freeSpace).toFixed(2)} / ${storageSize.totalSpace.toFixed(2)} ${device.unit}`}
+                                <Text style={styles.storagePercentage}>{` (${Math.round(usedPercentage)}% used)`}</Text>
                             </Text>
                         </>
                     )}
                     {!storageSize && (
-                        <Text style={styles.storageText}>กำลังคำนวณพื้นที่...</Text>
+                        <Text style={styles.storageText}>Calculating storage...</Text>
                     )}
                 </View>
             </View>
@@ -80,11 +86,12 @@ const StorageCard = ({ device, icon, onPress }: {
     );
 };
 
+// คอมโพเนนต์ปุ่มฟีเจอร์พิเศษ (เครื่องมืออรรถประโยชน์)
 const UtilityButton = ({ title, desc, icon, onPress }: {
-    title: string,
-    desc: string,
-    icon: ReactNode,
-    onPress: (event: GestureResponderEvent) => void
+    title: string,            // ชื่อฟีเจอร์
+    desc: string,             // คำอธิบายสั้นๆ
+    icon: ReactNode,          // ไอคอน
+    onPress: (event: GestureResponderEvent) => void  // ฟังก์ชันที่จะทำงานเมื่อกดปุ่ม
 }) => {
     return (
         <TouchableOpacity style={styles.utilityButton} onPress={onPress}>
@@ -100,10 +107,11 @@ const UtilityButton = ({ title, desc, icon, onPress }: {
     );
 };
 
+// คอมโพเนนต์ส่วนหัวของหน้าจอ
 const HeaderBar = ({ navigation }: { navigation: any }) => {
     return (
         <View style={styles.headerBar}>
-            <Text style={styles.headerTitle}>ไฟล์ของฉัน</Text>
+            <Text style={styles.headerTitle}>My Files</Text>
             <View style={styles.headerActions}>
                 <TouchableOpacity
                     style={styles.headerButton}
@@ -122,8 +130,10 @@ const HeaderBar = ({ navigation }: { navigation: any }) => {
     );
 };
 
+// หน้าจอหลักของแอปพลิเคชัน
 export default function HomeScreen({ navigation }: NativeStackScreenProps<RootStackParamList>) {
 
+    // ตรวจสอบสิทธิ์การจัดการไฟล์เมื่อเปิดแอป
     useEffect(() => {
         checkManagePermission().then((allowed) => {
             if (!allowed) {
@@ -132,6 +142,7 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
         });
     }, []);
 
+    // ฟังก์ชันสำหรับนำทางไปยังหมวดหมู่ต่างๆ (รูปภาพ, วิดีโอ, เพลง, เอกสาร, ดาวน์โหลด)
     function gotoCategory(name: string) {
         navigation.navigate("Container", {
             containerName: name,
@@ -140,6 +151,7 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
         });
     }
 
+    // ฟังก์ชันสำหรับนำทางไปยังอุปกรณ์จัดเก็บข้อมูล
     function gotoStorageDevice(device: StorageDevice) {
         navigation.navigate("Container", {
             containerName: device.displayName,
@@ -148,67 +160,70 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
         });
     }
 
-    const internalStorage = new StorageDevice('Internal Storage', RNFS.ExternalStorageDirectoryPath);
+    // สร้างอ็อบเจกต์อุปกรณ์จัดเก็บภายใน
+    const internalStorage = new StorageDevice('Device Storage', RNFS.ExternalStorageDirectoryPath);
 
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar backgroundColor="#fff" barStyle="dark-content" />
             <HeaderBar navigation={navigation} />
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-                <Text style={styles.sectionTitle}>ประเภทไฟล์</Text>
+                {/* ส่วนแสดงประเภทไฟล์ */}
+                <Text style={styles.sectionTitle}>File Types</Text>
                 <View style={styles.quickAccessGrid}>
                     <QuickAccessButton
-                        name="รูปภาพ"
+                        name="Images"
                         icon={<Feather name="image" size={24} color="#007AFF" />}
                         onPress={() => gotoCategory("Images")}
                     />
                     <QuickAccessButton
-                        name="วิดีโอ"
+                        name="Videos"
                         icon={<Feather name="video" size={24} color="#FF2D55" />}
                         onPress={() => gotoCategory("Videos")}
                     />
                     <QuickAccessButton
-                        name="เพลง"
+                        name="Music"
                         icon={<Feather name="music" size={24} color="#FF9500" />}
                         onPress={() => gotoCategory("Audio")}
                     />
                     <QuickAccessButton
-                        name="เอกสาร"
+                        name="Documents"
                         icon={<Ionicons name="document-outline" size={24} color="#34C759" />}
                         onPress={() => gotoCategory("Documents")}
                     />
                     <QuickAccessButton
-                        name="ดาวน์โหลด"
+                        name="Downloads"
                         icon={<Feather name="download" size={24} color="#5856D6" />}
                         onPress={() => gotoCategory("Downloads")}
                     />
                     <QuickAccessButton
-                        name="ถังขยะ"
+                        name="Trash"
                         icon={<Feather name="trash-2" size={24} color="#8E8E93" />}
                         onPress={() => navigation.navigate("RecycleBin")}
                     />
                 </View>
 
-                <Text style={styles.sectionTitle}>พื้นที่จัดเก็บ</Text>
+                {/* ส่วนแสดงข้อมูลพื้นที่จัดเก็บ */}
+                <Text style={styles.sectionTitle}>Storage</Text>
                 <StorageCard
                     device={internalStorage}
-                    icon={<Feather name="smartphone" size={24} color="#007AFF" />}
+                    icon={<Feather name="smartphone" size={24} color="#4CAF50" />}
                     onPress={() => {
                         gotoStorageDevice(internalStorage);
                     }}
                 />
 
-                <Text style={styles.sectionTitle}>เครื่องมือ</Text>
+                <Text style={styles.sectionTitle}>Tools</Text>
                 <View style={styles.utilitiesSection}>
                     <UtilityButton
-                        title="ไฟล์ขนาดใหญ่"
-                        desc="ไฟล์ที่มีขนาดเกิน 200MB"
+                        title="Large Files"
+                        desc="Files larger than 200MB"
                         icon={<FontAwesome5 name="file-archive" size={22} color="#007AFF" />}
                         onPress={() => navigation.navigate("LargeFiles")}
                     />
                     <UtilityButton
-                        title="ไฟล์ซ้ำซ้อน"
-                        desc="ค้นหาและลบไฟล์ที่ซ้ำกัน"
+                        title="Duplicate Files"
+                        desc="Find and delete duplicate files"
                         icon={<MaterialCommunityIcons name="content-copy" size={24} color="#FF9500" />}
                         onPress={() => navigation.navigate("Duplicates")}
                     />

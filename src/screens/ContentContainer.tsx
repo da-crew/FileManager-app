@@ -19,6 +19,7 @@ import ItemViewModeSelection from "../components/ContentContainer/ItemViewModeSe
 import { getFileType, openWith } from "../utils/openWith";
 import { useProgress } from "../components/ProgressBar/ProgressContext";
 import ProgressBar from "../components/ProgressBar/ProgressBar";
+import SortOptionsBar from "../components/ContentContainer/SortOptionsBar";
 
 // รายการนามสกุลไฟล์รูปภาพ
 const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
@@ -113,7 +114,7 @@ const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator size="large" color="#2196F3" />
-                <Text style={{ marginTop: 10, color: '#333' }}>กำลังโหลดอัลบั้ม...</Text>
+                <Text style={{ marginTop: 10, color: '#333' }}>Loading albums...</Text>
             </View>
         );
     }
@@ -121,7 +122,7 @@ const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: {
     if (albums.length === 0) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 16, color: '#333' }}>ไม่พบอัลบั้ม</Text>
+                <Text style={{ fontSize: 16, color: '#333' }}>No albums found</Text>
             </View>
         );
     }
@@ -179,7 +180,7 @@ const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: {
                     )}
                     <View style={{ padding: 10 }}>
                         <Text style={{ fontWeight: 'bold', fontSize: 14 }} numberOfLines={1}>{item.name}</Text>
-                        <Text style={{ fontSize: 12, color: '#666' }}>{item.count} รูป</Text>
+                        <Text style={{ fontSize: 12, color: '#666' }}>{item.count} photos</Text>
                     </View>
                 </TouchableOpacity>
             )}
@@ -278,7 +279,7 @@ const AudioList = ({ audioFiles, isLoading, onAudioPress, onAudioLongPress, sele
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator size="large" color="#2196F3" />
-                <Text style={{ marginTop: 10, color: '#333' }}>กำลังโหลดไฟล์เสียง...</Text>
+                <Text style={{ marginTop: 10, color: '#333' }}>Loading audio files...</Text>
             </View>
         );
     }
@@ -286,7 +287,7 @@ const AudioList = ({ audioFiles, isLoading, onAudioPress, onAudioLongPress, sele
     if (audioFiles.length === 0) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 16, color: '#333' }}>ไม่พบไฟล์เสียง</Text>
+                <Text style={{ fontSize: 16, color: '#333' }}>No audio files found</Text>
             </View>
         );
     }
@@ -345,7 +346,7 @@ const DocumentList = ({ documents, isLoading, onDocumentPress, onDocumentLongPre
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator size="large" color="#2196F3" />
-                <Text style={{ marginTop: 10, color: '#333' }}>กำลังโหลดเอกสาร...</Text>
+                <Text style={{ marginTop: 10, color: '#333' }}>Loading documents...</Text>
             </View>
         );
     }
@@ -353,7 +354,7 @@ const DocumentList = ({ documents, isLoading, onDocumentPress, onDocumentLongPre
     if (documents.length === 0) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 16, color: '#333' }}>ไม่พบเอกสาร</Text>
+                <Text style={{ fontSize: 16, color: '#333' }}>No documents found</Text>
             </View>
         );
     }
@@ -495,8 +496,10 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 let files = items.filter((item) => item.isFile()).sort(sortHandler);
                 setContent(hiddenFolders.concat(folders).concat(files));
             })
-            .catch(() => {
-                console.log("An error occured");
+            .catch((error) => {
+                console.log("An error occurred in fetchContent:", error);
+                // Set empty content to prevent endless loading state
+                setContent([]);
             });
     }
 
@@ -717,16 +720,16 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 // แสดง Alert เตือนว่าเป็นไฟล์ขนาดใหญ่
                 Alert.alert(
                     "ไฟล์ขนาดใหญ่",
-                    `ไฟล์นี้มีขนาด ${fileSizeInMB.toFixed(2)} MB ต้องการเปิดหรือไม่?`,
+                    `This file is ${fileSizeInMB.toFixed(2)} MB in size. Do you want to open it?`,
                     [
-                        { text: "ยกเลิก", style: "cancel" },
+                        { text: "Cancel", style: "cancel" },
                         { 
-                            text: "เปิด", 
+                            text: "Open", 
                             onPress: () => {
                                 // แสดงความคืบหน้าในการโหลดไฟล์
-                                progress.startProgress(0, 100, `กำลังโหลด ${item.name}`, 
+                                progress.startProgress(0, 100, `Loading ${item.name}`, 
                                     () => {
-                                        console.log("ยกเลิกการโหลดไฟล์");
+                                        console.log("Canceled");
                                     },
                                     () => {
                                         // เมื่อโหลดเสร็จให้เปิดไฟล์
@@ -1050,8 +1053,11 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                             console.log("--------------DELETION END--------------");
                         } catch (error) {
                             console.error("Error deleting items:", error);
+                        } finally {
+                            // Always refresh content when deletion is complete, whether successful or not
+                            progress.quitProgress();
+                            fetchContent();
                         }
-                        fetchContent();
                     },
                 }
             ]
@@ -1479,14 +1485,39 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 { path: RNFS.ExternalStorageDirectoryPath + '/Movies', name: 'Movies' },
                 { path: RNFS.ExternalStorageDirectoryPath + '/Download', name: 'Downloads' },
                 { path: RNFS.ExternalStorageDirectoryPath + '/WhatsApp/Media/WhatsApp Video', name: 'WhatsApp' },
-                { path: RNFS.ExternalStorageDirectoryPath + '/Telegram/Telegram Video', name: 'Telegram' }
+                { path: RNFS.ExternalStorageDirectoryPath + '/Telegram/Telegram Video', name: 'Telegram' },
+                // เพิ่มโฟลเดอร์วิดีโอที่พบบ่อยในอุปกรณ์ต่างๆ
+                { path: RNFS.ExternalStorageDirectoryPath + '/DCIM', name: 'DCIM' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/DCIM/100MEDIA', name: 'Camera' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Camera', name: 'Camera' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Video', name: 'Video' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Videos', name: 'Videos' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Facebook/Videos', name: 'Facebook' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/WhatsApp/Media/WhatsApp Video/Sent', name: 'WhatsApp Sent' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/DCIM/ScreenRecorder', name: 'Screen Recordings' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Pictures/ScreenRecords', name: 'Screen Recordings' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/DCIM/OpenCamera', name: 'OpenCamera' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Android/data/com.whatsapp/files/Movies', name: 'WhatsApp' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Android/data/com.facebook.katana/files/Videos', name: 'Facebook' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Android/data/com.instagram.android/files/Videos', name: 'Instagram' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Android/data/com.snapchat.android/files/Videos', name: 'Snapchat' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Android/data/com.google.android.youtube/files/Movies', name: 'YouTube' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Android/data/com.vimeo.android.videoapp/files/Movies', name: 'Vimeo' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Android/data/com.zhiliaoapp.musically/files/Videos', name: 'TikTok' }
             ];
             
             let newAlbums: AlbumItem[] = [];
+            let processedPaths = new Set<string>(); // เพิ่มการตรวจสอบโฟลเดอร์ซ้ำ
             
             // สร้างอัลบัมสำหรับโฟลเดอร์หลัก
             for (const dir of mainVideoDirectories) {
                 try {
+                    // ข้ามถ้าเคยตรวจสอบโฟลเดอร์นี้แล้ว
+                    if (processedPaths.has(dir.path)) {
+                        continue;
+                    }
+                    processedPaths.add(dir.path);
+                    
                     if (await RNFS.exists(dir.path)) {
                         console.log(`Checking directory: ${dir.path}`);
                         // ตรวจสอบจำนวนวิดีโอในโฟลเดอร์
@@ -1508,6 +1539,45 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                 count: videos.length,
                                 thumbnail: videos[0]?.path || null
                             });
+                            
+                            // แสดงผลทันทีเมื่อมีข้อมูลบางส่วน
+                            if (newAlbums.length >= 2 && albums.length === 0) {
+                                setAlbums([...newAlbums]);
+                            }
+                        }
+                        
+                        // ตรวจสอบโฟลเดอร์ย่อยระดับแรกเพื่อหาอัลบั้มเพิ่มเติม
+                        for (const item of items) {
+                            if (item.isDirectory() && !item.name.startsWith('.')) {
+                                // ข้ามถ้าเคยตรวจสอบโฟลเดอร์นี้แล้ว
+                                if (processedPaths.has(item.path)) {
+                                    continue;
+                                }
+                                processedPaths.add(item.path);
+                                
+                                try {
+                                    const subItems = await RNFS.readDir(item.path);
+                                    const subVideos = subItems.filter(subItem => {
+                                        if (subItem.isFile()) {
+                                            const extension = subItem.path.toLowerCase().substring(subItem.path.lastIndexOf('.'));
+                                            return VIDEO_EXTENSIONS.includes(extension);
+                                        }
+                                        return false;
+                                    });
+                                    
+                                    if (subVideos.length > 0) {
+                                        console.log(`Found sub-album: ${item.name} with ${subVideos.length} videos`);
+                                        newAlbums.push({
+                                            name: item.name,
+                                            path: item.path,
+                                            count: subVideos.length,
+                                            thumbnail: subVideos[0]?.path || null
+                                        });
+                                    }
+                                } catch (subError) {
+                                    console.log(`Error checking sub-directory ${item.path}:`, subError);
+                                }
+                            }
                         }
                     }
                 } catch (error) {
@@ -1558,23 +1628,44 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         }
         
         try {
-            // โฟลเดอร์หลักที่มักมีรูปภาพ
+            // โฟลเดอร์หลักที่มักมีรูปภาพ - เพิ่มโฟลเดอร์ที่พบบ่อยในอุปกรณ์ต่างๆ
             const mainImageDirectories = [
                 { path: RNFS.ExternalStorageDirectoryPath + '/DCIM/Camera', name: 'Camera' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Camera', name: 'Camera' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/DCIM/100MEDIA', name: 'Camera' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/DCIM/Camera/100MEDIA', name: 'Camera' },
                 { path: RNFS.ExternalStorageDirectoryPath + '/Pictures/Screenshots', name: 'Screenshots' },
                 { path: RNFS.ExternalStorageDirectoryPath + '/DCIM', name: 'DCIM' },
                 { path: RNFS.ExternalStorageDirectoryPath + '/Pictures', name: 'Pictures' },
                 { path: RNFS.ExternalStorageDirectoryPath + '/Download', name: 'Downloads' },
-                // เพิ่มไดเร็กทอรีอื่นๆ ที่อาจมีรูปภาพ
+                { path: RNFS.ExternalStorageDirectoryPath + '/WhatsApp/Media/WhatsApp Images', name: 'WhatsApp' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Telegram/Telegram Images', name: 'Telegram' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/DCIM/Screenshots', name: 'Screenshots' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/DCIM/OpenCamera', name: 'OpenCamera' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Pictures/Messenger', name: 'Messenger' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/DCIM/Facebook', name: 'Facebook' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/DCIM/Instagram', name: 'Instagram' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Pictures/Instagram', name: 'Instagram' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Pictures/Twitter', name: 'Twitter' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Pictures/LINE', name: 'LINE' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Android/data/com.instagram.android/files/Pictures', name: 'Instagram' },
+                { path: RNFS.ExternalStorageDirectoryPath + '/Android/data/com.facebook.katana/files/Pictures', name: 'Facebook' },
                 { path: RNFS.DocumentDirectoryPath, name: 'Documents' },
                 { path: RNFS.CachesDirectoryPath, name: 'Cache' }
             ];
             
             let newAlbums: AlbumItem[] = [];
+            let processedPaths = new Set<string>(); // เพิ่มการตรวจสอบโฟลเดอร์ซ้ำ
             
             // สร้างอัลบัมสำหรับโฟลเดอร์หลัก
             for (const dir of mainImageDirectories) {
                 try {
+                    // ข้ามถ้าเคยตรวจสอบโฟลเดอร์นี้แล้ว
+                    if (processedPaths.has(dir.path)) {
+                        continue;
+                    }
+                    processedPaths.add(dir.path);
+                    
                     if (await RNFS.exists(dir.path)) {
                         console.log(`Checking directory: ${dir.path}`);
                         // ตรวจสอบจำนวนรูปในโฟลเดอร์
@@ -1600,6 +1691,40 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                             // แสดงผลทันทีเมื่อมีข้อมูลบางส่วน
                             if (newAlbums.length >= 2 && albums.length === 0) {
                                 setAlbums([...newAlbums]);
+                            }
+                        }
+                        
+                        // ตรวจสอบโฟลเดอร์ย่อยระดับแรกเพื่อหาอัลบั้มเพิ่มเติม
+                        for (const item of items) {
+                            if (item.isDirectory() && !item.name.startsWith('.')) {
+                                // ข้ามถ้าเคยตรวจสอบโฟลเดอร์นี้แล้ว
+                                if (processedPaths.has(item.path)) {
+                                    continue;
+                                }
+                                processedPaths.add(item.path);
+                                
+                                try {
+                                    const subItems = await RNFS.readDir(item.path);
+                                    const subImages = subItems.filter(subItem => {
+                                        if (subItem.isFile()) {
+                                            const extension = subItem.path.toLowerCase().substring(subItem.path.lastIndexOf('.'));
+                                            return filterFileByCurrentType(extension);
+                                        }
+                                        return false;
+                                    });
+                                    
+                                    if (subImages.length > 0) {
+                                        console.log(`Found sub-album: ${item.name} with ${subImages.length} images`);
+                                        newAlbums.push({
+                                            name: item.name,
+                                            path: item.path,
+                                            count: subImages.length,
+                                            thumbnail: subImages[0]?.path || null
+                                        });
+                                    }
+                                } catch (subError) {
+                                    console.log(`Error checking sub-directory ${item.path}:`, subError);
+                                }
                             }
                         }
                     }
@@ -2177,9 +2302,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             if (!hasPermission) {
                 console.log('ไม่ได้รับสิทธิ์การเข้าถึงไฟล์เอกสาร');
                 Alert.alert(
-                    "ไม่สามารถเข้าถึงเอกสารได้",
-                    "กรุณาอนุญาตให้แอปเข้าถึงที่เก็บข้อมูลเพื่อแสดงเอกสารของคุณ",
-                    [{ text: "ตกลง" }]
+                    "Cannot Access Documents",
+                    "Please grant storage permission to view your documents",
+                    [{ text: "OK" }]
                 );
                 setContent([]);
                 setIsLoadingImages(false);
@@ -2266,9 +2391,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 setContent([]);
                 console.log("ไม่พบเอกสาร อาจเกิดจากไม่มีสิทธิ์การเข้าถึงหรือไม่มีเอกสารในไดเร็กทอรี่ที่สแกน");
                 Alert.alert(
-                    "ไม่พบเอกสาร",
-                    "ไม่พบเอกสารในอุปกรณ์ของคุณ หรืออาจมีปัญหาในการเข้าถึงข้อมูล",
-                    [{ text: "ตกลง" }]
+                    "No Documents Found",
+                    "No documents found on your device, or there might be an issue accessing data",
+                    [{ text: "OK" }]
                 );
             }
             
@@ -2278,12 +2403,26 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             setContent([]);
             setIsLoadingImages(false);
             Alert.alert(
-                "เกิดข้อผิดพลาด",
-                "ไม่สามารถโหลดเอกสารได้ โปรดลองอีกครั้ง",
-                [{ text: "ตกลง" }]
+                "Error",
+                "Unable to load documents. Please try again",
+                [{ text: "OK" }]
             );
         }
     }
+
+    // สร้างตัวเลือกการเรียงลำดับสำหรับ SortOptionsBar
+    const sortOptions = [
+        {
+            id: SortType.ALPHABETICAL,
+            label: 'Sort by name (A-Z)',
+            icon: <FontAwesome name="sort-alpha-asc" size={24} color="#007AFF" />
+        },
+        {
+            id: SortType.DATE,
+            label: 'Sort by date (Latest)',
+            icon: <MaterialIcons name="access-time" size={24} color="#FF9500" />
+        }
+    ];
 
     // Return section
     return (
@@ -2388,8 +2527,8 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                     }}>Collections</Text>
                                 </TouchableOpacity>
                             </View>
-                        ) : storageName === "Audio" || storageName === "Downloads" ? (
-                            // ไม่แสดงแถบชื่อสำหรับหน้าเสียงและดาวน์โหลด
+                        ) : storageName === "Audio" || storageName === "Downloads" || storageName === "Documents" ? (
+                            // Don't show header for Audio, Downloads, and Documents pages
                             null
                         ) : <ItemViewModeSelection 
                         fileType={currentFileType}
@@ -2457,65 +2596,14 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     pasteActionHandler={() => handlePasteAction().catch((reason) => { throw new Error(reason) })}
         />
 
-        <Modal visible={sortByOptionVisible} transparent={true} onRequestClose={() => setSortByOptionVisible(false)} animationType="slide">
-            <TouchableOpacity 
-                style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}
-                activeOpacity={1} 
-                onPress={() => setSortByOptionVisible(false)}
-            >
-                <View 
-                    style={{ 
-                        backgroundColor: 'white', 
-                        borderTopLeftRadius: 20, 
-                        borderTopRightRadius: 20,
-                        paddingVertical: 20
-                    }}
-                >
-                    <View style={{ alignItems: 'center', marginBottom: 15 }}>
-                        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#333' }}>เรียงลำดับตาม</Text>
-                        <View style={{ width: 40, height: 4, backgroundColor: '#ccc', borderRadius: 2, marginTop: 10 }} />
-                    </View>
-                    
-                    <TouchableOpacity
-                        style={{ 
-                            flexDirection: 'row', 
-                            alignItems: 'center', 
-                            paddingVertical: 12, 
-                            paddingHorizontal: 20,
-                            backgroundColor: sortType === SortType.ALPHABETICAL ? '#f0f0f0' : 'transparent'
-                        }}
-                        onPress={() => {
-                            updateSortType(SortType.ALPHABETICAL);
-                        }}
-                    >
-                        <FontAwesome name="sort-alpha-asc" size={24} color="#007AFF" style={{ marginRight: 20 }} />
-                        <Text style={{ fontSize: 16, color: '#333' }}>เรียงตามชื่อ (A-Z)</Text>
-                        {sortType === SortType.ALPHABETICAL && (
-                            <MaterialIcons name="check" size={24} color="#007AFF" style={{ marginLeft: 'auto' }} />
-                        )}
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity
-                        style={{ 
-                            flexDirection: 'row', 
-                            alignItems: 'center',
-                            paddingVertical: 12, 
-                            paddingHorizontal: 20,
-                            backgroundColor: sortType === SortType.DATE ? '#f0f0f0' : 'transparent'
-                        }}
-                        onPress={() => {
-                            updateSortType(SortType.DATE);
-                        }}
-                    >
-                        <MaterialIcons name="access-time" size={24} color="#FF9500" style={{ marginRight: 20 }} />
-                        <Text style={{ fontSize: 16, color: '#333' }}>เรียงตามวันที่ (ล่าสุด)</Text>
-                        {sortType === SortType.DATE && (
-                            <MaterialIcons name="check" size={24} color="#007AFF" style={{ marginLeft: 'auto' }} />
-                        )}
-                    </TouchableOpacity>
-                </View>
-            </TouchableOpacity>
-        </Modal>
+        {/* ใช้ SortOptionsBar แทน Modal เดิม */}
+        <SortOptionsBar
+            visible={sortByOptionVisible}
+            onClose={() => setSortByOptionVisible(false)}
+            options={sortOptions}
+            selectedOption={sortType}
+            onSelectOption={(option) => updateSortType(option as SortType)}
+        />
 
         <Modal visible={renameModalVisible} transparent={true} onRequestClose={closeRenameModal}>
             <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: 30 }}>
