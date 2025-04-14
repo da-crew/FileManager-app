@@ -29,6 +29,7 @@ export type ThemeConfig = {
     inputBackground: string,          // Input field background color
     inputText: string,                // Input text color
     toolbarColor: string,
+    toolbarColorButton: string,
 }
 
 export enum ThemeName {
@@ -51,8 +52,10 @@ export const LIGHT_THEME: ThemeConfig = {
     buttonText: "#FFFFFF", // Button text color
     inputBackground: "#FFFFFF", // Input field background color
     inputText: "#000000", // Input text color
-    toolbarColor: "#d9d9d9",
-    statusBarStyle: undefined
+    toolbarColor: "#FFFFFF",
+    toolbarColorButton: "#F2F2F2",
+    statusBarStyle: undefined,
+    
 };
 
 
@@ -70,7 +73,8 @@ export const DARK_THEME: ThemeConfig = {
     inputBackground: "#2C2C2E", // Input field background color
     inputText: "#FFFFFF", // Input text color
     toolbarColor: "#4D4D4D",
-    statusBarStyle: undefined
+    toolbarColorButton: "#5c5c5c",
+    statusBarStyle: undefined,
 };
 
 export const GLOBAL_THEME: Map<ThemeName, ThemeConfig> = new Map([

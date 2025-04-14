@@ -1,17 +1,19 @@
+import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useEffect, useState, useCallback } from "react";
-import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View, StatusBar, BackHandler } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { BackHandler, StatusBar, TextInput, TouchableOpacity, View } from "react-native";
+import * as RNFS from 'react-native-fs';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RootStackParamList } from "../App";
-import * as RNFS from 'react-native-fs';
-import {MaterialIcons} from '@expo/vector-icons';
 
 import { ContainerType, ContentContainerRouteParams, MovingState, SortType } from "../components/ContentContainer/common";
 import ContentList from "../components/ContentContainer/ContentList";
+import { useTheme } from '../components/ThemeContext';
 import { getFileType, openWith } from "../utils/openWith";
 
 
 export default function SearchScreen({ route, navigation }: NativeStackScreenProps<RootStackParamList>) {
+    const { theme } = useTheme();
     const routeParams = route.params as ContentContainerRouteParams;
     const storageName = routeParams?.containerName;
     const containerType = routeParams.containerType;
@@ -132,14 +134,14 @@ export default function SearchScreen({ route, navigation }: NativeStackScreenPro
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 14, marginTop: 0 }}>
+        <SafeAreaView style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 14, marginTop: 0, backgroundColor: theme.background }}>
             <StatusBar />
             <View style={{ marginBottom: 16, flexDirection: 'row', alignItems: 'center' }}>
                 <TouchableOpacity onPress={handleGoBack} style={{ marginRight: 8 }}>
-                    <MaterialIcons name="arrow-back-ios-new" size={20} color="#000" />
+                    <MaterialIcons name="arrow-back-ios-new" size={20} color={theme.text} />
                 </TouchableOpacity>
                 <TextInput
-                    style={{ flex: 1, height: 40, borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 12, backgroundColor: '#fff' }}
+                    style={{ flex: 1, height: 40, borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 12, marginRight:20 , backgroundColor: '#fff' }}
                     placeholder="search..."
                     value={searchQuery}
                     onChangeText={handleSearch}

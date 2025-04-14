@@ -41,7 +41,7 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
                     padding: 10,
                     marginRight: 5,
                     borderRadius: 20,
-                    backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                    backgroundColor: theme.toolbarColorButton,
                 }}
                 onPress={goBackHandler}
             >
@@ -62,7 +62,7 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
                         marginRight: 10,
                         padding: 8,
                         borderRadius: 20,
-                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                        backgroundColor: theme.toolbarColorButton
                     }}
                     onPress={() => navigation.replace("Search", {
                         containerName: containerName,
@@ -80,7 +80,7 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
                         marginRight: 10,
                         padding: 8,
                         borderRadius: 20,
-                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                        backgroundColor: theme.toolbarColorButton
                     }}
                     onPress={layoutChangeHandler}
                 >
@@ -93,7 +93,7 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
                         marginRight: 10,
                         padding: 8,
                         borderRadius: 20,
-                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                        backgroundColor: theme.toolbarColorButton
                     }}
                     onPress={sortByHandler}
                 >
@@ -106,7 +106,7 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
                         marginRight: 10,
                         padding: 8,
                         borderRadius: 20,
-                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                        backgroundColor: theme.toolbarColorButton
                     }}
                     onPress={createHandler}
                 >
@@ -119,7 +119,7 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
                         marginRight: 5,
                         padding: 8,
                         borderRadius: 20,
-                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                        backgroundColor: theme.toolbarColorButton
                     }}
                     onPress={menuHandler}
                 >
