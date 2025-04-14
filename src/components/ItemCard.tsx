@@ -1,8 +1,6 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import { AntDesign, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as RNFS from "react-native-fs"
-import { memo } from "react";
-
 
 export interface ItemCardProps {
     item: RNFS.ReadDirItem,

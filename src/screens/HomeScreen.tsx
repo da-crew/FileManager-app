@@ -6,10 +6,10 @@ import { Path } from '../FileSystem';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
 import { checkManagePermission } from 'manage-external-storage';
-import RNFS, { writeFile } from 'react-native-fs';
+import RNFS from 'react-native-fs';
 import { openAppSettings, StorageCapacity, StorageDevice } from '../FileSystem';
 import { ContainerType } from '../components/ContentContainer/common';
-
+import { useTheme } from '../components/ThemeContext';
 
 
 const QuickAccessButton = ({ name, icon, onPress }: {
@@ -17,12 +17,13 @@ const QuickAccessButton = ({ name, icon, onPress }: {
     icon: ReactNode,
     onPress: (event: GestureResponderEvent) => void
 }) => {
+    const { theme } = useTheme();
     return (
-        <TouchableOpacity style={styles.quickAccessButton} onPress={onPress}>
-            <View style={styles.iconContainer}>
+        <TouchableOpacity style={[styles.quickAccessButton, { backgroundColor: theme.card }]} onPress={onPress}>
+            <View style={[styles.iconContainer, { backgroundColor: theme.background }]}>
                 {icon}
             </View>
-            <Text style={styles.quickAccessText}>{name}</Text>
+            <Text style={[styles.quickAccessText, { color: theme.text }]}>{name}</Text>
         </TouchableOpacity>
     );
 };
@@ -33,6 +34,7 @@ const StorageCard = ({ device, icon, onPress }: {
     onPress: (event: GestureResponderEvent) => void,
 }) => {
     const [storageSize, setStorageSize] = useState<StorageCapacity | null>(null);
+    const { theme } = useTheme();
 
     useEffect(() => {
         device.getCapacity().then((result) => {
@@ -41,11 +43,11 @@ const StorageCard = ({ device, icon, onPress }: {
     }, []);
 
     return (
-        <TouchableOpacity style={styles.storageCard} onPress={onPress}>
-            <View style={styles.storageInfo}>
+        <TouchableOpacity style={[styles.storageCard, { backgroundColor: theme.card }]} onPress={onPress}>
+            <View style={[styles.storageInfo, { backgroundColor: theme.card }]}>
                 {icon}
                 <View style={styles.storageTextContainer}>
-                    <Text style={styles.storageTitle}>{device.displayName}</Text>
+                    <Text style={[styles.storageTitle, { color: theme.text }]}>{device.displayName}</Text>
                     {
                         storageSize
                             ?
@@ -59,7 +61,7 @@ const StorageCard = ({ device, icon, onPress }: {
                             </View>
                             : <></>
                     }
-                    <Text style={styles.storageText}>{
+                    <Text style={[styles.storageText, { color: theme.text }]}>{
                         storageSize
                             ? `${(storageSize.totalSpace - storageSize.freeSpace).toPrecision(3)} / ${storageSize.totalSpace.toPrecision(3)} ${device.unit}`
                             : "Calculating..."
@@ -76,13 +78,16 @@ const UtilityButton = ({ title, desc, icon, onPress }: {
     icon: ReactNode,
     onPress: (event: GestureResponderEvent) => void
 }) => {
+
+    const { theme } = useTheme();
+
     return (
-        <TouchableOpacity style={styles.utilityButton} onPress={onPress}>
+        <TouchableOpacity style={[styles.utilityButton, { backgroundColor: theme.card }]} onPress={onPress}>
             <View style={styles.utilityContent}>
                 {icon}
                 <View style={styles.utilityTextContainer}>
-                    <Text style={styles.utilityTitle}>{title}</Text>
-                    <Text style={styles.utilityDesc}>{desc}</Text>
+                    <Text style={[styles.utilityTitle, { color: theme.text }]}>{title}</Text>
+                    <Text style={[styles.utilityDesc, { color: theme.textSecondary }]}>{desc}</Text>
                 </View>
             </View>
         </TouchableOpacity>
@@ -90,6 +95,8 @@ const UtilityButton = ({ title, desc, icon, onPress }: {
 };
 
 export default function HomeScreen({ navigation }: NativeStackScreenProps<RootStackParamList>) {
+
+    const { theme } = useTheme();
 
     useEffect(() => {
         checkManagePermission().then((allowed) => {
@@ -118,33 +125,33 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
     const internalStorage = new StorageDevice('Internal Storage', RNFS.ExternalStorageDirectoryPath);
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             <HomeSearchBar navigation={navigation} />
             <ScrollView style={styles.scrollView}>
-                <View style={styles.quickAccessGrid}>
+                <View style={[styles.quickAccessGrid, { backgroundColor: theme.card}]}>
                     <QuickAccessButton
                         name="Images"
-                        icon={<Feather name="image" size={28} color="black" />}
+                        icon={<Feather name="image" size={28} color={theme.text} />}
                         onPress={() => gotoCategory("Images")}
                     />
                     <QuickAccessButton
                         name="Videos"
-                        icon={<Feather name="video" size={28} color="black" />}
+                        icon={<Feather name="video" size={28} color={theme.text} />}
                         onPress={() => gotoCategory("Videos")}
                     />
                     <QuickAccessButton
                         name="Audio"
-                        icon={<Feather name="music" size={28} color="black" />}
+                        icon={<Feather name="music" size={28} color={theme.text} />}
                         onPress={() => gotoCategory("Audio")}
                     />
                     <QuickAccessButton
                         name="Documents"
-                        icon={<Ionicons name="document-outline" size={28} color="black" />}
+                        icon={<Ionicons name="document-outline" size={28} color={theme.text} />}
                         onPress={() => gotoCategory("Documents")}
                     />
                     <QuickAccessButton
                         name="Downloads"
-                        icon={<Feather name="download" size={28} color="black" />}
+                        icon={<Feather name="download" size={28} color={theme.text} />}
                         onPress={() => gotoCategory("Downloads")}
                     />
                     {/* <QuickAccessButton
@@ -154,11 +161,11 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
                     /> */}
                 </View>
 
-                <Text style={styles.sectionTitle}>All storage</Text>
+                <Text style={[styles.storageTitle, { color: theme.text }]}>All storage</Text>
                 <View style={styles.storageSection}>
                     <StorageCard
                         device={internalStorage}
-                        icon={<Feather name="smartphone" size={24} color="#666" />}
+                        icon={<Feather name="smartphone" size={24} color={theme.text} />}
                         onPress={() => {
                             gotoStorageDevice(internalStorage);
                         }}
@@ -169,18 +176,18 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
                     /> */}
                 </View>
 
-                <Text style={styles.sectionTitle}>Utilities</Text>
+                <Text style={[styles.storageTitle, { color: theme.text }]}>Utilities</Text>
                 <View style={styles.utilitiesSection}>
                     <UtilityButton
                         title="Large File"
                         desc="Files larger than 200MB"
-                        icon={<MaterialCommunityIcons name="file-document-outline" size={24} color="#666" />}
+                        icon={<MaterialCommunityIcons name="file-document-outline" size={24} color={theme.text} />}
                         onPress={() => navigation.navigate("LargeFiles")}
                     />
                     <UtilityButton
                         title="Duplicate Files"
                         desc="Find and remove duplicate files"
-                        icon={<MaterialCommunityIcons name="content-copy" size={24} color="#666" />}
+                        icon={<MaterialCommunityIcons name="content-copy" size={24} color={theme.text} />}
                         onPress={() => navigation.navigate("Duplicates")}
                     />
                     {/* <UtilityButton

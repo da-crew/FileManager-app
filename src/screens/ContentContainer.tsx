@@ -20,6 +20,7 @@ import ItemViewModeSelection from "../components/ContentContainer/ItemViewModeSe
 import { getFileType, openWith } from "../utils/openWith";
 import { useProgress } from "../components/ProgressBar/ProgressContext";
 import ProgressBar from "../components/ProgressBar/ProgressBar";
+import { useTheme } from "../components/ThemeContext";
 
 
 
@@ -35,6 +36,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{ selectionSet: Set<RNFS.ReadDirItem>, isSelecting: boolean }>({ selectionSet: new Set(), isSelecting: false });
     const [movingState, setMovingState] = useState<MovingState | null>(null);
 
+    const { theme } = useTheme();
     const progress = useProgress();
 
     const deleteCancelledRef = useRef(false);

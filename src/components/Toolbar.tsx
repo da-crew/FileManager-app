@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, GestureResponderEvent } from 'react-nativ
 import { MaterialIcons, Ionicons, AntDesign } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import PropTypes from 'prop-types';
-
+import { useTheme } from './ThemeContext';
 
 interface ToolbarProps {
     navigation: any,
@@ -31,6 +31,7 @@ interface ToolbarProps {
  */
 
 export default function Toolbar({ navigation, containerName, goBackHandler, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
+    const { theme } = useTheme();
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#d9d9d9' }}>
             <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={goBackHandler}>
