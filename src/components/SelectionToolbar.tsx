@@ -36,4 +36,5 @@ export default function SelectionToolBar({ onCancel, onSelectAll, count, maxCoun
             </TouchableOpacity>
         </View>
     </View>
+    /*hi*/ 
 }
