@@ -33,6 +33,7 @@ interface ToolbarProps {
  * @returns {JSX.Element} The rendered Toolbar component.
  */
 
+
 export default function Toolbar({ navigation, containerName, path, goBackHandler, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
     return (
         <View style={{ 
@@ -68,22 +69,24 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
             }}>
                 {containerName}
             </Text>
-            <TouchableOpacity
-                style={{ 
-                    marginLeft: 'auto', 
-                    marginRight: 10,
-                    padding: 8,
-                    borderRadius: 20,
-                    backgroundColor: 'rgba(242, 242, 242, 0.6)'
-                }}
-                onPress={() => navigation.replace("Search", {
-                    containerName: containerName,
-                    path: path,
-                    containerType: ContainerType.DEFAULT
-                })}
-            >
-                <Ionicons name="search" size={22} color="#333" />
-            </TouchableOpacity>
+            {path && containerName && (
+                <TouchableOpacity
+                    style={{ 
+                        marginLeft: 'auto', 
+                        marginRight: 10,
+                        padding: 8,
+                        borderRadius: 20,
+                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                    }}
+                    onPress={() => navigation.replace("Search", {
+                        containerName: containerName,
+                        path: path,
+                        containerType: ContainerType.DEFAULT
+                    })}
+                >
+                    <Ionicons name="search" size={22} color="#333" />
+                </TouchableOpacity>
+            )}
 
             {//View option, i.e., grid, detailed, simple
                 layoutChangeHandler ? <TouchableOpacity
