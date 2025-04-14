@@ -29,28 +29,26 @@ const Stack = createNativeStackNavigator();
 
 export default function App() {
 
-    return (
-        
-    <ThemeProvider>
-      <ProgressProvider>
-        <NavigationContainer>
-            <Stack.Navigator
-                initialRouteName="Home"
-                screenOptions={{
-                    headerShown: false
-                }}
-            >
-                <Stack.Screen name="Home" component={HomeScreen} />
-                <Stack.Screen name="Container" component={ContentContainer} />
-                <Stack.Screen name="LargeFiles" component={LargeFiles} />
-                <Stack.Screen name="Duplicates" component={DuplicateFiles} />
-                <Stack.Screen name="RecycleBin" component={RecycleBin} />
-                <Stack.Screen name="Search" component={SearchScreen} />
-                <Stack.Screen name="Settings" component={SettingsScreen} />
-                <Stack.Screen name="Test" component={TestScreen} />
+    return (<ThemeProvider>
+        <ProgressProvider>
+            <NavigationContainer>
+                <Stack.Navigator
+                    initialRouteName="Home"
+                    screenOptions={{
+                        headerShown: false
+                    }}
+                >
+                    <Stack.Screen name="Home" component={HomeScreen} />
+                    <Stack.Screen name="Container" component={ContentContainer} />
+                    <Stack.Screen name="LargeFiles" component={LargeFiles} />
+                    <Stack.Screen name="Duplicates" component={DuplicateFiles} />
+                    <Stack.Screen name="RecycleBin" component={RecycleBin} />
+                    <Stack.Screen name="Search" component={SearchScreen} />
+                    <Stack.Screen name="Settings" component={SettingsScreen} />
+                    <Stack.Screen name="Test" component={TestScreen} />
 
-            </Stack.Navigator>
-        </NavigationContainer>
+                </Stack.Navigator>
+            </NavigationContainer>
         </ProgressProvider>;
     </ThemeProvider>
     );

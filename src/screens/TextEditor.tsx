@@ -6,6 +6,7 @@ import { Alert, BackHandler, SafeAreaView, StyleSheet, Text, TextInput, Touchabl
 import * as RNFS from 'react-native-fs';
 import { RootStackParamList } from '../App';
 import { ContentContainerRouteParams } from '../components/ContentContainer/common';
+import { useTheme } from '../components/ThemeContext';
 
 export default function TextEditor({ route, navigation }: NativeStackScreenProps<RootStackParamList>) {
   const [content, setContent] = useState<string>('');
@@ -13,7 +14,7 @@ export default function TextEditor({ route, navigation }: NativeStackScreenProps
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { path, containerName } = route.params as ContentContainerRouteParams;
   const filePath = path.build();
-
+  const { theme } = useTheme();
   useEffect(() => {
     loadFile();
   }, []);
@@ -120,11 +121,11 @@ export default function TextEditor({ route, navigation }: NativeStackScreenProps
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#d9d9d9' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: theme.background }}>
         <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={handleBack}>
           <MaterialIcons name="arrow-back-ios-new" size={20} />
         </TouchableOpacity>
-        <Text style={{ fontSize: 20 }}>{filePath.split('/').pop()}</Text>
+        <Text style={{ fontSize: 20, color: theme.text }}>{filePath.split('/').pop()}</Text>
         <TouchableOpacity
           style={{ marginLeft: 'auto', marginRight: 15 }}
           onPress={saveFile}

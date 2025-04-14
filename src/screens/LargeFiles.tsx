@@ -51,7 +51,7 @@ enum SortType {
 
 export default function LargeFiles() {
     const navigation = useNavigation();
-    const { theme } = useTheme();
+    const { theme } = useTheme()
     const [largeFiles, setLargeFiles] = useState<RNFS.ReadDirItem[]>(mockLargeFiles);
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
     const [isSelecting, setIsSelecting] = useState(false);
@@ -144,10 +144,9 @@ export default function LargeFiles() {
         updateFileList();
 
     };
-
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-            <StatusBar barStyle="dark-content" backgroundColor={theme.background} /> 
+            <StatusBar barStyle={theme.barStyle === '#000000' ? 'light-content' : 'dark-content'} backgroundColor={theme.background} /> 
 
             {!isSelecting ? (
                 <Toolbar
@@ -172,7 +171,7 @@ export default function LargeFiles() {
                 />
             )}
 
-            <View style={styles.contentContainer}>
+            <View style={[styles.contentContainer, { backgroundColor: theme.background}]}>
                 <FlatList
                     data={largeFiles}
                     keyExtractor={(item) => item.path}
@@ -189,27 +188,27 @@ export default function LargeFiles() {
             </View>
 
             {isSelecting && (
-                <View style={{ backgroundColor: '#d9d9d9', borderTopWidth: 1, borderColor: '#e7e7e7', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20 }}>
-                    <BottomBarItem name='Copy' icon={<Feather name='copy' size={30} />} onPress={() => console.log('Copy')} />
-                    <BottomBarItem name='Move' icon={<Feather name='scissors' size={30} />} onPress={() => console.log('Move')} />
-                    <BottomBarItem name='Rename' icon={<Foundation name='pencil' size={30} />} onPress={() => console.log('Rename')} />
-                    <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} />} onPress={() => console.log('Delete')} />
-                    <BottomBarItem name='More' icon={<MaterialIcons name='more-vert' size={30} />} onPress={() => console.log('More')} />
+                <View style={{ backgroundColor: theme.background, borderTopWidth: 1, borderColor: theme.iconColor, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20 }}>
+                    <BottomBarItem name='Copy' icon={<Feather name='copy' size={30} color={theme.iconColor} />} onPress={() => console.log('Copy')} />
+                    <BottomBarItem name='Move' icon={<Feather name='scissors' size={30} color={theme.iconColor} />} onPress={() => console.log('Move')} />
+                    <BottomBarItem name='Rename' icon={<Foundation name='pencil' size={30} color={theme.iconColor} />} onPress={() => console.log('Rename')} />
+                    <BottomBarItem name='Delete' icon={<MaterialIcons name='delete' size={30} color={theme.iconColor} />} onPress={() => console.log('Delete')} />
+                    <BottomBarItem name='More' icon={<MaterialIcons name='more-vert' size={30} color={theme.iconColor} />} onPress={() => console.log('More')} />
                 </View>
             )}
 
             <Modal visible={sortByOptionVisible} transparent={true} onRequestClose={() => setSortByOptionVisible(false)} >
-                <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <View style={{ backgroundColor: 'white', justifyContent: 'space-between', paddingBottom: 5 }}>
-                        <BottomBarOptions name='Alphabetical' icon={<FontAwesome name="sort-alpha-asc" size={30} style={{ padding: 15 }} />} onPress={() => {
+                <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: theme.background }}>
+                    <View style={{ backgroundColor: theme.background, justifyContent: 'space-between', paddingBottom: 5 }}>
+                        <BottomBarOptions name='Alphabetical' icon={<FontAwesome name="sort-alpha-asc" size={30}  style={{ padding: 15, color:theme.iconColor }} />} onPress={() => {
                             updateSortType(SortType.ALPHABETICAL);
                             setSortByOptionVisible(false);
                         }} />
-                        <BottomBarOptions name='Date' icon={<FontAwesome name="sort-numeric-asc" size={30} style={{ padding: 15 }} />} onPress={() => {
+                        <BottomBarOptions name='Date' icon={<FontAwesome name="sort-numeric-asc" size={30} style={{ padding: 15, color:theme.iconColor }} />} onPress={() => {
                             updateSortType(SortType.DATE);
                             setSortByOptionVisible(false);
                         }} />
-                        <BottomBarOptions name='Size' icon={<MaterialIcons name="format-size" size={30} style={{ padding: 15 }} />} onPress={() => {
+                        <BottomBarOptions name='Size' icon={<MaterialIcons name="format-size" size={30} style={{ padding: 15, color:theme.iconColor}} />} onPress={() => {
                             updateSortType(SortType.SIZE);
                             setSortByOptionVisible(false);
                         }} />
@@ -223,7 +222,7 @@ export default function LargeFiles() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#F2F2F7"
+        
     },
     contentContainer: {
         flex: 1,
@@ -234,10 +233,8 @@ const styles = StyleSheet.create({
     listContent: {
         paddingVertical: 0
     },
-    bottomBar: {
-        backgroundColor: '#d9d9d9', 
-        borderTopWidth: 1, 
-        borderColor: '#e7e7e7', 
+    bottomBar: { 
+        borderTopWidth: 1,  
         flexDirection: 'row', 
         justifyContent: 'space-between', 
         paddingHorizontal: 15,

@@ -55,7 +55,7 @@ export default function RecycleBin() {
         const isSelected = selectedItems.includes(item.id);
         return (
             <TouchableOpacity style={styles.itemContainer} onPress={() => toggleSelect(item.id)}>
-                <MaterialCommunityIcons name="file-pdf-box" size={40} color={theme.textSecondary} />
+                <MaterialCommunityIcons name="file-pdf-box" size={40} color={theme.primary} />
                 <View style={styles.itemInfo}>
                     <Text style={[styles.itemName, { color: theme.text }]}>{item.name}</Text>
                     <Text style={[styles.itemDetail, { color: theme.textSecondary }]}>{item.date} - {item.size}</Text>
@@ -84,7 +84,7 @@ export default function RecycleBin() {
                         style={{ marginLeft: 'auto', marginRight: 15 }}
                         onPress={() => navigation.navigate("Search")} // 3. ใช้ navigation แบบมีประเภทแล้ว
                     >
-                        <Ionicons name="search" size={24} color="black" />
+                        <Ionicons name="search" size={24} color={theme.iconColor} />
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -144,7 +144,7 @@ export default function RecycleBin() {
                             setSortByOptionVisible(true);
                         }}>
 
-                            <MaterialCommunityIcons name="select-all" size={24} color="black" />
+                            <MaterialCommunityIcons name="select-all" size={24} color={theme.textSecondary} />
                             <Text style={styles.menuItemText}>Select All</Text>
                         </TouchableOpacity>
                         
@@ -167,7 +167,7 @@ export default function RecycleBin() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff"
+
     },
     header: {
         flexDirection: "row",
@@ -177,7 +177,6 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         backgroundColor: "#fff",
         borderBottomWidth: 1,
-        borderBottomColor: "#000"
     },
     headerTitle: {
         fontSize: 18,
@@ -191,7 +190,6 @@ const styles = StyleSheet.create({
         color: "#555",
         paddingHorizontal: 16,
         paddingVertical: 8,
-        backgroundColor: "#f9f9f9"
     },
     listContainer: {
         padding: 16
@@ -202,7 +200,6 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         alignItems: "center",
         borderBottomWidth: 1,
-        borderBottomColor: "#000"
     },
     itemInfo: {
         flex: 1,

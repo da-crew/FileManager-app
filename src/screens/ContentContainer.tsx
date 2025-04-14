@@ -20,7 +20,7 @@ import ItemViewModeSelection from "../components/ContentContainer/ItemViewModeSe
 import { getFileType, openWith } from "../utils/openWith";
 import { useProgress } from "../components/ProgressBar/ProgressContext";
 import ProgressBar from "../components/ProgressBar/ProgressBar";
-
+import { useTheme } from '../components/ThemeContext';
 
 
 
@@ -31,7 +31,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     const routeParams = route.params as ContentContainerRouteParams;
     const storageName = routeParams.containerName;
     const containerType = routeParams.containerType;
-
+    const { theme } = useTheme();
     const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{ selectionSet: Set<RNFS.ReadDirItem>, isSelecting: boolean }>({ selectionSet: new Set(), isSelecting: false });
     const [movingState, setMovingState] = useState<MovingState | null>(null);
 
@@ -446,8 +446,8 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         />
 
         <Modal visible={sortByOptionVisible} transparent={true} onRequestClose={() => setSortByOptionVisible(false)} >
-            <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }} >
-                <View style={{ backgroundColor: 'white', justifyContent: 'space-between', paddingBottom: 5 }} >
+            <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: theme.background }} >
+                <View style={{ backgroundColor: theme.background, justifyContent: 'space-between', paddingBottom: 5 }} >
                     <BottomBarOptions name='Alphabetical' icon={<FontAwesome name="sort-alpha-asc" size={30} style={{ padding: 15 }} />} onPress={() => {
                         updateSortType(SortType.ALPHABETICAL);
                         setSortByOptionVisible(false);
@@ -461,9 +461,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         </Modal>
 
         <Modal visible={renameModalVisible} transparent={true} onRequestClose={closeRenameModal}>
-            <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: 30 }}>
-                <View style={{ padding: 15, backgroundColor: 'white', borderRadius: 5 }}>
-                    <Text style={{ fontSize: 20, paddingBottom: 10 }}>Rename Item</Text>
+            <View style={{ flex: 1, justifyContent: 'center', backgroundColor: theme.background, padding: 30 }}>
+                <View style={{ padding: 15, backgroundColor: theme.background, borderRadius: 5 }}>
+                    <Text style={{ fontSize: 20, paddingBottom: 10, color:theme.text }}>Rename Item</Text>
                     <TextInput
                         style={{
                             height: 40,
@@ -482,17 +482,17 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     {/* Buttons */}
                     <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'space-between' }}>
                         <TouchableOpacity
-                            style={{ flex: 1, backgroundColor: '#6C757D', marginRight: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
+                            style={{ flex: 1, backgroundColor: theme.background, marginRight: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
                             onPress={closeRenameModal}
                         >
-                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
+                            <Text style={{ color: theme.text, fontWeight: 'bold' }}>Cancel</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={{ flex: 1, backgroundColor: newName == "" ? '#6C757D' : '#007BFF', marginLeft: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
                             onPress={confirmRename}
                             disabled={newName == ""}
                         >
-                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Rename</Text>
+                            <Text style={{ color: theme.text, fontWeight: 'bold' }}>Rename</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

@@ -6,7 +6,7 @@ import * as RNFS from 'react-native-fs';
 import { Path } from "../../FileSystem";
 import BottomBarOptions from "./BottomBarOptions";
 import { CreationType } from "./common";
-
+import { useTheme } from '../ThemeContext';
 
 export default function ItemCreator(props: {
     enabled: boolean,
@@ -74,11 +74,12 @@ export default function ItemCreator(props: {
         setCreationState(null);
         props.onCreationCanceled();
     };
+    const { theme } = useTheme();
 
     return (<>
         <Modal visible={newItemOptionVisible} transparent={true} onRequestClose={() => props.onCreationCanceled()}>
-            <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                <View style={{ backgroundColor: 'white', justifyContent: 'space-between', paddingBottom: 5 }}>
+            <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: theme.background }}>
+                <View style={{ backgroundColor: theme.background, justifyContent: 'space-between', paddingBottom: 5 }}>
                     <BottomBarOptions name='New Folder' icon={<MaterialIcons name="create-new-folder" size={30} style={{ padding: 15 }} />} onPress={() => {
                         setNewItemOptionVisible(false);
                         setCreationState({
@@ -98,8 +99,8 @@ export default function ItemCreator(props: {
         </Modal>
 
         <Modal visible={creationState != null && props.enabled} transparent={true} onRequestClose={() => props.onCreationCanceled()}>
-            <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: 30 }}>
-                <View style={{ padding: 15, backgroundColor: 'white', borderRadius: 5 }}>
+            <View style={{ flex: 1, justifyContent: 'center', backgroundColor: theme.background, padding: 30 }}>
+                <View style={{ padding: 15, backgroundColor: theme.background, borderRadius: 5 }}>
                     <Text style={{ fontSize: 20, paddingBottom: 10 }}>Enter a name</Text>
                     <TextInput
                         style={{
@@ -125,16 +126,16 @@ export default function ItemCreator(props: {
                     {/* Buttons */}
                     <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'space-between' }}>
                         <TouchableOpacity
-                            style={{ flex: 1, backgroundColor: '#6C757D', marginRight: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
+                            style={{ flex: 1, backgroundColor: theme.background, marginRight: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
                             onPress={() => props.onCreationCanceled()}
                         >
-                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
+                            <Text style={{ color: theme.text, fontWeight: 'bold' }}>Cancel</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={{ flex: 1, backgroundColor: '#007BFF', marginLeft: 5, padding: 10, paddingVertical: 10, alignItems: 'center', borderRadius: 5 }}
+                            style={{ flex: 1, backgroundColor: theme.background, marginLeft: 5, padding: 10, paddingVertical: 10, alignItems: 'center', borderRadius: 5 }}
                             onPress={onCreate}
                         >
-                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Ok</Text>
+                            <Text style={{ color: theme.text, fontWeight: 'bold' }}>Ok</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

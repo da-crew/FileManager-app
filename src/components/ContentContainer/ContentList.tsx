@@ -1,7 +1,7 @@
 import { SafeAreaView, View, StatusBar, Text, ScrollView, TouchableOpacity, Modal, GestureResponderEvent, Alert, BackHandler, FlatList } from "react-native";
 import ItemCard from "../ItemCard";
 import * as RNFS from "react-native-fs"
-
+import { useTheme } from '../ThemeContext';
 interface ContentListProps {
     content: RNFS.ReadDirItem[] | null;
     selectionSet: Set<RNFS.ReadDirItem>;
@@ -11,10 +11,11 @@ interface ContentListProps {
 
 
 export default function ContentList({content, selectionSet, handleSelect, handleOpen}: ContentListProps) {
+    const { theme } = useTheme();
     if (content) {
         if (content.length == 0) {
             return (<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 15 }}>Empty</Text>
+                <Text style={{ fontSize: 15, color: theme.text }}>Empty</Text>
             </View>);
         }
         return (
@@ -33,7 +34,7 @@ export default function ContentList({content, selectionSet, handleSelect, handle
     } else {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 15 }}>Loading</Text>
+                <Text style={{ fontSize: 15, color: theme.text }}>Loading</Text>
             </View>
         );
     }
