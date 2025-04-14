@@ -550,7 +550,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             setContent([]);
             setIsLoadingImages(false);
         }
-    }
+    useEffect(() => fetchContent(), [sortType]);
 
     useEffect(() => {
         // เริ่มตรวจสอบการอนุญาตเมื่อเริ่มต้น
@@ -591,7 +591,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
 
         return () => backHandler.remove();
-    }, []);
+    }, [navpath]);
 
     function updateSortType(type: SortType) {
         if (sortType !== type) {
@@ -1860,7 +1860,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         }
         
         if (navpath.nodes.length == 0) {
-            navigation.goBack();
+            navigation.navigate("Home");
             return;
         }
         navpath.nodes.pop();
@@ -2432,7 +2432,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             {//Toolbar 1
                 !isSelecting
                     //Default Mode
-                    ? <Toolbar navigation={navigation} containerName={storageName}
+                    ? <Toolbar navigation={navigation} containerName={storageName} path={navpath}
                         goBackHandler={() => handleGoBack()}
                         sortByHandler={() => setSortByOptionVisible(true)}
                         createHandler={containerType == ContainerType.DEFAULT ? () => setItemCreatorVisible(true) : undefined}
@@ -2659,5 +2659,5 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         </SafeAreaView>
     );
 }
-
+}
 export default ContentContainer;

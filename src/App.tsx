@@ -4,7 +4,6 @@ import ContentContainer from './screens/ContentContainer';
 import LargeFiles from './screens/LargeFiles';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react';
-
 import DuplicateFiles from './screens/Duplicates';
 import RecycleBin from './screens/RecycleBin';
 import SearchScreen from './screens/Search';
@@ -24,12 +23,14 @@ export type RootStackParamList = {
     RecycleBin: undefined,
     Test: undefined,
     Container: ContentContainerRouteParams,
-    Search: undefined,
     Settings: undefined,
-    ImageViewer: {
+    ImageViewer: 
+    {
         imagePath: string;
         imageName: string;
     }
+    TextEditor: ContentContainerRouteParams,
+    Search: ContentContainerRouteParams,
 };
 
 const Stack = createNativeStackNavigator();
