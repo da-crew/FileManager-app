@@ -20,6 +20,7 @@ import ItemViewModeSelection from "../components/ContentContainer/ItemViewModeSe
 import { getFileType, openWith } from "../utils/openWith";
 import { useProgress } from "../components/ProgressBar/ProgressContext";
 import ProgressBar from "../components/ProgressBar/ProgressBar";
+import { useTheme } from "../components/ThemeContext";
 
 // รายการนามสกุลไฟล์รูปภาพ
 const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
@@ -424,6 +425,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{ selectionSet: Set<RNFS.ReadDirItem>, isSelecting: boolean }>({ selectionSet: new Set(), isSelecting: false });
     const [movingState, setMovingState] = useState<MovingState | null>(null);
 
+    const { theme } = useTheme();
     const progress = useProgress();
 
     const deleteCancelledRef = useRef(false);
@@ -496,8 +498,8 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 let files = items.filter((item) => item.isFile()).sort(sortHandler);
                 setContent(hiddenFolders.concat(folders).concat(files));
             })
-            .catch(() => {
-                console.log("An error occured");
+            .catch((e) => {
+                console.log("Error while reading content: ", e);
             });
     }
 
@@ -2288,23 +2290,25 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
     // Return section
     return (
-        <SafeAreaView style={{ flex: 1 }}>
-        <StatusBar />
-        <View style={{ flex: 1 }}>
-            {//Toolbar 1
-                !isSelecting
-                    //Default Mode
-                    ? <Toolbar navigation={navigation} containerName={storageName} path={navpath}
+        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+            <StatusBar backgroundColor={theme.background} />
+            <View style={{ flex: 1 }}>
+                {/* Toolbar */}
+                {!isSelecting ? (
+                    <Toolbar
+                        navigation={navigation}
+                        containerName={storageName}
+                        path={navpath}
                         goBackHandler={() => handleGoBack()}
                         sortByHandler={() => setSortByOptionVisible(true)}
-                        createHandler={containerType == ContainerType.DEFAULT ? () => setItemCreatorVisible(true) : undefined}
+                        createHandler={containerType === ContainerType.DEFAULT ? () => setItemCreatorVisible(true) : undefined}
                     />
-                    //Selection Mode
-                    : <SelectionToolBar
+                ) : (
+                    <SelectionToolBar
                         onCancel={unselectAll}
                         onSelectAll={() => {
                             if (content) {
-                                if (selectionSet.size == content.length) {
+                                if (selectionSet.size === content.length) {
                                     unselectAll();
                                 } else {
                                     for (const item of content) {
@@ -2317,86 +2321,49 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                         count={selectionSet.size}
                         maxCount={(content ?? []).length}
                     />
-            }
-            {//Toolbar 2
-                containerType == ContainerType.DEFAULT
-                    ? <PathDisplayer navpath={navpath} />//Display path
-                        : storageName === "Videos" ? (
-                            // แท็บสำหรับวิดีโอ
-                            <View style={{ 
-                                flexDirection: 'row', 
-                                backgroundColor: '#f8f8f8', 
-                                borderRadius: 30, 
-                                overflow: 'hidden',
-                                margin: 10,
-                                elevation: 3,
-                                shadowColor: '#000',
-                                shadowOffset: { width: 0, height: 1 },
-                                shadowOpacity: 0.22,
-                                shadowRadius: 2.22,
-                                borderWidth: 0.5,
-                                borderColor: '#e0e0e0',
-                                padding: 4
-                            }}>
-                                <TouchableOpacity 
-                                    style={{ 
-                                        flex: 1, 
-                                        backgroundColor: currentTab === 'Videos' ? '#FFFFFF' : 'transparent',
-                                        paddingVertical: 12,
-                                        paddingHorizontal: 5,
-                                        alignItems: 'center',
-                                        borderRadius: 25,
-                                        flexDirection: 'row',
-                                        justifyContent: 'center',
-                                    }}
-                                    onPress={() => switchTab('Videos')}
-                                >
-                                    <MaterialIcons 
-                                        name="videocam" 
-                                        size={18} 
-                                        color={currentTab === 'Videos' ? '#2196F3' : '#757575'} 
-                                        style={{marginRight: 6}}
-                                    />
-                                    <Text style={{ 
-                                        fontWeight: currentTab === 'Videos' ? 'bold' : 'normal',
-                                        color: currentTab === 'Videos' ? '#2196F3' : '#757575',
-                                        fontSize: 15
-                                    }}>Videos</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity 
-                                    style={{ 
-                                        flex: 1, 
-                                        backgroundColor: currentTab === 'Collections' ? '#FFFFFF' : 'transparent',
-                                        paddingVertical: 12,
-                                        paddingHorizontal: 5,
-                                        alignItems: 'center',
-                                        borderRadius: 25,
-                                        flexDirection: 'row',
-                                        justifyContent: 'center'
-                                    }}
-                                    onPress={() => switchTab('Collections')}
-                                >
-                                    <MaterialIcons 
-                                        name="collections" 
-                                        size={18} 
-                                        color={currentTab === 'Collections' ? '#2196F3' : '#757575'} 
-                                        style={{marginRight: 6}}
-                                    />
-                                    <Text style={{ 
-                                        fontWeight: currentTab === 'Collections' ? 'bold' : 'normal',
-                                        color: currentTab === 'Collections' ? '#2196F3' : '#757575',
-                                        fontSize: 15
-                                    }}>Collections</Text>
-                                </TouchableOpacity>
-                            </View>
-                        ) : storageName === "Audio" || storageName === "Downloads" ? (
-                            // ไม่แสดงแถบชื่อสำหรับหน้าเสียงและดาวน์โหลด
-                            null
-                        ) : <ItemViewModeSelection 
+                )}
+    
+                {/* Path Displayer or Tab Selector */}
+                {containerType === ContainerType.DEFAULT ? (
+                    <PathDisplayer navpath={navpath} />
+                ) : storageName === "Videos" ? (
+                    <View style={{ flexDirection: 'row', backgroundColor: '#f8f8f8', borderRadius: 30, margin: 10, padding: 4 }}>
+                        <TouchableOpacity
+                            style={{
+                                flex: 1,
+                                backgroundColor: currentTab === 'Videos' ? '#FFFFFF' : 'transparent',
+                                paddingVertical: 12,
+                                alignItems: 'center',
+                                borderRadius: 25,
+                                flexDirection: 'row',
+                                justifyContent: 'center',
+                            }}
+                            onPress={() => switchTab('Videos')}
+                        >
+                            <MaterialIcons name="videocam" size={18} color={currentTab === 'Videos' ? '#2196F3' : '#757575'} />
+                            <Text style={{ color: currentTab === 'Videos' ? '#2196F3' : '#757575', fontWeight: currentTab === 'Videos' ? 'bold' : 'normal' }}>Videos</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{
+                                flex: 1,
+                                backgroundColor: currentTab === 'Collections' ? '#FFFFFF' : 'transparent',
+                                paddingVertical: 12,
+                                alignItems: 'center',
+                                borderRadius: 25,
+                                flexDirection: 'row',
+                                justifyContent: 'center',
+                            }}
+                            onPress={() => switchTab('Collections')}
+                        >
+                            <MaterialIcons name="collections" size={18} color={currentTab === 'Collections' ? '#2196F3' : '#757575'} />
+                            <Text style={{ color: currentTab === 'Collections' ? '#2196F3' : '#757575', fontWeight: currentTab === 'Collections' ? 'bold' : 'normal' }}>Collections</Text>
+                        </TouchableOpacity>
+                    </View>
+                ) : (
+                    <ItemViewModeSelection
                         fileType={currentFileType}
                         initialMode={currentViewMode}
-                        onChange={(mode) => {//Display Viewing Options
-                            console.log('Changing view mode to:', mode);
+                        onChange={(mode) => {
                             setCurrentViewMode(mode);
                             if (mode === ViewMode.FOLDERS) {
                                 setCurrentAlbum(null);
@@ -2405,170 +2372,115 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                 loadAllImages();
                             }
                             unselectAll();
-                        }} 
-                      />
-            }
-
-            {/* Content is displayed here */}
-            <View style={{ margin: 10, flex: 1 }}>
-                {renderContent()}
-        </View>
-
-        <SelectionBottomBar 
-            selectionSet={selectionSet}
-        isSelecting={selectionSet.size > 0} 
-        isMoving={movingState != null} 
-        isPasteLocationValid={movingState?.sourceDir.build() != navpath.build()}
-            copyActionHandler={function (): void {
-                let itemArray = Array.from(selectionSet);
-
-                setMovingState({
-                    sourceDir: navpath.clone(),
-                    moveType: MoveType.COPY,
-                    items: itemArray,
-                });
-
-                unselectAll();
-                    }} 
-                    moveActionHandler={function (): void {
-                let itemArray = Array.from(selectionSet);
-
-                setMovingState({
-                    sourceDir: navpath.clone(),
-                    moveType: MoveType.CUT,
-                    items: itemArray,
-                });
-
-                unselectAll();
-                    }} 
-                    renameActionHandler={function (): void {
-                if (selectionSet.size !== 1) {
-                    throw new Error("Selection Set has more than element!");
-                }
-
-                const itemToRename = Array.from(selectionSet)[0];
-                openRenameModal(itemToRename);
-                unselectAll();
-
-                    }} 
-                    deleteActionHandler={handleDeleteAction} 
-                    pasteCancelActionHandler={function (): void {
-                setMovingState(null);
-                    }} 
-                    pasteActionHandler={() => handlePasteAction().catch((reason) => { throw new Error(reason) })}
-        />
-
-        <Modal visible={sortByOptionVisible} transparent={true} onRequestClose={() => setSortByOptionVisible(false)} animationType="slide">
-            <TouchableOpacity 
-                style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}
-                activeOpacity={1} 
-                onPress={() => setSortByOptionVisible(false)}
-            >
-                <View 
-                    style={{ 
-                        backgroundColor: 'white', 
-                        borderTopLeftRadius: 20, 
-                        borderTopRightRadius: 20,
-                        paddingVertical: 20
-                    }}
-                >
-                    <View style={{ alignItems: 'center', marginBottom: 15 }}>
-                        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#333' }}>เรียงลำดับตาม</Text>
-                        <View style={{ width: 40, height: 4, backgroundColor: '#ccc', borderRadius: 2, marginTop: 10 }} />
-                    </View>
-                    
-                    <TouchableOpacity
-                        style={{ 
-                            flexDirection: 'row', 
-                            alignItems: 'center', 
-                            paddingVertical: 12, 
-                            paddingHorizontal: 20,
-                            backgroundColor: sortType === SortType.ALPHABETICAL ? '#f0f0f0' : 'transparent'
                         }}
-                        onPress={() => {
-                            updateSortType(SortType.ALPHABETICAL);
-                        }}
-                    >
-                        <FontAwesome name="sort-alpha-asc" size={24} color="#007AFF" style={{ marginRight: 20 }} />
-                        <Text style={{ fontSize: 16, color: '#333' }}>เรียงตามชื่อ (A-Z)</Text>
-                        {sortType === SortType.ALPHABETICAL && (
-                            <MaterialIcons name="check" size={24} color="#007AFF" style={{ marginLeft: 'auto' }} />
-                        )}
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity
-                        style={{ 
-                            flexDirection: 'row', 
-                            alignItems: 'center',
-                            paddingVertical: 12, 
-                            paddingHorizontal: 20,
-                            backgroundColor: sortType === SortType.DATE ? '#f0f0f0' : 'transparent'
-                        }}
-                        onPress={() => {
-                            updateSortType(SortType.DATE);
-                        }}
-                    >
-                        <MaterialIcons name="access-time" size={24} color="#FF9500" style={{ marginRight: 20 }} />
-                        <Text style={{ fontSize: 16, color: '#333' }}>เรียงตามวันที่ (ล่าสุด)</Text>
-                        {sortType === SortType.DATE && (
-                            <MaterialIcons name="check" size={24} color="#007AFF" style={{ marginLeft: 'auto' }} />
-                        )}
-                    </TouchableOpacity>
-                </View>
-            </TouchableOpacity>
-        </Modal>
-
-        <Modal visible={renameModalVisible} transparent={true} onRequestClose={closeRenameModal}>
-            <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: 30 }}>
-                <View style={{ padding: 15, backgroundColor: 'white', borderRadius: 5 }}>
-                    <Text style={{ fontSize: 20, paddingBottom: 10 }}>Rename Item</Text>
-                    <TextInput
-                        style={{
-                            height: 40,
-                            borderWidth: 1,
-                            borderColor: '#ddd',
-                            paddingHorizontal: 12,
-                            borderRadius: 5,
-                            fontSize: 17,
-                            backgroundColor: '#fff',
-                        }}
-                        value={newName}
-                        placeholder="Enter new name"
-                        onChangeText={setNewName}
                     />
-
-                    {/* Buttons */}
-                    <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'space-between' }}>
+                )}
+    
+                {/* Content */}
+                <View style={{ margin: 10, flex: 1, backgroundColor: theme.background }}>
+                    {renderContent()}
+                </View>
+            </View>
+    
+            {/* Bottom Bar */}
+            <SelectionBottomBar
+                selectionSet={selectionSet}
+                isSelecting={selectionSet.size > 0}
+                isMoving={movingState != null}
+                isPasteLocationValid={movingState?.sourceDir.build() !== navpath.build()}
+                copyActionHandler={() => {
+                    const itemArray = Array.from(selectionSet);
+                    setMovingState({ sourceDir: navpath.clone(), moveType: MoveType.COPY, items: itemArray });
+                    unselectAll();
+                }}
+                moveActionHandler={() => {
+                    const itemArray = Array.from(selectionSet);
+                    setMovingState({ sourceDir: navpath.clone(), moveType: MoveType.CUT, items: itemArray });
+                    unselectAll();
+                }}
+                renameActionHandler={() => {
+                    if (selectionSet.size !== 1) throw new Error("Selection Set has more than one element!");
+                    const itemToRename = Array.from(selectionSet)[0];
+                    openRenameModal(itemToRename);
+                    unselectAll();
+                }}
+                deleteActionHandler={handleDeleteAction}
+                pasteCancelActionHandler={() => setMovingState(null)}
+                pasteActionHandler={() => handlePasteAction().catch((reason) => { throw new Error(reason); })}
+            />
+    
+            {/* Modals */}
+            <Modal visible={sortByOptionVisible} transparent={true} onRequestClose={() => setSortByOptionVisible(false)} animationType="slide">
+                <TouchableOpacity
+                    style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}
+                    activeOpacity={1}
+                    onPress={() => setSortByOptionVisible(false)}
+                >
+                    <View style={{ backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingVertical: 20 }}>
+                        <View style={{ alignItems: 'center', marginBottom: 15 }}>
+                            <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#333' }}>Sort By</Text>
+                            <View style={{ width: 40, height: 4, backgroundColor: '#ccc', borderRadius: 2, marginTop: 10 }} />
+                        </View>
                         <TouchableOpacity
-                            style={{ flex: 1, backgroundColor: '#6C757D', marginRight: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
-                            onPress={closeRenameModal}
-                    >
-                        <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
-                    </TouchableOpacity>
-                        <TouchableOpacity
-                            style={{ flex: 1, backgroundColor: newName == "" ? '#6C757D' : '#007BFF', marginLeft: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
-                            onPress={confirmRename}
-                            disabled={newName == ""}
+                            style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 20 }}
+                            onPress={() => updateSortType(SortType.ALPHABETICAL)}
                         >
-                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Rename</Text>
+                            <FontAwesome name="sort-alpha-asc" size={24} color="#007AFF" style={{ marginRight: 20 }} />
+                            <Text style={{ fontSize: 16, color: '#333' }}>Alphabetical (A-Z)</Text>
+                            {sortType === SortType.ALPHABETICAL && <MaterialIcons name="check" size={24} color="#007AFF" />}
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 20 }}
+                            onPress={() => updateSortType(SortType.DATE)}
+                        >
+                            <MaterialIcons name="access-time" size={24} color="#FF9500" style={{ marginRight: 20 }} />
+                            <Text style={{ fontSize: 16, color: '#333' }}>Date (Newest First)</Text>
+                            {sortType === SortType.DATE && <MaterialIcons name="check" size={24} color="#007AFF" />}
                         </TouchableOpacity>
                     </View>
+                </TouchableOpacity>
+            </Modal>
+    
+            <Modal visible={renameModalVisible} transparent={true} onRequestClose={closeRenameModal}>
+                <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: 30 }}>
+                    <View style={{ padding: 15, backgroundColor: 'white', borderRadius: 5 }}>
+                        <Text style={{ fontSize: 20, paddingBottom: 10 }}>Rename Item</Text>
+                        <TextInput
+                            style={{ height: 40, borderWidth: 1, borderColor: '#ddd', paddingHorizontal: 12, borderRadius: 5, fontSize: 17 }}
+                            value={newName}
+                            placeholder="Enter new name"
+                            onChangeText={setNewName}
+                        />
+                        <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'space-between' }}>
+                            <TouchableOpacity
+                                style={{ flex: 1, backgroundColor: '#6C757D', marginRight: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
+                                onPress={closeRenameModal}
+                            >
+                                <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={{ flex: 1, backgroundColor: newName === "" ? '#6C757D' : '#007BFF', marginLeft: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
+                                onPress={confirmRename}
+                                disabled={newName === ""}
+                            >
+                                <Text style={{ color: 'white', fontWeight: 'bold' }}>Rename</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                 </View>
-            </View>
-        </Modal>
-
-        <ProgressBar />
-
-        <ItemCreator enabled={itemCreatorVisible} currentPath={navpath}
-            onCreationCanceled={() => {
-                setItemCreatorVisible(false);
-            }}
-            onCreationDone={() => {
-                setItemCreatorVisible(false);
-                fetchContent();
-            }}
-        />
-            </View>
+            </Modal>
+    
+            <ProgressBar />
+    
+            <ItemCreator
+                enabled={itemCreatorVisible}
+                currentPath={navpath}
+                onCreationCanceled={() => setItemCreatorVisible(false)}
+                onCreationDone={() => {
+                    setItemCreatorVisible(false);
+                    fetchContent();
+                }}
+            />
         </SafeAreaView>
     );
 }

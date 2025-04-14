@@ -1,5 +1,7 @@
 import { View, Text, TouchableOpacity, GestureResponderEvent, StyleSheet } from "react-native";
-import { ReactNode} from "react";
+import { ReactNode } from "react";
+import { useTheme } from "../ThemeContext";
+import React from "react";
 
 const BottomBarItem = ({ name, icon, onPress, disabled }: {
     name: string,
@@ -7,20 +9,22 @@ const BottomBarItem = ({ name, icon, onPress, disabled }: {
     onPress: (event: GestureResponderEvent) => void,
     disabled?: boolean,
 }) => {
+    const { theme } = useTheme();
+
     return (
-        <TouchableOpacity 
+        <TouchableOpacity
             style={[
                 styles.container,
-                { opacity: disabled ? 0.5 : 1 }
-            ]} 
-            onPress={disabled ? undefined : onPress} 
+                { opacity: disabled ? 0.5 : 1, backgroundColor: theme.card }
+            ]}
+            onPress={disabled ? undefined : onPress}
             disabled={disabled}
             activeOpacity={0.7}
         >
-            <View style={styles.iconContainer}>
+            <View style={[styles.iconContainer, { backgroundColor: theme.background }]}>
                 {icon}
             </View>
-            <Text style={styles.text}>{name}</Text>
+            <Text style={[styles.text, { color: theme.textSecondary }]}>{name}</Text>
         </TouchableOpacity>
     );
 };
@@ -40,8 +44,7 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 14,
         fontWeight: '500',
-        color: '#333',
-        textAlign: 'center'
+        textAlign: 'center',
     }
 });
 

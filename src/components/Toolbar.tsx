@@ -3,9 +3,9 @@ import { View, Text, TouchableOpacity, GestureResponderEvent } from 'react-nativ
 import { MaterialIcons, Ionicons, AntDesign } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import PropTypes from 'prop-types';
-import { ContainerType, ContentContainerRouteParams } from './ContentContainer/common';
+import { useTheme } from './ThemeContext';
+import { ContainerType } from './ContentContainer/common';
 import { Path } from '../FileSystem';
-
 
 interface ToolbarProps {
     navigation: any,
@@ -18,28 +18,14 @@ interface ToolbarProps {
     menuHandler?: (event: GestureResponderEvent) => void,
 }
 
-/**
- * Toolbar component that provides navigation and action buttons.
- *
- * @param {Object} props - The properties object.
- * @param {Object} props.navigation - The navigation object.
- * @param {Function} props.navigation.goBack - Function to navigate back.
- * @param {Function} props.navigation.navigate - Function to navigate to a specific route.
- * @param {string} props.containerName - The name of the container to be displayed.
- * @param {Function} [props.layoutChangeHandler] - Optional handler function for layout change.
- * @param {Function} [props.sortByHandler] - Optional handler function for sorting items.
- * @param {Function} [props.createHandler] - Optional handler function for creating a new item.
- * @param {Function} [props.menuHandler] - Optional handler function for the three-dot menu.
- * @returns {JSX.Element} The rendered Toolbar component.
- */
-
-
 export default function Toolbar({ navigation, containerName, path, goBackHandler, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
+    const { theme } = useTheme();
+
     return (
-        <View style={{ 
-            flexDirection: 'row', 
-            alignItems: 'center', 
-            backgroundColor: '#FFFFFF',
+        <View style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.toolbarColor,
             paddingVertical: 8,
             paddingHorizontal: 10,
             elevation: 4,
@@ -50,29 +36,29 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
             borderBottomWidth: 1,
             borderBottomColor: '#f2f2f2'
         }}>
-            <TouchableOpacity 
-                style={{ 
-                    padding: 10, 
-                    marginRight: 5, 
+            <TouchableOpacity
+                style={{
+                    padding: 10,
+                    marginRight: 5,
                     borderRadius: 20,
-                    backgroundColor: 'rgba(242, 242, 242, 0.6)' 
-                }} 
+                    backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                }}
                 onPress={goBackHandler}
             >
-                <MaterialIcons name="arrow-back-ios-new" size={20} color="#333" />
+                <MaterialIcons name="arrow-back-ios-new" size={20} color={theme.text} />
             </TouchableOpacity>
-            <Text style={{ 
-                fontSize: 20, 
-                fontWeight: '500', 
-                color: '#333',
+            <Text style={{
+                fontSize: 20,
+                fontWeight: '500',
+                color: theme.text,
                 marginLeft: 5
             }}>
                 {containerName}
             </Text>
             {path && containerName && (
                 <TouchableOpacity
-                    style={{ 
-                        marginLeft: 'auto', 
+                    style={{
+                        marginLeft: 'auto',
                         marginRight: 10,
                         padding: 8,
                         borderRadius: 20,
@@ -84,13 +70,13 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
                         containerType: ContainerType.DEFAULT
                     })}
                 >
-                    <Ionicons name="search" size={22} color="#333" />
+                    <Ionicons name="search" size={22} color={theme.text} />
                 </TouchableOpacity>
             )}
 
-            {//View option, i.e., grid, detailed, simple
+            {// View option, i.e., grid, detailed, simple
                 layoutChangeHandler ? <TouchableOpacity
-                    style={{ 
+                    style={{
                         marginRight: 10,
                         padding: 8,
                         borderRadius: 20,
@@ -98,12 +84,12 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
                     }}
                     onPress={layoutChangeHandler}
                 >
-                    <Ionicons name="grid-outline" size={22} color="#333" />
-                </TouchableOpacity> : <></>}
+                    <Ionicons name="grid-outline" size={24} color={theme.text} />
+                </TouchableOpacity> : null}
 
-            {//Sort by
+            {// Sort by
                 sortByHandler ? <TouchableOpacity
-                    style={{ 
+                    style={{
                         marginRight: 10,
                         padding: 8,
                         borderRadius: 20,
@@ -111,12 +97,12 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
                     }}
                     onPress={sortByHandler}
                 >
-                    <FontAwesome5 name="sort" size={22} color="#333" />
-                </TouchableOpacity> : <></>}
+                    <FontAwesome5 name="sort" size={24} color={theme.text} />
+                </TouchableOpacity> : null}
 
-            {//Create item
+            {// Create item
                 createHandler ? <TouchableOpacity
-                    style={{ 
+                    style={{
                         marginRight: 10,
                         padding: 8,
                         borderRadius: 20,
@@ -124,13 +110,12 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
                     }}
                     onPress={createHandler}
                 >
-                    <AntDesign name="plus" size={22} color="#333" />
-                </TouchableOpacity>
-                    : <></>}
-                    
-            {//Three-dot menu
+                    <AntDesign name="plus" size={24} color={theme.text} />
+                </TouchableOpacity> : null}
+
+            {// Three-dot menu
                 menuHandler ? <TouchableOpacity
-                    style={{ 
+                    style={{
                         marginRight: 5,
                         padding: 8,
                         borderRadius: 20,
@@ -138,8 +123,8 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
                     }}
                     onPress={menuHandler}
                 >
-                    <MaterialIcons name="more-vert" size={22} color="#333" />
-                </TouchableOpacity> : <></>}
+                    <MaterialIcons name="more-vert" size={24} color={theme.text} />
+                </TouchableOpacity> : null}
         </View>
     );
 };
