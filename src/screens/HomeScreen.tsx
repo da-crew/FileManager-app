@@ -8,7 +8,7 @@ import { checkManagePermission } from 'manage-external-storage';
 import RNFS from 'react-native-fs';
 import { openAppSettings, StorageCapacity, StorageDevice } from '../FileSystem';
 import { ContainerType } from '../components/ContentContainer/common';
-
+//hi
 // คอมโพเนนต์ปุ่มเมนูแบบรวดเร็ว (แสดงในส่วน File Types)
 const QuickAccessButton = ({ name, icon, onPress }: {
     name: string,             // ชื่อปุ่ม
