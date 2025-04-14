@@ -101,13 +101,18 @@ const UtilityButton = ({ title, desc, icon, onPress }: {
 };
 
 const HeaderBar = ({ navigation }: { navigation: any }) => {
+    const internalStorage = new StorageDevice('Internal Storage', RNFS.ExternalStorageDirectoryPath);
     return (
         <View style={styles.headerBar}>
             <Text style={styles.headerTitle}>ไฟล์ของฉัน</Text>
             <View style={styles.headerActions}>
                 <TouchableOpacity
                     style={styles.headerButton}
-                    onPress={() => navigation.navigate("Search")}
+                    onPress={() => navigation.navigate("Search", {
+                        containerName: internalStorage.displayName,
+                        path: new Path(internalStorage.displayName, internalStorage.devicePath, []),
+                        containerType: ContainerType.DEFAULT
+                    })}
                 >
                     <Ionicons name="search" size={24} color="#333" />
                 </TouchableOpacity>

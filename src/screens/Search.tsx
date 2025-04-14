@@ -13,7 +13,7 @@ import { getFileType, openWith } from "../utils/openWith";
 
 export default function SearchScreen({ route, navigation }: NativeStackScreenProps<RootStackParamList>) {
     const routeParams = route.params as ContentContainerRouteParams;
-    const storageName = routeParams.containerName;
+    const storageName = routeParams?.containerName;
     const containerType = routeParams.containerType;
 
     const [{ selectionSet, isSelecting }, updateSelectionState] = useState<{ selectionSet: Set<RNFS.ReadDirItem>, isSelecting: boolean }>({ selectionSet: new Set(), isSelecting: false });
