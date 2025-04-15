@@ -11,18 +11,19 @@ import BottomBarOptions from "../components/ContentContainer/BottomBarOptions";
 import { Platform, PermissionsAndroid } from "react-native";
 import { getFileType, openWith } from "../utils/openWith";
 import SortOptionsBar from '../components/ContentContainer/SortOptionsBar';
+import { Path } from '../FileSystem';
 
 // เปลี่ยนขนาดไฟล์ขั้นต่ำเป็น 200MB
 const LARGE_FILE_SIZE_THRESHOLD = 200 * 1024 * 1024; // 200MB ในหน่วย bytes
 
 // เพิ่ม enum สำหรับประเภทการเรียงลำดับ
 enum SortType {
-    SIZE_DESC, // ขนาดใหญ่ไปเล็ก (ค่าเริ่มต้น)
-    SIZE_ASC,  // ขนาดเล็กไปใหญ่
-    NAME_ASC,  // ชื่อไฟล์ A-Z
-    NAME_DESC, // ชื่อไฟล์ Z-A
-    DATE_DESC, // วันที่ล่าสุดไปเก่าสุด
-    DATE_ASC,  // วันที่เก่าสุดไปล่าสุด
+    SIZE_DESC,  // ขนาดใหญ่ไปเล็ก (ค่าเริ่มต้น)
+    SIZE_ASC,   // ขนาดเล็กไปใหญ่
+    NAME_ASC,   // ชื่อไฟล์ A-Z
+    NAME_DESC,  // ชื่อไฟล์ Z-A
+    DATE_DESC,  // วันที่ล่าสุดไปเก่าสุด
+    DATE_ASC,   // วันที่เก่าสุดไปล่าสุด
 }
 
 // คอมโพเนนต์หน้าจอค้นหาไฟล์ขนาดใหญ่
@@ -183,13 +184,20 @@ export default function LargeFiles() {
     // ฟังก์ชันแปลงชื่อการเรียงลำดับเป็นข้อความที่แสดงบนหน้าจอ
     const getSortByLabel = (type: SortType): string => {
         switch (type) {
-            case SortType.SIZE_DESC: return 'File Size (Large-Small)';
-            case SortType.SIZE_ASC: return 'File Size (Small-Large)';
-            case SortType.NAME_ASC: return 'Filename (A-Z)';
-            case SortType.NAME_DESC: return 'Filename (Z-A)';
-            case SortType.DATE_DESC: return 'Date Modified (Latest)';
-            case SortType.DATE_ASC: return 'Date Modified (Oldest)';
-            default: return 'Not specified';
+            case SortType.SIZE_DESC: 
+                return 'ขนาดไฟล์ (ใหญ่-เล็ก) / File Size (Large-Small)';
+            case SortType.SIZE_ASC: 
+                return 'ขนาดไฟล์ (เล็ก-ใหญ่) / File Size (Small-Large)';
+            case SortType.NAME_ASC: 
+                return 'ชื่อไฟล์ (ก-ฮ) / Filename (A-Z)';
+            case SortType.NAME_DESC: 
+                return 'ชื่อไฟล์ (ฮ-ก) / Filename (Z-A)';
+            case SortType.DATE_DESC: 
+                return 'วันที่แก้ไข (ล่าสุด) / Date Modified (Latest)';
+            case SortType.DATE_ASC: 
+                return 'วันที่แก้ไข (เก่าสุด) / Date Modified (Oldest)';
+            default: 
+                return 'ไม่ระบุ / Not specified';
         }
     };
 

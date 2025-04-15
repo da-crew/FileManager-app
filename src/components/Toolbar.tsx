@@ -108,6 +108,7 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
             {/* ปุ่มเรียงลำดับ */}
             {sortByHandler ? <TouchableOpacity
                 style={{ 
+                    marginLeft: 'auto',
                     marginRight: 10,
                     padding: 8,
                     borderRadius: 20,
