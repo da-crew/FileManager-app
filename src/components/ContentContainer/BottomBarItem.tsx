@@ -1,5 +1,6 @@
-import { View, Text, TouchableOpacity, GestureResponderEvent, StyleSheet } from "react-native";
-import { ReactNode} from "react";
+import { View, Text, TouchableOpacity, GestureResponderEvent,StyleSheet } from "react-native";
+import { ReactNode } from "react";
+import { useTheme } from "../ThemeContext";
 
 /**
  * คอมโพเนนต์ปุ่มในแถบด้านล่าง

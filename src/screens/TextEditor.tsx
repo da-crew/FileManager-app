@@ -6,8 +6,12 @@ import { Alert, BackHandler, SafeAreaView, StyleSheet, Text, TextInput, Touchabl
 import * as RNFS from 'react-native-fs';
 import { RootStackParamList } from '../App';
 import { ContentContainerRouteParams } from '../components/ContentContainer/common';
+import { useTheme } from '../components/ThemeContext';
+import { invertHexColor } from '../components/themes';
 
 export default function TextEditor({ route, navigation }: NativeStackScreenProps<RootStackParamList>) {
+  const { theme } = useTheme();
+
   const [content, setContent] = useState<string>('');
   const [originalContent, setOriginalContent] = useState<string>('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -120,22 +124,22 @@ export default function TextEditor({ route, navigation }: NativeStackScreenProps
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#d9d9d9' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: theme.toolbarColor }}>
         <TouchableOpacity style={{ padding: 15, marginRight: 0 }} onPress={handleBack}>
-          <MaterialIcons name="arrow-back-ios-new" size={20} />
+          <MaterialIcons name="arrow-back-ios-new" size={20} color={theme.iconColor} />
         </TouchableOpacity>
-        <Text style={{ fontSize: 20 }}>{filePath.split('/').pop()}</Text>
+        <Text style={{ fontSize: 20, color: theme.text }}>{filePath.split('/').pop()}</Text>
         <TouchableOpacity
           style={{ marginLeft: 'auto', marginRight: 15 }}
           onPress={saveFile}
         >
-          <Ionicons name="save-sharp" size={24} color={hasUnsavedChanges ? "black" : "gray"} />
+          <Ionicons name="save-sharp" size={24} color={hasUnsavedChanges ? theme.iconColor : "gray"} />
         </TouchableOpacity>
       </View>
 
-      <View style={styles.editorContainer}>
+      <View style={[styles.editorContainer, {backgroundColor: theme.inputBackground}]}>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { color: theme.inputText }]}
           multiline
           value={content}
           onChangeText={handleContentChange}

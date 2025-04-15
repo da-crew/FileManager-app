@@ -4,10 +4,13 @@ import { Ionicons } from "@expo/vector-icons/";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import { requestNotificationPermission, checkStorageUsage } from "../services/NotificationService";
+import { useTheme } from "../components/ThemeContext";
 
 // หน้าจอการตั้งค่าแอปพลิเคชัน
 export default function SettingsScreen({ navigation }: NativeStackScreenProps<RootStackParamList>) {
-    // App settings
+
+    const { theme, changeTheme, isDarkMode } = useTheme();
+
     const [imageViewer, setImageViewer] = useState(true);
     const [videoPlayer, setVideoPlayer] = useState(true);
     const [musicPlayer, setMusicPlayer] = useState(true);
@@ -28,24 +31,22 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
     const version = "1.0.0";
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar backgroundColor="#fff" barStyle="dark-content" />
-
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity
+        <SafeAreaView style={[styles.container, {backgroundColor: theme.background}]}>
+            <StatusBar barStyle='default' backgroundColor={theme.background}/>
+            <View style={[styles.header, {backgroundColor: theme.toolbarColor}]}>
+                <TouchableOpacity 
                     onPress={() => navigation.goBack()}
                     style={styles.backButton}
                 >
-                    <Ionicons name="chevron-back" size={28} color="#007AFF" />
+                    <AntDesign name="left" size={24} color={theme.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Settings</Text>
+                <Text style={[styles.headerTitle, {color: theme.text}]}>Settings</Text>
                 <View style={{ width: 40 }} />
             </View>
 
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 {/* 1. แอปพลิเคชันเริ่มต้น */}
-                <Text style={styles.sectionHeader}>Default Applications</Text>
+                <Text style={[styles.sectionHeader, {color: theme.textSecondary}]}>Built-in apps</Text>
                 <View style={styles.sectionContainer}>
                     {/* โปรแกรมดูรูปภาพ */}
                     <SettingItem
@@ -266,8 +267,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 12,
         backgroundColor: "#fff",
-        borderBottomWidth: 1,
-        borderBottomColor: "#E5E5EA",
+        // borderBottomWidth: 1,
+        // borderBottomColor: "#E5E5EA",
     },
     backButton: {
         padding: 4

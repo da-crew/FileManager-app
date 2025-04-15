@@ -2,6 +2,9 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { FontAwesome, AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as RNFS from 'react-native-fs';
+import { useTheme } from "./ThemeContext";
+
+
 
 // กำหนด Props ที่จำเป็นสำหรับ ItemCard
 interface ItemCardProps {
@@ -34,6 +37,7 @@ const DOCUMENT_EXTENSIONS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '
  */
 
 const ItemCard = ({ item, onSelect, onOpen, isSelected, hideCheckbox, showPath }: ItemCardProps) => {
+    const { theme } = useTheme();
     // คืนค่าไอคอนตามประเภทไฟล์
     const getFileIcon = () => {
         if (item.isDirectory()) {
@@ -92,7 +96,7 @@ const ItemCard = ({ item, onSelect, onOpen, isSelected, hideCheckbox, showPath }
                     ellipsizeMode="tail"
                 >{item.name}</Text>
                 {showPath && (
-                    <Text style={{ fontSize: 12, color: '#777' }}
+                    <Text style={{ fontSize: 12, color:theme.text }}
                         numberOfLines={1}
                         ellipsizeMode="tail"
                     >{item.path.replace('/storage/emulated/0', 'Internal Storage')}</Text>
@@ -108,7 +112,7 @@ const ItemCard = ({ item, onSelect, onOpen, isSelected, hideCheckbox, showPath }
                     <MaterialCommunityIcons
                         name={isSelected ? "checkbox-marked" : "checkbox-blank-outline"}
                         size={25}
-                        color="black"
+                        color={theme.text}
                     />
                 </TouchableOpacity>
             </View>

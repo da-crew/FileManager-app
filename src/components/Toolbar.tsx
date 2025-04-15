@@ -5,7 +5,8 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import PropTypes from 'prop-types';
 import { ContainerType, ContentContainerRouteParams } from './ContentContainer/common';
 import { Path } from '../FileSystem';
-
+import { useTheme } from './ThemeContext';
+import { invertHexColor } from './themes';
 
 // กำหนด Props ที่จำเป็นสำหรับ Toolbar
 interface ToolbarProps {
@@ -34,13 +35,13 @@ interface ToolbarProps {
  * @returns {JSX.Element} คอมโพเนนต์ที่เรนเดอร์แล้ว
  */
 
-
-export default function Toolbar({ navigation, containerName, path, goBackHandler, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps) {
+export default function  Toolbar({ navigation, containerName, path, goBackHandler, layoutChangeHandler, sortByHandler, createHandler, menuHandler }: ToolbarProps)  {
+    const { theme } = useTheme();
     return (
         <View style={{ 
             flexDirection: 'row', 
             alignItems: 'center', 
-            backgroundColor: '#FFFFFF',
+            backgroundColor: theme.toolbarColor,
             paddingVertical: 8,
             paddingHorizontal: 10,
             elevation: 4,
@@ -51,17 +52,20 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
             borderBottomWidth: 1,
             borderBottomColor: '#f2f2f2'
         }}>
-            {/* ปุ่มย้อนกลับ */}
-            <TouchableOpacity 
-                style={{ 
+            <TouchableOpacity  style={{ 
                     padding: 10, 
                     marginRight: 5, 
                     borderRadius: 20,
                     backgroundColor: 'rgba(242, 242, 242, 0.6)' 
-                }} 
-                onPress={goBackHandler}
+                }}  onPress={goBackHandler}>
+                <MaterialIcons name="arrow-back-ios-new" size={20} color={theme.text} />
+            </TouchableOpacity>
+            <Text style={{ fontSize: 20, color: theme.text }}>{containerName}</Text>
+            <TouchableOpacity
+                style={{ marginLeft: 'auto', marginRight: 15 }}
+                onPress={() => navigation.navigate("Search")}
             >
-                <MaterialIcons name="arrow-back-ios-new" size={20} color="#333" />
+                <Ionicons name="search" size={24} color={theme.text} />
             </TouchableOpacity>
             
             {/* ชื่อคอนเทนเนอร์ */}
@@ -73,7 +77,7 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
             }}>
                 {containerName}
             </Text>
-            {path && containerName && (
+            {path && containerName ?
                 <TouchableOpacity
                     style={{ 
                         marginLeft: 'auto', 
@@ -88,9 +92,25 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
                         containerType: ContainerType.DEFAULT
                     })}
                 >
-                    <Ionicons name="search" size={22} color="#333" />
+                    <Ionicons name="grid-outline" size={24} color={theme.text} />
+                </TouchableOpacity> : <></>}
+
+            {//Sort by
+                sortByHandler ? <TouchableOpacity
+                    style={{ marginRight: 15 }}
+                    onPress={sortByHandler}
+                >
+                    <FontAwesome5 name="sort" size={24} color={theme.text} />
+                </TouchableOpacity> : <></>}
+
+            {//Create item
+                createHandler ? <TouchableOpacity
+                    style={{ marginRight: 15 }}
+                    onPress={createHandler}
+                >
+                    <AntDesign name="plus" size={24} color={theme.text} />
                 </TouchableOpacity>
-            )}
+                : <></>}
 
             {/* ปุ่มเปลี่ยนรูปแบบการแสดงผล - กริด, รายละเอียด, เรียบง่าย */}
             {layoutChangeHandler ? <TouchableOpacity
@@ -142,11 +162,11 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
                 }}
                 onPress={menuHandler}
             >
-                <MaterialIcons name="more-vert" size={22} color="#333" />
+                <MaterialIcons name="more-vert" size={22} color={theme.text} />
             </TouchableOpacity> : <></>}
         </View>
     );
-};
+}
 
 // กำหนด PropTypes สำหรับการตรวจสอบประเภทข้อมูล
 Toolbar.propTypes = {
@@ -160,3 +180,4 @@ Toolbar.propTypes = {
     createHandler: PropTypes.func,
     menuHandler: PropTypes.func,
 };
+

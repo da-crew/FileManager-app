@@ -1,7 +1,7 @@
-import React from "react";
-import { SafeAreaView, View, StatusBar, Text, ScrollView, TouchableOpacity, Modal, GestureResponderEvent, Alert, BackHandler, FlatList, StyleSheet, Dimensions, ActivityIndicator } from "react-native";
+import {SafeAreaView, View, StatusBar, Text, ScrollView, TouchableOpacity, Modal, GestureResponderEvent, Alert, BackHandler, FlatList, StyleSheet, Dimensions, ActivityIndicator  } from "react-native";
 import ItemCard from "../ItemCard";
 import * as RNFS from "react-native-fs"
+import { useTheme } from "../ThemeContext";
 
 // กำหนด Props ที่จำเป็นสำหรับ ContentList
 interface ContentListProps {

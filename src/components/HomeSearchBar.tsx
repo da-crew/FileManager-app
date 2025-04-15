@@ -5,6 +5,7 @@ import { NavigationProp } from '@react-navigation/native';
 import { Path } from '../FileSystem';
 import { ContainerType } from './ContentContainer/common';
 import RNFS from 'react-native-fs';
+import { useTheme } from './ThemeContext';
 
 /**
  * คอมโพเนนต์แถบค้นหาสำหรับหน้าหลัก แสดงไอคอนค้นหาและไอคอนการตั้งค่า
@@ -19,6 +20,8 @@ export interface HomeSearchBarProps {
 }
 
 const HomeSearchBar: React.FC<HomeSearchBarProps> = ({ navigation }) => {
+
+    const { theme } = useTheme();
     const handleSearch = () => {
         const rootPath = new Path('Internal Storage', RNFS.ExternalStorageDirectoryPath, []);
         navigation.navigate("Search", {
@@ -35,13 +38,13 @@ const HomeSearchBar: React.FC<HomeSearchBarProps> = ({ navigation }) => {
                     style={{ marginLeft: 'auto' }}
                     onPress={handleSearch}
                 >
-                    <Ionicons name="search" size={24} color="black" />
+                    <Ionicons name="search" size={24} color={theme.text} />
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={{ marginLeft: 10 }}
                     onPress={() => navigation.navigate("Settings")}
                 >
-                    <Octicons name="gear" size={24} color="black" />
+                    <Octicons name="gear" size={24} color={theme.text} />
                 </TouchableOpacity>
             </View>
         </View>
