@@ -6,6 +6,7 @@ import * as RNFS from 'react-native-fs';
 import { Path } from "../../FileSystem";
 import BottomBarOptions from "./BottomBarOptions";
 import { CreationType } from "./common";
+import React from 'react'
 
 // คอมโพเนนต์สำหรับสร้างไฟล์หรือโฟลเดอร์ใหม่
 export default function ItemCreator(props: {

@@ -1,5 +1,6 @@
 import { Text, TouchableOpacity, GestureResponderEvent, StyleSheet, View } from "react-native";
 import { ReactNode } from "react";
+import React from 'react'
 
 /**
  * คอมโพเนนต์ปุ่มตัวเลือกในแถบด้านล่าง

@@ -3,6 +3,7 @@ import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { ViewMode } from "./common";
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 
+
 interface ItemViewModeSelectionProps {
     onChange: (mode: ViewMode) => void;
     fileType?: 'images' | 'videos' | 'audio' | 'documents' | string;
