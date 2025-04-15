@@ -39,8 +39,8 @@ interface AlbumItem {
 }
 
 // ตัวแทนองค์ประกอบ ImageGrid เพื่อแก้ปัญหาเรื่องการนำเข้า
-const ImageGrid = ({ images, isLoading, onImagePress, onImageLongPress, selectedImages }: { 
-    images: RNFS.ReadDirItem[], 
+const ImageGrid = ({ images, isLoading, onImagePress, onImageLongPress, selectedImages }: {
+    images: RNFS.ReadDirItem[],
     isLoading: boolean,
     onImagePress: (item: RNFS.ReadDirItem) => void,
     onImageLongPress?: (item: RNFS.ReadDirItem) => void,
@@ -49,7 +49,7 @@ const ImageGrid = ({ images, isLoading, onImagePress, onImageLongPress, selected
     const { width } = Dimensions.get('window');
     const numColumns = 3;
     const itemWidth = (width - 20) / numColumns;
-    
+
     if (isLoading) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -58,7 +58,7 @@ const ImageGrid = ({ images, isLoading, onImagePress, onImageLongPress, selected
             </View>
         );
     }
-    
+
     if (images.length === 0) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -66,7 +66,7 @@ const ImageGrid = ({ images, isLoading, onImagePress, onImageLongPress, selected
             </View>
         );
     }
-    
+
     return (
         <FlatList
             data={images}
@@ -81,9 +81,9 @@ const ImageGrid = ({ images, isLoading, onImagePress, onImageLongPress, selected
                     >
                         <Image
                             source={{ uri: `file://${item.path}` }}
-                            style={{ 
-                                width: '100%', 
-                                height: '100%', 
+                            style={{
+                                width: '100%',
+                                height: '100%',
                                 borderWidth: selectedImages.has(item) ? 3 : 0,
                                 borderColor: '#2196F3',
                             }}
@@ -109,7 +109,7 @@ const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: {
     const { width } = Dimensions.get('window');
     const numColumns = 2;
     const itemWidth = (width - 30) / numColumns;
-    
+
     if (isLoading) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -118,7 +118,7 @@ const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: {
             </View>
         );
     }
-    
+
     if (albums.length === 0) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -126,19 +126,19 @@ const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: {
             </View>
         );
     }
-    
+
     console.log('Rendering albums:', albums.length);
-    
+
     return (
         <FlatList
             data={albums}
             numColumns={numColumns}
             keyExtractor={(item) => item.path}
             renderItem={({ item }) => (
-                <TouchableOpacity 
-                    style={{ 
-                        width: itemWidth, 
-                        height: itemWidth * 1.2, 
+                <TouchableOpacity
+                    style={{
+                        width: itemWidth,
+                        height: itemWidth * 1.2,
                         margin: 5,
                         borderRadius: 10,
                         overflow: 'hidden',
@@ -152,14 +152,14 @@ const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: {
                     onPress={() => onAlbumPress(item)}
                 >
                     {item.thumbnail ? (
-                        <Image 
-                            source={{ uri: `file://${item.thumbnail}` }} 
+                        <Image
+                            source={{ uri: `file://${item.thumbnail}` }}
                             style={{ width: '100%', height: '70%' }}
                             resizeMode="cover"
                         />
                     ) : (
-                        <View style={{ 
-                            width: '100%', 
+                        <View style={{
+                            width: '100%',
                             height: '70%',
                             backgroundColor: '#f0f0f0',
                             justifyContent: 'center',
@@ -189,8 +189,8 @@ const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: {
     );
 };
 
-const VideoGrid = ({ videos, isLoading, onVideoPress, onVideoLongPress, selectedVideos }: { 
-    videos: RNFS.ReadDirItem[], 
+const VideoGrid = ({ videos, isLoading, onVideoPress, onVideoLongPress, selectedVideos }: {
+    videos: RNFS.ReadDirItem[],
     isLoading: boolean,
     onVideoPress: (item: RNFS.ReadDirItem) => void,
     onVideoLongPress?: (item: RNFS.ReadDirItem) => void,
@@ -199,7 +199,7 @@ const VideoGrid = ({ videos, isLoading, onVideoPress, onVideoLongPress, selected
     const { width } = Dimensions.get('window');
     const numColumns = 3;
     const itemWidth = (width - 20) / numColumns;
-    
+
     if (isLoading) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -208,7 +208,7 @@ const VideoGrid = ({ videos, isLoading, onVideoPress, onVideoLongPress, selected
             </View>
         );
     }
-    
+
     if (videos.length === 0) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -216,7 +216,7 @@ const VideoGrid = ({ videos, isLoading, onVideoPress, onVideoLongPress, selected
             </View>
         );
     }
-    
+
     return (
         <FlatList
             data={videos}
@@ -229,17 +229,17 @@ const VideoGrid = ({ videos, isLoading, onVideoPress, onVideoLongPress, selected
                         onLongPress={() => onVideoLongPress && onVideoLongPress(item)}
                         style={{ flex: 1 }}
                     >
-                        <View style={{ 
-                            width: '100%', 
-                            height: '100%', 
+                        <View style={{
+                            width: '100%',
+                            height: '100%',
                             borderWidth: selectedVideos.has(item) ? 3 : 0,
                             borderColor: '#2196F3',
                             position: 'relative'
                         }}>
                             <Image
                                 source={{ uri: `file://${item.path}` }}
-                                style={{ 
-                                    width: '100%', 
+                                style={{
+                                    width: '100%',
                                     height: '100%',
                                     backgroundColor: '#f0f0f0'
                                 }}
@@ -268,8 +268,8 @@ const VideoGrid = ({ videos, isLoading, onVideoPress, onVideoLongPress, selected
 };
 
 // AudioList component สำหรับแสดงรายการไฟล์เสียง
-const AudioList = ({ audioFiles, isLoading, onAudioPress, onAudioLongPress, selectedAudio }: { 
-    audioFiles: RNFS.ReadDirItem[], 
+const AudioList = ({ audioFiles, isLoading, onAudioPress, onAudioLongPress, selectedAudio }: {
+    audioFiles: RNFS.ReadDirItem[],
     isLoading: boolean,
     onAudioPress: (item: RNFS.ReadDirItem) => void,
     onAudioLongPress?: (item: RNFS.ReadDirItem) => void,
@@ -283,7 +283,7 @@ const AudioList = ({ audioFiles, isLoading, onAudioPress, onAudioLongPress, sele
             </View>
         );
     }
-    
+
     if (audioFiles.length === 0) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -291,14 +291,14 @@ const AudioList = ({ audioFiles, isLoading, onAudioPress, onAudioLongPress, sele
             </View>
         );
     }
-    
+
     return (
         <FlatList
             data={audioFiles}
             keyExtractor={(item) => item.path}
             renderItem={({ item }) => (
-                <TouchableOpacity 
-                    style={{ 
+                <TouchableOpacity
+                    style={{
                         flexDirection: 'row',
                         padding: 12,
                         borderBottomWidth: 1,
@@ -309,10 +309,10 @@ const AudioList = ({ audioFiles, isLoading, onAudioPress, onAudioLongPress, sele
                     onPress={() => onAudioPress(item)}
                     onLongPress={() => onAudioLongPress && onAudioLongPress(item)}
                 >
-                    <View style={{ 
-                        width: 40, 
-                        height: 40, 
-                        borderRadius: 20, 
+                    <View style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 20,
                         backgroundColor: '#f0f0f0',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -335,8 +335,8 @@ const AudioList = ({ audioFiles, isLoading, onAudioPress, onAudioLongPress, sele
 };
 
 // DocumentList component สำหรับแสดงรายการเอกสาร
-const DocumentList = ({ documents, isLoading, onDocumentPress, onDocumentLongPress, selectedDocuments }: { 
-    documents: RNFS.ReadDirItem[], 
+const DocumentList = ({ documents, isLoading, onDocumentPress, onDocumentLongPress, selectedDocuments }: {
+    documents: RNFS.ReadDirItem[],
     isLoading: boolean,
     onDocumentPress: (item: RNFS.ReadDirItem) => void,
     onDocumentLongPress?: (item: RNFS.ReadDirItem) => void,
@@ -350,7 +350,7 @@ const DocumentList = ({ documents, isLoading, onDocumentPress, onDocumentLongPre
             </View>
         );
     }
-    
+
     if (documents.length === 0) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -358,27 +358,27 @@ const DocumentList = ({ documents, isLoading, onDocumentPress, onDocumentLongPre
             </View>
         );
     }
-    
+
     // เลือกไอคอนตามประเภทเอกสาร
     const getDocumentIcon = (fileName: string): any => {
         const ext = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
-        
+
         if (ext === '.pdf') return 'file-pdf-o';
         if (['.doc', '.docx'].includes(ext)) return 'file-word-o';
         if (['.xls', '.xlsx'].includes(ext)) return 'file-excel-o';
         if (['.ppt', '.pptx'].includes(ext)) return 'file-powerpoint-o';
         if (ext === '.txt') return 'file-text-o';
-        
+
         return 'file-o';
     };
-    
+
     return (
         <FlatList
             data={documents}
             keyExtractor={(item) => item.path}
             renderItem={({ item }) => (
-                <TouchableOpacity 
-                    style={{ 
+                <TouchableOpacity
+                    style={{
                         flexDirection: 'row',
                         padding: 12,
                         borderBottomWidth: 1,
@@ -389,10 +389,10 @@ const DocumentList = ({ documents, isLoading, onDocumentPress, onDocumentLongPre
                     onPress={() => onDocumentPress(item)}
                     onLongPress={() => onDocumentLongPress && onDocumentLongPress(item)}
                 >
-                    <View style={{ 
-                        width: 40, 
-                        height: 40, 
-                        borderRadius: 5, 
+                    <View style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 5,
                         backgroundColor: '#f0f0f0',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -508,11 +508,11 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         setContent(null);
         setIsLoadingImages(true);
         console.log('โหลดไฟล์จากโฟลเดอร์ดาวน์โหลดโดยตรง');
-        
+
         try {
             const downloadPath = RNFS.ExternalStorageDirectoryPath + '/Download';
             console.log('ตรวจสอบโฟลเดอร์:', downloadPath);
-            
+
             const exists = await RNFS.exists(downloadPath);
             if (!exists) {
                 console.log('ไม่พบโฟลเดอร์ดาวน์โหลด');
@@ -520,10 +520,10 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 setIsLoadingImages(false);
                 return;
             }
-            
+
             const items = await RNFS.readDir(downloadPath);
             console.log(`พบไฟล์ในโฟลเดอร์ดาวน์โหลด: ${items.length} รายการ`);
-            
+
             const sortHandler = (a: RNFS.ReadDirItem, b: RNFS.ReadDirItem) => {
                 switch (sortType) {
                     case SortType.ALPHABETICAL:
@@ -534,17 +534,17 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                         return 0;
                 }
             };
-            
+
             let hiddenFolders = items.filter((item) => item.isDirectory() && item.name.startsWith("."));
             let folders = items.filter((item) => item.isDirectory() && !item.name.startsWith(".")).sort(sortHandler);
             let files = items.filter((item) => item.isFile()).sort(sortHandler);
-            
+
             setContent(hiddenFolders.concat(folders).concat(files));
             setIsLoadingImages(false);
-            
+
             // กำหนดฟังก์ชันความจำและการแสดงผลให้เป็นแบบไฟล์ (ไม่ใช่แบบอัลบั้ม)
             setCurrentViewMode(ViewMode.FILES);
-            
+
         } catch (error) {
             console.error("เกิดข้อผิดพลาดในการโหลดไฟล์จากโฟลเดอร์ดาวน์โหลด:", error);
             setContent([]);
@@ -563,7 +563,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 // ถ้าเป็นแท็บ Videos ให้โหลดวิดีโอทันที
                 if (currentTab === 'Videos') {
                     loadAllVideos();
-                } 
+                }
                 // ถ้าเป็นแท็บ Collections ให้สร้างอัลบั้ม
                 else if (currentTab === 'Collections') {
                     createVideoAlbums();
@@ -582,7 +582,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             // กรณีไม่ใช่ categorized container ให้โหลดเนื้อหาตามปกติ
             fetchContent();
         }
-        
+
         const backAction = () => {
             handleGoBack();
             return true; // Prevent default behavior
@@ -597,7 +597,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         if (sortType !== type) {
             setSortType(type);
             console.log('Sort type changed to:', type);
-            
+
             // กรณีแสดงรูปภาพหรืออัลบั้ม
             if (containerType === ContainerType.CATEGORIZED && storageName === "Images") {
                 if (currentViewMode === ViewMode.FILES) {
@@ -647,7 +647,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         // ปิด modal หลังจากเลือก sort type
         setSortByOptionVisible(false);
     }
-    
+
     // เพิ่ม useEffect เพื่อติดตามการเปลี่ยนแปลง sortType
     useEffect(() => {
         // เมื่อ sortType เปลี่ยน ให้เรียงลำดับข้อมูลใหม่ตาม type
@@ -670,7 +670,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             }
         }
     }, [sortType]); // ลบ content ออกจาก dependencies
-    
+
     // เพิ่ม useEffect เพื่อเรียงลำดับอัลบั้มเมื่อ sortType เปลี่ยน
     useEffect(() => {
         if (albums && albums.length > 0 && currentViewMode === ViewMode.FOLDERS) {
@@ -711,11 +711,11 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     function handleOpen(item: RNFS.ReadDirItem): void {
         if (item.isFile()) {
             console.log("Open file", item.name);
-            
+
             // ตรวจสอบว่าเป็นไฟล์ขนาดใหญ่หรือไม่ (มากกว่า 50MB)
             const fileSizeInMB = (item.size || 0) / (1024 * 1024);
             const isLargeFile = fileSizeInMB > 50;
-            
+
             if (isLargeFile) {
                 // แสดง Alert เตือนว่าเป็นไฟล์ขนาดใหญ่
                 Alert.alert(
@@ -723,11 +723,11 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     `This file is ${fileSizeInMB.toFixed(2)} MB in size. Do you want to open it?`,
                     [
                         { text: "Cancel", style: "cancel" },
-                        { 
-                            text: "Open", 
+                        {
+                            text: "Open",
                             onPress: () => {
                                 // แสดงความคืบหน้าในการโหลดไฟล์
-                                progress.startProgress(0, 100, `Loading ${item.name}`, 
+                                progress.startProgress(0, 100, `Loading ${item.name}`,
                                     () => {
                                         console.log("Canceled");
                                     },
@@ -736,29 +736,29 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                         openLargeFile(item);
                                     }
                                 );
-                                
+
                                 // จำลองการโหลดไฟล์
                                 simulateFileLoading(100, () => {
                                     progress.quitProgress();
                                 });
-                            } 
+                            }
                         }
                     ]
                 );
             } else {
                 // ไฟล์ขนาดปกติ เปิดตามปกติ
-            if (getFileType(item) == "text/plain") {
-                console.log("Open Text editor", navpath.build());
-                const newPath = navpath.clone();
-                newPath.push(item.name);
-                navigation.navigate("TextEditor", {
-                    containerName: storageName,
-                    path: newPath,
-                    containerType: ContainerType.DEFAULT
-                });
-            }
-            else {
-                openWith(item.path, getFileType(item));
+                if (getFileType(item) == "text/plain") {
+                    console.log("Open Text editor", navpath.build());
+                    const newPath = navpath.clone();
+                    newPath.push(item.name);
+                    navigation.navigate("TextEditor", {
+                        containerName: storageName,
+                        path: newPath,
+                        containerType: ContainerType.DEFAULT
+                    });
+                }
+                else {
+                    openWith(item.path, getFileType(item));
                 }
             }
         } else if (item.isDirectory()) {
@@ -769,21 +769,21 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             fetchContent();
         }
     }
-    
+
     // ฟังก์ชันจำลองการโหลดไฟล์ขนาดใหญ่
     function simulateFileLoading(steps: number, onComplete: () => void) {
         let currentStep = 0;
         const interval = setInterval(() => {
             currentStep++;
             progress.updateProgress(currentStep);
-            
+
             if (currentStep >= steps) {
                 clearInterval(interval);
                 onComplete();
             }
         }, 50);
     }
-    
+
     // ฟังก์ชันเปิดไฟล์ขนาดใหญ่
     function openLargeFile(item: RNFS.ReadDirItem) {
         try {
@@ -793,20 +793,20 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         } catch (error) {
             console.error("เกิดข้อผิดพลาดในการเปิดไฟล์ขนาดใหญ่:", error);
             Alert.alert(
-                "ไม่สามารถเปิดไฟล์ได้", 
+                "ไม่สามารถเปิดไฟล์ได้",
                 "ไม่พบแอพที่เหมาะสมสำหรับเปิดไฟล์นี้หรือไฟล์อาจเสียหาย",
                 [{ text: "ตกลง" }]
             );
         }
     }
-    
+
     // แสดงขนาดไฟล์ในรูปแบบที่อ่านง่าย
     function formatFileSize(bytes: number | undefined): string {
         if (!bytes) return "0 B";
-        
+
         const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
         const i = Math.floor(Math.log(bytes) / Math.log(1024));
-        
+
         return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
     }
 
@@ -889,10 +889,10 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
     async function deleteItems(items: RNFS.ReadDirItem[], onItemDone?: () => void) {
         if (deleteCancelledRef.current) return;
-        
+
         // ใช้ฟังก์ชัน getRecycleBinPath เพื่อหาเส้นทางถังขยะ
         const recycleBinPath = await getRecycleBinPath();
-        
+
         // หากไม่พบถังขยะหรือไม่สามารถสร้างได้ในทุกตัวเลือก ลบไฟล์ถาวร
         if (!recycleBinPath) {
             console.error("ไม่สามารถเข้าถึงหรือสร้างถังขยะได้ ลบไฟล์ถาวร");
@@ -910,21 +910,21 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             }
             return;
         }
-        
+
         const currentTime = new Date().getTime();
-        
+
         for (const item of items) {
             if (deleteCancelledRef.current) return;
-            
+
             try {
                 const fileName = item.name;
                 const fileExt = fileName.includes('.') ? fileName.substring(fileName.lastIndexOf('.')) : '';
                 const fileBaseName = fileName.includes('.') ? fileName.substring(0, fileName.lastIndexOf('.')) : fileName;
-                
+
                 // สร้างชื่อไฟล์ใหม่ที่มีเวลาลบและชื่อจริงของไฟล์
                 const recycleName = `${fileBaseName}_${currentTime}${fileExt}`;
                 const recyclePath = `${recycleBinPath}/${recycleName}`;
-                
+
                 // ข้อมูลเมตาที่จะบันทึกเพิ่มเติม (เช่น พาธต้นทาง, เวลาที่ลบ, ฯลฯ)
                 const metaData = {
                     originalPath: item.path,
@@ -936,10 +936,10 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     size: item.size,
                     mtime: item.mtime?.getTime()
                 };
-                
+
                 // บันทึกข้อมูลเมตาลงในไฟล์ .meta
                 const metaPath = `${recycleBinPath}/${recycleName}.meta`;
-                
+
                 try {
                     await RNFS.writeFile(metaPath, JSON.stringify(metaData), 'utf8');
                     console.log(`บันทึกไฟล์ meta สำเร็จ: ${metaPath}`);
@@ -947,7 +947,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     console.error(`ไม่สามารถเขียนไฟล์ meta: ${metaPath}`, writeError);
                     throw writeError; // ถ้าเขียนไฟล์ meta ไม่ได้ ให้ลบแบบถาวรแทน
                 }
-                
+
                 if (item.isFile()) {
                     console.log(`ย้ายไฟล์ไปยังถังขยะ: ${item.path} -> ${recyclePath}`);
                     await RNFS.moveFile(item.path, recyclePath);
@@ -955,7 +955,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     // กรณีเป็นโฟลเดอร์ ลบโฟลเดอร์ย่อยก่อน
                     const subItems = await RNFS.readDir(item.path);
                     await deleteItems(subItems, onItemDone);
-                    
+
                     console.log(`ย้ายโฟลเดอร์ไปยังถังขยะ: ${item.path} -> ${recyclePath}`);
                     await RNFS.moveFile(item.path, recyclePath);
                 }
@@ -980,7 +980,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     console.error(`ไม่สามารถลบไฟล์ถาวร: ${item.path}`, unlinkError);
                 }
             }
-            
+
             if (onItemDone) onItemDone();
         }
     }
@@ -993,7 +993,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         progress.startProgress(0, -1, "Scanning for items", () => {
             console.log("Canceled");
             setMovingState(null);
-        }, () => {});
+        }, () => { });
 
         let items = await scanItems(movingState.items, progress.incrementProgress);
         progress.quitProgress();
@@ -1001,7 +1001,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         progress.startProgress(0, items, "Moving items", () => {
             console.log("Canceled");
             setMovingState(null);
-        }, () => {});
+        }, () => { });
 
         let destPath = navpath.clone();
 
@@ -1039,28 +1039,28 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
 
         Alert.alert(
             "Delete Items",
-            "Are you sure you want to delete " 
-            + getDeleteMessage(foldersCount, filesCount),[
-                { text: "Cancel", style: "cancel" },
-                {
-                    text: "Delete",
-                    style: "destructive",
-                    onPress: async () => {
-                        progress.startProgress(0, foldersCount + filesCount, "Deleting items", () => {deleteCancelledRef.current = true}, () => {});
-                        try {
-                            console.log("--------------DELETION BEGIN--------------");
-                            await deleteItems(itemsToDelete, progress.incrementProgress);
-                            console.log("--------------DELETION END--------------");
-                        } catch (error) {
-                            console.error("Error deleting items:", error);
-                        } finally {
-                            // Always refresh content when deletion is complete, whether successful or not
-                            progress.quitProgress();
-                            fetchContent();
-                        }
-                    },
-                }
-            ]
+            "Are you sure you want to delete "
+            + getDeleteMessage(foldersCount, filesCount), [
+            { text: "Cancel", style: "cancel" },
+            {
+                text: "Delete",
+                style: "destructive",
+                onPress: async () => {
+                    progress.startProgress(0, foldersCount + filesCount, "Deleting items", () => { deleteCancelledRef.current = true }, () => { });
+                    try {
+                        console.log("--------------DELETION BEGIN--------------");
+                        await deleteItems(itemsToDelete, progress.incrementProgress);
+                        console.log("--------------DELETION END--------------");
+                    } catch (error) {
+                        console.error("Error deleting items:", error);
+                    } finally {
+                        // Always refresh content when deletion is complete, whether successful or not
+                        progress.quitProgress();
+                        fetchContent();
+                    }
+                },
+            }
+        ]
         );
 
         unselectAll();
@@ -1109,17 +1109,17 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
         if (storageName === "Videos") {
             // ตรวจสอบว่ามีสิทธิ์หรือไม่
             const hasVideoPermission = await checkStoragePermission();
-            
+
             // โหลดวิดีโอทันทีโดยไม่รอการกดอนุญาต
             await loadAllVideos();
-            
+
             // ถ้ายังไม่มีสิทธิ์ ขออนุญาติในเบื้องหลังโดยไม่บล็อกการโหลด
             if (!hasVideoPermission) {
                 requestStoragePermission();
             }
             return;
         }
-        
+
         // ตรวจสอบสิทธิ์ก่อนค้นหารูปภาพ
         const hasPermission = await checkStoragePermission();
         if (!hasPermission) {
@@ -1130,21 +1130,21 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 return;
             }
         }
-        
+
         console.log('Finding images in mode:', currentViewMode, 'Album:', currentAlbum);
-        
+
         // สำหรับ Images หมวดหมู่ ให้เริ่มต้นที่โหมด Photos (FILES) เสมอ
         if (storageName === "Images" && containerType === ContainerType.CATEGORIZED) {
             setCurrentViewMode(ViewMode.FILES);
         }
-        
+
         if (currentViewMode === ViewMode.FOLDERS && !currentAlbum) {
             // ถ้ามีแคชอยู่แล้ว ให้ใช้แคชเพื่อไม่ต้องโหลดอัลบั้มซ้ำๆ
             if (albumsCache.length > 0) {
                 console.log('findAllImages: Using cached albums');
                 setAlbums(albumsCache);
                 setIsLoadingAlbums(false);
-                
+
                 // ตรวจสอบว่าควรอัปเดตแคชหรือไม่
                 const currentTime = Date.now();
                 if (currentTime - lastAlbumUpdateTime > 600000) { // 10 นาทีขึ้นไป
@@ -1266,7 +1266,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                 buttonPositive: "ตกลง"
                             }
                         );
-                        
+
                         const grantedStorage = await PermissionsAndroid.request(
                             PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
                             {
@@ -1277,13 +1277,13 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                 buttonPositive: "ตกลง"
                             }
                         );
-                        
-                        const isGranted = 
+
+                        const isGranted =
                             grantedImages === PermissionsAndroid.RESULTS.GRANTED &&
                             grantedStorage === PermissionsAndroid.RESULTS.GRANTED;
-                        
+
                         setHasPermission(isGranted);
-                        
+
                         if (!isGranted) {
                             Alert.alert(
                                 "สิทธิ์ไม่เพียงพอ",
@@ -1291,7 +1291,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                 [{ text: "ตกลง" }]
                             );
                         }
-                        
+
                         return isGranted;
                     } else {
                         // สำหรับรูปภาพ
@@ -1372,7 +1372,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     async function loadAllImages() {
         setContent(null); // รีเซ็ตข้อมูลเดิมก่อนเริ่มค้นหา
         setIsLoadingImages(true);
-        
+
         try {
             // ค้นหาจากที่อยู่ที่มักจะมีไฟล์มีเดีย
             const baseDirs = [
@@ -1387,19 +1387,19 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 RNFS.DocumentDirectoryPath,
                 RNFS.CachesDirectoryPath,
             ];
-            
+
             let allFiles: RNFS.ReadDirItem[] = [];
-            
+
             // สแกนไดเร็กทอรี่แบบไม่ลึกมาก
             for (const baseDir of baseDirs) {
                 try {
                     // ตรวจสอบว่าไดเร็กทอรีมีอยู่จริง
                     const exists = await RNFS.exists(baseDir);
                     if (!exists) continue;
-                    
+
                     console.log(`Scanning directory: ${baseDir}`);
                     const items = await RNFS.readDir(baseDir);
-                    
+
                     // หาไฟล์ในระดับบนสุด
                     for (const item of items) {
                         if (item.isFile()) {
@@ -1409,7 +1409,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                             }
                         }
                     }
-                    
+
                     // หาไฟล์ในระดับลึกลงไปอีก 1 ระดับ
                     for (const item of items) {
                         if (item.isDirectory() && !item.name.startsWith('.')) {
@@ -1428,11 +1428,11 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                             }
                         }
                     }
-                    
+
                     // แสดงไฟล์ที่พบบางส่วนทันทีถ้ามีมากกว่า 20 ไฟล์
                     if (allFiles.length > 20 && content === null) {
                         // เรียงตามวันที่
-                        const sortedFiles = [...allFiles].sort((a, b) => 
+                        const sortedFiles = [...allFiles].sort((a, b) =>
                             (b.mtime?.getTime() ?? 0) - (a.mtime?.getTime() ?? 0)
                         );
                         setContent(sortedFiles);
@@ -1441,7 +1441,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     console.log(`Error scanning directory ${baseDir}:`, error);
                 }
             }
-            
+
             // แสดงผลลัพธ์สุดท้าย
             if (allFiles.length > 0) {
                 // เรียงตาม sortType ปัจจุบัน แทนที่จะเรียงตามวันที่เสมอ
@@ -1454,7 +1454,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                             return (b.mtime?.getTime() ?? 0) - (a.mtime?.getTime() ?? 0);
                     }
                 });
-                
+
                 // จำกัดจำนวนไฟล์ที่แสดง
                 const limitedFiles = allFiles.slice(0, 300);
                 setContent(limitedFiles);
@@ -1463,7 +1463,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 setContent([]);
                 Alert.alert("No Files Found", `Could not find any ${getFileTypeDisplayName()} files on your device. Please check storage permissions.`);
             }
-            
+
             setIsLoadingImages(false);
         } catch (error) {
             console.error("Error finding files:", error);
@@ -1477,7 +1477,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     async function createVideoAlbums() {
         console.log('Creating video albums...');
         setIsLoadingAlbums(true);
-        
+
         try {
             // โฟลเดอร์หลักที่มักมีวิดีโอ
             const mainVideoDirectories = [
@@ -1505,10 +1505,10 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 { path: RNFS.ExternalStorageDirectoryPath + '/Android/data/com.vimeo.android.videoapp/files/Movies', name: 'Vimeo' },
                 { path: RNFS.ExternalStorageDirectoryPath + '/Android/data/com.zhiliaoapp.musically/files/Videos', name: 'TikTok' }
             ];
-            
+
             let newAlbums: AlbumItem[] = [];
             let processedPaths = new Set<string>(); // เพิ่มการตรวจสอบโฟลเดอร์ซ้ำ
-            
+
             // สร้างอัลบัมสำหรับโฟลเดอร์หลัก
             for (const dir of mainVideoDirectories) {
                 try {
@@ -1517,7 +1517,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                         continue;
                     }
                     processedPaths.add(dir.path);
-                    
+
                     if (await RNFS.exists(dir.path)) {
                         console.log(`Checking directory: ${dir.path}`);
                         // ตรวจสอบจำนวนวิดีโอในโฟลเดอร์
@@ -1529,7 +1529,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                             }
                             return false;
                         });
-             
+
                         if (videos.length > 0) {
                             console.log(`Found album: ${dir.name} with ${videos.length} videos`);
                             // สร้างข้อมูลอัลบัม
@@ -1539,13 +1539,13 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                 count: videos.length,
                                 thumbnail: videos[0]?.path || null
                             });
-                            
+
                             // แสดงผลทันทีเมื่อมีข้อมูลบางส่วน
                             if (newAlbums.length >= 2 && albums.length === 0) {
                                 setAlbums([...newAlbums]);
                             }
                         }
-                        
+
                         // ตรวจสอบโฟลเดอร์ย่อยระดับแรกเพื่อหาอัลบั้มเพิ่มเติม
                         for (const item of items) {
                             if (item.isDirectory() && !item.name.startsWith('.')) {
@@ -1554,7 +1554,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                     continue;
                                 }
                                 processedPaths.add(item.path);
-                                
+
                                 try {
                                     const subItems = await RNFS.readDir(item.path);
                                     const subVideos = subItems.filter(subItem => {
@@ -1564,7 +1564,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                         }
                                         return false;
                                     });
-                                    
+
                                     if (subVideos.length > 0) {
                                         console.log(`Found sub-album: ${item.name} with ${subVideos.length} videos`);
                                         newAlbums.push({
@@ -1584,7 +1584,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     console.log(`Error checking directory ${dir.path}:`, error);
                 }
             }
-            
+
             // เพิ่มอัลบัมสำหรับวิดีโอทั้งหมด
             const totalVideosCount = newAlbums.reduce((total, album) => total + album.count, 0);
             if (totalVideosCount > 0) {
@@ -1595,7 +1595,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     thumbnail: newAlbums[0]?.thumbnail || null
                 });
             }
-            
+
             setAlbums(newAlbums);
             setIsLoadingAlbums(false);
         } catch (error) {
@@ -1609,13 +1609,13 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     async function createAlbums() {
         console.log('Creating albums...');
         setIsLoadingAlbums(true);
-        
+
         // ตรวจสอบแคชก่อน
         if (albumsCache.length > 0) {
             console.log('Using cached albums:', albumsCache.length);
             setAlbums(albumsCache);
             setIsLoadingAlbums(false);
-            
+
             // อัปเดตแคชในพื้นหลังหลังจากผ่านไป 10 นาที (600,000 ms)
             const currentTime = Date.now();
             if (currentTime - lastAlbumUpdateTime > 600000) {
@@ -1626,7 +1626,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             }
             return;
         }
-        
+
         try {
             // โฟลเดอร์หลักที่มักมีรูปภาพ - เพิ่มโฟลเดอร์ที่พบบ่อยในอุปกรณ์ต่างๆ
             const mainImageDirectories = [
@@ -1653,10 +1653,10 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 { path: RNFS.DocumentDirectoryPath, name: 'Documents' },
                 { path: RNFS.CachesDirectoryPath, name: 'Cache' }
             ];
-            
+
             let newAlbums: AlbumItem[] = [];
             let processedPaths = new Set<string>(); // เพิ่มการตรวจสอบโฟลเดอร์ซ้ำ
-            
+
             // สร้างอัลบัมสำหรับโฟลเดอร์หลัก
             for (const dir of mainImageDirectories) {
                 try {
@@ -1665,7 +1665,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                         continue;
                     }
                     processedPaths.add(dir.path);
-                    
+
                     if (await RNFS.exists(dir.path)) {
                         console.log(`Checking directory: ${dir.path}`);
                         // ตรวจสอบจำนวนรูปในโฟลเดอร์
@@ -1677,7 +1677,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                             }
                             return false;
                         });
-             
+
                         if (images.length > 0) {
                             console.log(`Found album: ${dir.name} with ${images.length} images`);
                             // สร้างข้อมูลอัลบัม
@@ -1687,13 +1687,13 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                 count: images.length,
                                 thumbnail: images[0]?.path || null
                             });
-                            
+
                             // แสดงผลทันทีเมื่อมีข้อมูลบางส่วน
                             if (newAlbums.length >= 2 && albums.length === 0) {
                                 setAlbums([...newAlbums]);
                             }
                         }
-                        
+
                         // ตรวจสอบโฟลเดอร์ย่อยระดับแรกเพื่อหาอัลบั้มเพิ่มเติม
                         for (const item of items) {
                             if (item.isDirectory() && !item.name.startsWith('.')) {
@@ -1702,7 +1702,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                     continue;
                                 }
                                 processedPaths.add(item.path);
-                                
+
                                 try {
                                     const subItems = await RNFS.readDir(item.path);
                                     const subImages = subItems.filter(subItem => {
@@ -1712,7 +1712,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                         }
                                         return false;
                                     });
-                                    
+
                                     if (subImages.length > 0) {
                                         console.log(`Found sub-album: ${item.name} with ${subImages.length} images`);
                                         newAlbums.push({
@@ -1732,7 +1732,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     console.log(`Error checking directory ${dir.path}:`, error);
                 }
             }
-            
+
             // เพิ่มอัลบัมสำหรับรูปภาพทั้งหมด
             const totalImagesCount = newAlbums.reduce((total, album) => total + album.count, 0);
             if (totalImagesCount > 0) {
@@ -1743,7 +1743,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     thumbnail: newAlbums[0]?.thumbnail || null
                 });
             }
-            
+
             setAlbums(newAlbums);
             setAlbumsCache(newAlbums);
             setLastAlbumUpdateTime(Date.now());
@@ -1773,10 +1773,10 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             loadAllImages();
             return;
         }
-        
+
         setContent(null);
         setIsLoadingImages(true);
-        
+
         try {
             // ตรวจสอบว่าไดเร็กทอรีมีอยู่จริง
             const exists = await RNFS.exists(albumPath);
@@ -1785,7 +1785,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 setIsLoadingImages(false);
                 return;
             }
-            
+
             // อ่านรูปภาพในอัลบั้ม
             const items = await RNFS.readDir(albumPath);
             const images = items.filter(item => {
@@ -1795,7 +1795,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 }
                 return false;
             });
-            
+
             // เรียงตาม sortType ปัจจุบัน
             images.sort((a, b) => {
                 switch (sortType) {
@@ -1806,7 +1806,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                         return (b.mtime?.getTime() ?? 0) - (a.mtime?.getTime() ?? 0);
                 }
             });
-            
+
             setContent(images);
             setIsLoadingImages(false);
         } catch (error) {
@@ -1824,11 +1824,11 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     };
 
     function handleGoBack() {
-        if (containerType === ContainerType.CATEGORIZED) { 
+        if (containerType === ContainerType.CATEGORIZED) {
             if (storageName === "Images" && currentAlbum) {
-            // กลับไปหน้าอัลบั้ม
-            goBackToAlbums();
-            return;
+                // กลับไปหน้าอัลบั้ม
+                goBackToAlbums();
+                return;
             }
             else if (storageName === "Videos" && currentAlbum) {
                 // กรณีวิดีโอมีการเปิดอัลบั้มอยู่ ให้กลับไปหน้าอัลบั้ม
@@ -1858,7 +1858,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 return;
             }
         }
-        
+
         if (navpath.nodes.length == 0) {
             navigation.goBack();
             return;
@@ -1874,7 +1874,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     async function loadAllVideos() {
         setContent(null);
         setIsLoadingImages(true);
-        
+
         try {
             // เพิ่มโฟลเดอร์ที่มักจะมีวิดีโอ
             const baseDirs = [
@@ -1889,9 +1889,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 RNFS.ExternalStorageDirectoryPath + '/Video',
                 RNFS.ExternalStorageDirectoryPath + '/Videos'
             ];
-            
+
             let allFiles: RNFS.ReadDirItem[] = [];
-            
+
             // สแกนไดเร็กทอรี่
             for (const baseDir of baseDirs) {
                 try {
@@ -1901,11 +1901,11 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                         console.log('Directory does not exist:', baseDir);
                         continue;
                     }
-                    
+
                     console.log('Reading directory:', baseDir);
                     const items = await RNFS.readDir(baseDir);
                     console.log(`Found ${items.length} items in ${baseDir}`);
-                    
+
                     // หาไฟล์วิดีโอในระดับบนสุด
                     for (const item of items) {
                         if (item.isFile()) {
@@ -1916,7 +1916,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                             }
                         }
                     }
-                    
+
                     // หาไฟล์วิดีโอในโฟลเดอร์ย่อย
                     for (const item of items) {
                         if (item.isDirectory() && !item.name.startsWith('.')) {
@@ -1940,9 +1940,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     console.log(`Error scanning directory ${baseDir}:`, error);
                 }
             }
-            
+
             console.log(`Total videos found: ${allFiles.length}`);
-            
+
             if (allFiles.length > 0) {
                 allFiles.sort((a, b) => {
                     switch (sortType) {
@@ -1953,14 +1953,14 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                             return (b.mtime?.getTime() ?? 0) - (a.mtime?.getTime() ?? 0);
                     }
                 });
-                
+
                 setContent(allFiles);
                 console.log(`Displaying ${allFiles.length} videos`);
             } else {
                 setContent([]);
                 console.log("No videos found. This might be due to missing permissions or no videos in the scanned directories.");
             }
-            
+
             setIsLoadingImages(false);
         } catch (error) {
             console.error("Error finding videos:", error);
@@ -1973,7 +1973,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     async function loadAllAudio() {
         setContent(null);
         setIsLoadingImages(true);
-        
+
         try {
             // โฟลเดอร์ที่มักจะมีไฟล์เสียง
             const baseDirs = [
@@ -1988,9 +1988,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 RNFS.ExternalStorageDirectoryPath + '/Alarms',
                 RNFS.ExternalStorageDirectoryPath + '/Notifications',
             ];
-            
+
             let allFiles: RNFS.ReadDirItem[] = [];
-            
+
             // สแกนไดเร็กทอรี่
             for (const baseDir of baseDirs) {
                 try {
@@ -2000,11 +2000,11 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                         console.log('Directory does not exist:', baseDir);
                         continue;
                     }
-                    
+
                     console.log('Reading directory:', baseDir);
                     const items = await RNFS.readDir(baseDir);
                     console.log(`Found ${items.length} items in ${baseDir}`);
-                    
+
                     // หาไฟล์เสียงในระดับบนสุด
                     for (const item of items) {
                         if (item.isFile()) {
@@ -2015,7 +2015,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                             }
                         }
                     }
-                    
+
                     // หาไฟล์เสียงในโฟลเดอร์ย่อย
                     for (const item of items) {
                         if (item.isDirectory() && !item.name.startsWith('.')) {
@@ -2039,9 +2039,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     console.log(`Error scanning directory ${baseDir}:`, error);
                 }
             }
-            
+
             console.log(`Total audio files found: ${allFiles.length}`);
-            
+
             if (allFiles.length > 0) {
                 allFiles.sort((a, b) => {
                     switch (sortType) {
@@ -2052,14 +2052,14 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                             return (b.mtime?.getTime() ?? 0) - (a.mtime?.getTime() ?? 0);
                     }
                 });
-                
+
                 setContent(allFiles);
                 console.log(`Displaying ${allFiles.length} audio files`);
             } else {
                 setContent([]);
                 console.log("No audio files found. This might be due to missing permissions or no audio files in the scanned directories.");
             }
-            
+
             setIsLoadingImages(false);
         } catch (error) {
             console.error("Error finding audio:", error);
@@ -2075,9 +2075,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             if (storageName === "Videos") {
                 // มีการเลือกอัลบั้มแล้ว
                 if (currentAlbum) {
-                return (
-                        <VideoGrid 
-                            videos={content || []} 
+                    return (
+                        <VideoGrid
+                            videos={content || []}
                             isLoading={isLoadingImages}
                             onVideoPress={(item) => handleOpen(item)}
                             onVideoLongPress={(item) => {
@@ -2090,22 +2090,22 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 // ถ้าเป็นแท็บ Collections และยังไม่ได้เลือกอัลบั้ม ให้แสดง Albums
                 else if (currentTab === 'Collections') {
                     return (
-                        <AlbumsGrid 
-                            albums={albums} 
-                            isLoading={isLoadingAlbums} 
+                        <AlbumsGrid
+                            albums={albums}
+                            isLoading={isLoadingAlbums}
                             onAlbumPress={(album) => {
                                 console.log("Album selected:", album.name);
                                 setCurrentAlbum(album);
                                 loadAlbumImages(album.path);
-                            }} 
+                            }}
                         />
                     );
-                } 
+                }
                 // ถ้าเป็นแท็บ Videos ให้แสดงวิดีโอทั้งหมด
                 else {
                     return (
-                        <VideoGrid 
-                            videos={content || []} 
+                        <VideoGrid
+                            videos={content || []}
                             isLoading={isLoadingImages}
                             onVideoPress={(item) => handleOpen(item)}
                             onVideoLongPress={(item) => {
@@ -2116,12 +2116,12 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     );
                 }
             }
-            
+
             // กรณีเสียง
             if (storageName === "Audio") {
                 return (
-                    <AudioList 
-                        audioFiles={content || []} 
+                    <AudioList
+                        audioFiles={content || []}
                         isLoading={isLoadingImages}
                         onAudioPress={(item) => handleOpen(item)}
                         onAudioLongPress={(item) => {
@@ -2131,12 +2131,12 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     />
                 );
             }
-            
+
             // กรณีเอกสาร
             if (storageName === "Documents") {
                 return (
-                    <DocumentList 
-                        documents={content || []} 
+                    <DocumentList
+                        documents={content || []}
                         isLoading={isLoadingImages}
                         onDocumentPress={(item) => handleOpen(item)}
                         onDocumentLongPress={(item) => {
@@ -2146,25 +2146,25 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     />
                 );
             }
-            
+
             // กรณีรูปภาพ (แบบเดิม)
             if (currentViewMode === ViewMode.FOLDERS && !currentAlbum) {
                 return (
-                    <AlbumsGrid 
-                        albums={albums} 
-                        isLoading={isLoadingAlbums} 
+                    <AlbumsGrid
+                        albums={albums}
+                        isLoading={isLoadingAlbums}
                         onAlbumPress={(album) => {
                             console.log("Album selected:", album.name);
                             setCurrentAlbum(album);
                             loadAlbumImages(album.path);
-                        }} 
+                        }}
                     />
                 );
             } else if (currentAlbum || currentViewMode === ViewMode.FILES) {
                 if (storageName === "Images") {
                     return (
-                        <ImageGrid 
-                            images={content || []} 
+                        <ImageGrid
+                            images={content || []}
                             isLoading={isLoadingImages}
                             onImagePress={(item) => handleOpen(item)}
                             onImageLongPress={(item) => {
@@ -2176,13 +2176,13 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 }
             }
         }
-        
+
         return (
-            <ContentList 
-                content={content} 
-                handleOpen={handleOpen} 
-                handleSelect={handleSelect} 
-                selectionSet={selectionSet} 
+            <ContentList
+                content={content}
+                handleOpen={handleOpen}
+                handleSelect={handleSelect}
+                selectionSet={selectionSet}
             />
         );
     };
@@ -2190,7 +2190,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     // สร้างฟังก์ชันสำหรับการสลับแท็บ
     const switchTab = (tab: 'Videos' | 'Collections' | 'Audio') => {
         setCurrentTab(tab);
-        
+
         // โหลดข้อมูลใหม่เมื่อสลับแท็บ
         if (tab === 'Videos') {
             console.log('Switching to Videos tab, reloading videos');
@@ -2210,7 +2210,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
             console.log('Switching to Audio tab, loading audio files');
             loadAllAudio();
         }
-        
+
         // เคลียร์การเลือกเมื่อสลับแท็บ
         unselectAll();
     };
@@ -2219,7 +2219,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     async function createAudioPlaylists() {
         console.log('Creating audio playlists...');
         setIsLoadingAlbums(true);
-        
+
         try {
             // โฟลเดอร์หลักที่มักมีไฟล์เสียง
             const mainAudioDirectories = [
@@ -2230,9 +2230,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 { path: RNFS.ExternalStorageDirectoryPath + '/Podcasts', name: 'Podcasts' },
                 { path: RNFS.ExternalStorageDirectoryPath + '/Ringtones', name: 'Ringtones' }
             ];
-            
+
             let newAlbums: AlbumItem[] = [];
-            
+
             // สร้าง playlist สำหรับโฟลเดอร์หลัก
             for (const dir of mainAudioDirectories) {
                 try {
@@ -2247,7 +2247,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                             }
                             return false;
                         });
-             
+
                         if (audioFiles.length > 0) {
                             console.log(`Found playlist: ${dir.name} with ${audioFiles.length} audio files`);
                             // สร้างข้อมูล playlist
@@ -2263,7 +2263,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     console.log(`Error checking directory ${dir.path}:`, error);
                 }
             }
-            
+
             // เพิ่ม playlist สำหรับไฟล์เสียงทั้งหมด
             const totalAudioCount = newAlbums.reduce((total, album) => total + album.count, 0);
             if (totalAudioCount > 0) {
@@ -2274,7 +2274,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     thumbnail: null
                 });
             }
-            
+
             setAlbums(newAlbums);
             setIsLoadingAlbums(false);
         } catch (error) {
@@ -2288,17 +2288,17 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     async function loadAllDocuments() {
         setContent(null);
         setIsLoadingImages(true);
-        
+
         try {
             // ตรวจสอบและขอสิทธิ์การเข้าถึงไฟล์
             console.log('เริ่มการตรวจสอบสิทธิ์การเข้าถึงเอกสาร');
             let hasPermission = await checkStoragePermission();
-            
+
             if (!hasPermission) {
                 console.log('ไม่ได้รับสิทธิ์การเข้าถึงเอกสาร ทำการขอสิทธิ์');
                 hasPermission = await requestStoragePermission();
             }
-            
+
             if (!hasPermission) {
                 console.log('ไม่ได้รับสิทธิ์การเข้าถึงไฟล์เอกสาร');
                 Alert.alert(
@@ -2310,7 +2310,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 setIsLoadingImages(false);
                 return;
             }
-            
+
             // โฟลเดอร์ที่มักจะมีเอกสาร
             const baseDirs = [
                 RNFS.ExternalStorageDirectoryPath + '/Documents',
@@ -2320,9 +2320,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                 RNFS.ExternalStorageDirectoryPath + '/WhatsApp/Media/WhatsApp Documents',
                 RNFS.ExternalStorageDirectoryPath + '/Telegram/Telegram Documents',
             ];
-            
+
             let allFiles: RNFS.ReadDirItem[] = [];
-            
+
             // สแกนไดเร็กทอรี่
             for (const baseDir of baseDirs) {
                 try {
@@ -2332,11 +2332,11 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                         console.log('ไม่พบไดเร็กทอรี่:', baseDir);
                         continue;
                     }
-                    
+
                     console.log('กำลังอ่านไดเร็กทอรี่:', baseDir);
                     const items = await RNFS.readDir(baseDir);
                     console.log(`พบรายการ ${items.length} รายการใน ${baseDir}`);
-                    
+
                     // หาไฟล์เอกสารในระดับบนสุด
                     for (const item of items) {
                         if (item.isFile()) {
@@ -2347,7 +2347,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                             }
                         }
                     }
-                    
+
                     // หาไฟล์เอกสารในโฟลเดอร์ย่อย (เฉพาะระดับเดียว)
                     for (const item of items) {
                         if (item.isDirectory() && !item.name.startsWith('.')) {
@@ -2371,9 +2371,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     console.log(`เกิดข้อผิดพลาดในการสแกนไดเร็กทอรี่ ${baseDir}:`, error);
                 }
             }
-            
+
             console.log(`พบเอกสารทั้งหมด: ${allFiles.length} ไฟล์`);
-            
+
             if (allFiles.length > 0) {
                 allFiles.sort((a, b) => {
                     switch (sortType) {
@@ -2384,7 +2384,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                             return (b.mtime?.getTime() ?? 0) - (a.mtime?.getTime() ?? 0);
                     }
                 });
-                
+
                 setContent(allFiles);
                 console.log(`กำลังแสดง ${allFiles.length} เอกสาร`);
             } else {
@@ -2396,7 +2396,7 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                     [{ text: "OK" }]
                 );
             }
-            
+
             setIsLoadingImages(false);
         } catch (error) {
             console.error("เกิดข้อผิดพลาดในการค้นหาเอกสาร:", error);
@@ -2427,44 +2427,44 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
     // Return section
     return (
         <SafeAreaView style={{ flex: 1 }}>
-        <StatusBar />
-        <View style={{ flex: 1 }}>
-            {//Toolbar 1
-                !isSelecting
-                    //Default Mode
-                    ? <Toolbar navigation={navigation} containerName={storageName} path={navpath}
-                        goBackHandler={() => handleGoBack()}
-                        sortByHandler={() => setSortByOptionVisible(true)}
-                        createHandler={containerType == ContainerType.DEFAULT ? () => setItemCreatorVisible(true) : undefined}
-                    />
-                    //Selection Mode
-                    : <SelectionToolBar
-                        onCancel={unselectAll}
-                        onSelectAll={() => {
-                            if (content) {
-                                if (selectionSet.size == content.length) {
-                                    unselectAll();
-                                } else {
-                                    for (const item of content) {
-                                        selectionSet.add(item);
+            <StatusBar />
+            <View style={{ flex: 1 }}>
+                {//Toolbar 1
+                    !isSelecting
+                        //Default Mode
+                        ? <Toolbar navigation={navigation} containerName={storageName} path={navpath}
+                            goBackHandler={() => handleGoBack()}
+                            sortByHandler={() => setSortByOptionVisible(true)}
+                            createHandler={containerType == ContainerType.DEFAULT ? () => setItemCreatorVisible(true) : undefined}
+                        />
+                        //Selection Mode
+                        : <SelectionToolBar
+                            onCancel={unselectAll}
+                            onSelectAll={() => {
+                                if (content) {
+                                    if (selectionSet.size == content.length) {
+                                        unselectAll();
+                                    } else {
+                                        for (const item of content) {
+                                            selectionSet.add(item);
+                                        }
+                                        updateSelectionState({ selectionSet, isSelecting: selectionSet.size > 0 });
                                     }
-                                    updateSelectionState({ selectionSet, isSelecting: selectionSet.size > 0 });
                                 }
-                            }
-                        }}
-                        count={selectionSet.size}
-                        maxCount={(content ?? []).length}
-                    />
-            }
-            {//Toolbar 2
-                containerType == ContainerType.DEFAULT
-                    ? <PathDisplayer navpath={navpath} />//Display path
+                            }}
+                            count={selectionSet.size}
+                            maxCount={(content ?? []).length}
+                        />
+                }
+                {//Toolbar 2
+                    containerType == ContainerType.DEFAULT
+                        ? <PathDisplayer navpath={navpath} />//Display path
                         : storageName === "Videos" ? (
                             // แท็บสำหรับวิดีโอ
-                            <View style={{ 
-                                flexDirection: 'row', 
-                                backgroundColor: '#f8f8f8', 
-                                borderRadius: 30, 
+                            <View style={{
+                                flexDirection: 'row',
+                                backgroundColor: '#f8f8f8',
+                                borderRadius: 30,
                                 overflow: 'hidden',
                                 margin: 10,
                                 elevation: 3,
@@ -2476,9 +2476,9 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                 borderColor: '#e0e0e0',
                                 padding: 4
                             }}>
-                                <TouchableOpacity 
-                                    style={{ 
-                                        flex: 1, 
+                                <TouchableOpacity
+                                    style={{
+                                        flex: 1,
                                         backgroundColor: currentTab === 'Videos' ? '#FFFFFF' : 'transparent',
                                         paddingVertical: 12,
                                         paddingHorizontal: 5,
@@ -2489,21 +2489,21 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                     }}
                                     onPress={() => switchTab('Videos')}
                                 >
-                                    <MaterialIcons 
-                                        name="videocam" 
-                                        size={18} 
-                                        color={currentTab === 'Videos' ? '#2196F3' : '#757575'} 
-                                        style={{marginRight: 6}}
+                                    <MaterialIcons
+                                        name="videocam"
+                                        size={18}
+                                        color={currentTab === 'Videos' ? '#2196F3' : '#757575'}
+                                        style={{ marginRight: 6 }}
                                     />
-                                    <Text style={{ 
+                                    <Text style={{
                                         fontWeight: currentTab === 'Videos' ? 'bold' : 'normal',
                                         color: currentTab === 'Videos' ? '#2196F3' : '#757575',
                                         fontSize: 15
                                     }}>Videos</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity 
-                                    style={{ 
-                                        flex: 1, 
+                                <TouchableOpacity
+                                    style={{
+                                        flex: 1,
                                         backgroundColor: currentTab === 'Collections' ? '#FFFFFF' : 'transparent',
                                         paddingVertical: 12,
                                         paddingHorizontal: 5,
@@ -2514,13 +2514,13 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                                     }}
                                     onPress={() => switchTab('Collections')}
                                 >
-                                    <MaterialIcons 
-                                        name="collections" 
-                                        size={18} 
-                                        color={currentTab === 'Collections' ? '#2196F3' : '#757575'} 
-                                        style={{marginRight: 6}}
+                                    <MaterialIcons
+                                        name="collections"
+                                        size={18}
+                                        color={currentTab === 'Collections' ? '#2196F3' : '#757575'}
+                                        style={{ marginRight: 6 }}
                                     />
-                                    <Text style={{ 
+                                    <Text style={{
                                         fontWeight: currentTab === 'Collections' ? 'bold' : 'normal',
                                         color: currentTab === 'Collections' ? '#2196F3' : '#757575',
                                         fontSize: 15
@@ -2530,131 +2530,131 @@ export function ContentContainer({ navigation }: NativeStackScreenProps<RootStac
                         ) : storageName === "Audio" || storageName === "Downloads" || storageName === "Documents" ? (
                             // Don't show header for Audio, Downloads, and Documents pages
                             null
-                        ) : <ItemViewModeSelection 
-                        fileType={currentFileType}
-                        initialMode={currentViewMode}
-                        onChange={(mode) => {//Display Viewing Options
-                            console.log('Changing view mode to:', mode);
-                            setCurrentViewMode(mode);
-                            if (mode === ViewMode.FOLDERS) {
-                                setCurrentAlbum(null);
-                                createAlbums();
-                            } else {
-                                loadAllImages();
-                            }
-                            unselectAll();
-                        }} 
-                      />
-            }
-
-            {/* Content is displayed here */}
-            <View style={{ margin: 10, flex: 1 }}>
-                {renderContent()}
-        </View>
-
-        <SelectionBottomBar 
-            selectionSet={selectionSet}
-        isSelecting={selectionSet.size > 0} 
-        isMoving={movingState != null} 
-        isPasteLocationValid={movingState?.sourceDir.build() != navpath.build()}
-            copyActionHandler={function (): void {
-                let itemArray = Array.from(selectionSet);
-
-                setMovingState({
-                    sourceDir: navpath.clone(),
-                    moveType: MoveType.COPY,
-                    items: itemArray,
-                });
-
-                unselectAll();
-                    }} 
-                    moveActionHandler={function (): void {
-                let itemArray = Array.from(selectionSet);
-
-                setMovingState({
-                    sourceDir: navpath.clone(),
-                    moveType: MoveType.CUT,
-                    items: itemArray,
-                });
-
-                unselectAll();
-                    }} 
-                    renameActionHandler={function (): void {
-                if (selectionSet.size !== 1) {
-                    throw new Error("Selection Set has more than element!");
+                        ) : <ItemViewModeSelection
+                            fileType={currentFileType}
+                            initialMode={currentViewMode}
+                            onChange={(mode) => {//Display Viewing Options
+                                console.log('Changing view mode to:', mode);
+                                setCurrentViewMode(mode);
+                                if (mode === ViewMode.FOLDERS) {
+                                    setCurrentAlbum(null);
+                                    createAlbums();
+                                } else {
+                                    loadAllImages();
+                                }
+                                unselectAll();
+                            }}
+                        />
                 }
 
-                const itemToRename = Array.from(selectionSet)[0];
-                openRenameModal(itemToRename);
-                unselectAll();
-
-                    }} 
-                    deleteActionHandler={handleDeleteAction} 
-                    pasteCancelActionHandler={function (): void {
-                setMovingState(null);
-                    }} 
-                    pasteActionHandler={() => handlePasteAction().catch((reason) => { throw new Error(reason) })}
-        />
-
-        {/* ใช้ SortOptionsBar แทน Modal เดิม */}
-        <SortOptionsBar
-            visible={sortByOptionVisible}
-            onClose={() => setSortByOptionVisible(false)}
-            options={sortOptions}
-            selectedOption={sortType}
-            onSelectOption={(option) => updateSortType(option as SortType)}
-        />
-
-        <Modal visible={renameModalVisible} transparent={true} onRequestClose={closeRenameModal}>
-            <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: 30 }}>
-                <View style={{ padding: 15, backgroundColor: 'white', borderRadius: 5 }}>
-                    <Text style={{ fontSize: 20, paddingBottom: 10 }}>Rename Item</Text>
-                    <TextInput
-                        style={{
-                            height: 40,
-                            borderWidth: 1,
-                            borderColor: '#ddd',
-                            paddingHorizontal: 12,
-                            borderRadius: 5,
-                            fontSize: 17,
-                            backgroundColor: '#fff',
-                        }}
-                        value={newName}
-                        placeholder="Enter new name"
-                        onChangeText={setNewName}
-                    />
-
-                    {/* Buttons */}
-                    <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'space-between' }}>
-                        <TouchableOpacity
-                            style={{ flex: 1, backgroundColor: '#6C757D', marginRight: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
-                            onPress={closeRenameModal}
-                    >
-                        <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
-                    </TouchableOpacity>
-                        <TouchableOpacity
-                            style={{ flex: 1, backgroundColor: newName == "" ? '#6C757D' : '#007BFF', marginLeft: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
-                            onPress={confirmRename}
-                            disabled={newName == ""}
-                        >
-                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Rename</Text>
-                        </TouchableOpacity>
-                    </View>
+                {/* Content is displayed here */}
+                <View style={{ margin: 10, flex: 1 }}>
+                    {renderContent()}
                 </View>
-            </View>
-        </Modal>
 
-        <ProgressBar />
+                <SelectionBottomBar
+                    selectionSet={selectionSet}
+                    isSelecting={selectionSet.size > 0}
+                    isMoving={movingState != null}
+                    isPasteLocationValid={movingState?.sourceDir.build() != navpath.build()}
+                    copyActionHandler={function (): void {
+                        let itemArray = Array.from(selectionSet);
 
-        <ItemCreator enabled={itemCreatorVisible} currentPath={navpath}
-            onCreationCanceled={() => {
-                setItemCreatorVisible(false);
-            }}
-            onCreationDone={() => {
-                setItemCreatorVisible(false);
-                fetchContent();
-            }}
-        />
+                        setMovingState({
+                            sourceDir: navpath.clone(),
+                            moveType: MoveType.COPY,
+                            items: itemArray,
+                        });
+
+                        unselectAll();
+                    }}
+                    moveActionHandler={function (): void {
+                        let itemArray = Array.from(selectionSet);
+
+                        setMovingState({
+                            sourceDir: navpath.clone(),
+                            moveType: MoveType.CUT,
+                            items: itemArray,
+                        });
+
+                        unselectAll();
+                    }}
+                    renameActionHandler={function (): void {
+                        if (selectionSet.size !== 1) {
+                            throw new Error("Selection Set has more than element!");
+                        }
+
+                        const itemToRename = Array.from(selectionSet)[0];
+                        openRenameModal(itemToRename);
+                        unselectAll();
+
+                    }}
+                    deleteActionHandler={handleDeleteAction}
+                    pasteCancelActionHandler={function (): void {
+                        setMovingState(null);
+                    }}
+                    pasteActionHandler={() => handlePasteAction().catch((reason) => { throw new Error(reason) })}
+                />
+
+                {/* ใช้ SortOptionsBar แทน Modal เดิม */}
+                <SortOptionsBar
+                    visible={sortByOptionVisible}
+                    onClose={() => setSortByOptionVisible(false)}
+                    options={sortOptions}
+                    selectedOption={sortType}
+                    onSelectOption={(option) => updateSortType(option as SortType)}
+                />
+
+                <Modal visible={renameModalVisible} transparent={true} onRequestClose={closeRenameModal}>
+                    <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: 30 }}>
+                        <View style={{ padding: 15, backgroundColor: 'white', borderRadius: 5 }}>
+                            <Text style={{ fontSize: 20, paddingBottom: 10 }}>Rename Item</Text>
+                            <TextInput
+                                style={{
+                                    height: 40,
+                                    borderWidth: 1,
+                                    borderColor: '#ddd',
+                                    paddingHorizontal: 12,
+                                    borderRadius: 5,
+                                    fontSize: 17,
+                                    backgroundColor: '#fff',
+                                }}
+                                value={newName}
+                                placeholder="Enter new name"
+                                onChangeText={setNewName}
+                            />
+
+                            {/* Buttons */}
+                            <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'space-between' }}>
+                                <TouchableOpacity
+                                    style={{ flex: 1, backgroundColor: '#6C757D', marginRight: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
+                                    onPress={closeRenameModal}
+                                >
+                                    <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{ flex: 1, backgroundColor: newName == "" ? '#6C757D' : '#007BFF', marginLeft: 5, padding: 10, alignItems: 'center', borderRadius: 5 }}
+                                    onPress={confirmRename}
+                                    disabled={newName == ""}
+                                >
+                                    <Text style={{ color: 'white', fontWeight: 'bold' }}>Rename</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                <ProgressBar />
+
+                <ItemCreator enabled={itemCreatorVisible} currentPath={navpath}
+                    onCreationCanceled={() => {
+                        setItemCreatorVisible(false);
+                    }}
+                    onCreationDone={() => {
+                        setItemCreatorVisible(false);
+                        fetchContent();
+                    }}
+                />
             </View>
         </SafeAreaView>
     );
