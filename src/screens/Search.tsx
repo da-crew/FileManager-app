@@ -23,28 +23,22 @@ export default function SearchScreen({ route, navigation }: NativeStackScreenPro
     const [isSearching, setIsSearching] = useState(false);
 
     function handleGoBack() {
-        // ล้างข้อมูลการค้นหา
-        setSearchQuery('');
-        setSearchResults([]);
-        
-        // ถ้าอยู่ในระดับ Device Storage หรือ Internal Storage ให้กลับไปหน้า Home
-        if (storageName === 'Device Storage' || storageName === 'Internal Storage') {
-            navigation.navigate("Home");
-            return;
-        }
-        
-        // กลับไปยังหน้าเดิมโดยใช้ path ที่ถูกต้อง
-        if (currentPath) {
-            navigation.navigate("Container", {
-                containerName: storageName,
-                path: currentPath,
-                containerType: containerType
-            });
-        } else {
-            // ถ้าไม่มี path ให้กลับไปหน้า Home
-            navigation.navigate("Home");
-        }
+        console.log("navpath:",currentPath.build())
+        navigation.replace("Container", {
+            containerName: storageName,
+            path: currentPath,
+            containerType: ContainerType.DEFAULT
+        });
+        console.log("navpath:",currentPath.build())
     }
+    useEffect(() => {//from ContentContainer
+        const backAction = () => {
+            handleGoBack();
+            return true; // Prevent default behavior
+        };
+        const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
+        return () => backHandler.remove();
+    }, [currentPath]);
 
     // ฟังก์ชันค้นหา
     const handleSearch = async (text: string) => {
