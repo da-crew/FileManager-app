@@ -237,6 +237,8 @@ export default function LargeFiles() {
             ];
             
             let foundFiles: RNFS.ReadDirItem[] = [];
+            // เพิ่ม Set เพื่อเก็บ path ของไฟล์ที่พบแล้ว ป้องกันไฟล์ซ้ำ
+            const existingFilePaths = new Set<string>();
             
             // สแกนไดเร็กทอรีที่ระบุ
             for (const baseDir of baseDirs) {
@@ -251,8 +253,12 @@ export default function LargeFiles() {
                     // หาไฟล์ขนาดใหญ่ในระดับบนสุด
                     for (const item of items) {
                         if (item.isFile() && item.size && item.size > LARGE_FILE_SIZE_THRESHOLD) {
-                            console.log(`Found large file: ${item.name} (${formatFileSize(item.size)})`);
+                            // ตรวจสอบว่าไฟล์นี้มีอยู่ในรายการแล้วหรือไม่
+                            if (!existingFilePaths.has(item.path)) {
+                                console.log(`Found large file: ${item.name} (${formatFileSize(item.size)})`);
                             foundFiles.push(item);
+                                existingFilePaths.add(item.path);
+                            }
                         }
                     }
                     
@@ -263,8 +269,12 @@ export default function LargeFiles() {
                                 const subItems = await RNFS.readDir(item.path);
                                 for (const subItem of subItems) {
                                     if (subItem.isFile() && subItem.size && subItem.size > LARGE_FILE_SIZE_THRESHOLD) {
-                                        console.log(`Found large file in subfolder: ${subItem.name} (${formatFileSize(subItem.size)})`);
+                                        // ตรวจสอบว่าไฟล์นี้มีอยู่ในรายการแล้วหรือไม่
+                                        if (!existingFilePaths.has(subItem.path)) {
+                                            console.log(`Found large file in subfolder: ${subItem.name} (${formatFileSize(subItem.size)})`);
                                         foundFiles.push(subItem);
+                                            existingFilePaths.add(subItem.path);
+                                        }
                                     }
                                 }
                             } catch (error) {
@@ -493,7 +503,6 @@ export default function LargeFiles() {
                     navigation={navigation}
                     containerName="Large Files"
                     sortByHandler={() => setSortByOptionVisible(true)}
-                    path={new Path('Large Files', '', [])}
                 />
             ) : (
                 <SelectionToolBar
