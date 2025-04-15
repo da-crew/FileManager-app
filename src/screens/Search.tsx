@@ -86,14 +86,10 @@ export default function SearchScreen({ route, navigation }: NativeStackScreenPro
                 openWith(item.path, getFileType(item));
             }
         } else if (item.isDirectory()) {
-            // เก็บ path ของโฟลเดอร์ที่จะเปิด
-            const folderPath = item.path;
-            console.log('Opening folder with path:', folderPath);
-            
-            // ใช้ path เต็มของโฟลเดอร์
+            currentPath.push(item.name); // เพิ่มชื่อโฟลเดอร์ใน path
             navigation.navigate("Container", {
                 containerName: storageName,
-                path: new Path(storageName, folderPath, []),
+                path: currentPath,
                 containerType: ContainerType.DEFAULT
             });
         }
