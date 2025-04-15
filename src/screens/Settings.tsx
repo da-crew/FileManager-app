@@ -93,15 +93,8 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                 <Text style={styles.sectionHeader}>Theme and Display</Text>
                 <View style={styles.sectionContainer}>
                     {/* โหมดกลางคืน */}
-                    <SettingItem
-                        icon="moon-outline"
-                        iconColor="#8E8E93"
-                        iconBgColor="#8E8E9320"
-                        label="Night Mode"
-                        value={darkMode}
-                        onValueChange={setDarkMode}
-                    />
-
+                    
+                    
                     {/* เรียงตามวันที่เป็นค่าเริ่มต้น */}
                     <SettingItem
                         icon="calendar-outline"
