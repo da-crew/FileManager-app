@@ -66,6 +66,7 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
             
             {/* ชื่อคอนเทนเนอร์ */}
             <Text style={{ 
+                flex: 1,
                 fontSize: 20, 
                 fontWeight: '500', 
                 color: '#333',
@@ -73,77 +74,79 @@ export default function Toolbar({ navigation, containerName, path, goBackHandler
             }}>
                 {containerName}
             </Text>
-            {path && containerName && (
-                <TouchableOpacity
+
+            {/* Container สำหรับปุ่มด้านขวาทั้งหมด */}
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {path && containerName && (
+                    <TouchableOpacity
+                        style={{ 
+                            marginRight: 10,
+                            padding: 8,
+                            borderRadius: 20,
+                            backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                        }}
+                        onPress={() => navigation.replace("Search", {
+                            containerName: containerName,
+                            path: path,
+                            containerType: ContainerType.DEFAULT
+                        })}
+                    >
+                        <Ionicons name="search" size={22} color="#333" />
+                    </TouchableOpacity>
+                )}
+
+                {/* ปุ่มเปลี่ยนรูปแบบการแสดงผล */}
+                {layoutChangeHandler ? <TouchableOpacity
                     style={{ 
-                        marginLeft: 'auto', 
                         marginRight: 10,
                         padding: 8,
                         borderRadius: 20,
                         backgroundColor: 'rgba(242, 242, 242, 0.6)'
                     }}
-                    onPress={() => navigation.replace("Search", {
-                        containerName: containerName,
-                        path: path,
-                        containerType: ContainerType.DEFAULT
-                    })}
+                    onPress={layoutChangeHandler}
                 >
-                    <Ionicons name="search" size={22} color="#333" />
-                </TouchableOpacity>
-            )}
+                    <Ionicons name="grid-outline" size={22} color="#333" />
+                </TouchableOpacity> : <></>}
 
-            {/* ปุ่มเปลี่ยนรูปแบบการแสดงผล - กริด, รายละเอียด, เรียบง่าย */}
-            {layoutChangeHandler ? <TouchableOpacity
-                style={{ 
-                    marginRight: 10,
-                    padding: 8,
-                    borderRadius: 20,
-                    backgroundColor: 'rgba(242, 242, 242, 0.6)'
-                }}
-                onPress={layoutChangeHandler}
-            >
-                <Ionicons name="grid-outline" size={22} color="#333" />
-            </TouchableOpacity> : <></>}
+                {/* ปุ่มเรียงลำดับ */}
+                {sortByHandler ? <TouchableOpacity
+                    style={{ 
+                        marginRight: 10,
+                        padding: 8,
+                        borderRadius: 20,
+                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                    }}
+                    onPress={sortByHandler}
+                >
+                    <FontAwesome5 name="sort" size={22} color="#333" />
+                </TouchableOpacity> : <></>}
 
-            {/* ปุ่มเรียงลำดับ */}
-            {sortByHandler ? <TouchableOpacity
-                style={{ 
-                    marginRight: 10,
-                    padding: 8,
-                    borderRadius: 20,
-                    backgroundColor: 'rgba(242, 242, 242, 0.6)'
-                }}
-                onPress={sortByHandler}
-            >
-                <FontAwesome5 name="sort" size={22} color="#333" />
-            </TouchableOpacity> : <></>}
-
-            {/* ปุ่มสร้างรายการใหม่ */}
-            {createHandler ? <TouchableOpacity
-                style={{ 
-                    marginRight: 10,
-                    padding: 8,
-                    borderRadius: 20,
-                    backgroundColor: 'rgba(242, 242, 242, 0.6)'
-                }}
-                onPress={createHandler}
-            >
-                <AntDesign name="plus" size={22} color="#333" />
-            </TouchableOpacity>
-                : <></>}
-                    
-            {/* ปุ่มเมนูสามจุด */}
-            {menuHandler ? <TouchableOpacity
-                style={{ 
-                    marginRight: 5,
-                    padding: 8,
-                    borderRadius: 20,
-                    backgroundColor: 'rgba(242, 242, 242, 0.6)'
-                }}
-                onPress={menuHandler}
-            >
-                <MaterialIcons name="more-vert" size={22} color="#333" />
-            </TouchableOpacity> : <></>}
+                {/* ปุ่มสร้างรายการใหม่ */}
+                {createHandler ? <TouchableOpacity
+                    style={{ 
+                        marginRight: 10,
+                        padding: 8,
+                        borderRadius: 20,
+                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                    }}
+                    onPress={createHandler}
+                >
+                    <AntDesign name="plus" size={22} color="#333" />
+                </TouchableOpacity> : <></>}
+                        
+                {/* ปุ่มเมนูสามจุด */}
+                {menuHandler ? <TouchableOpacity
+                    style={{ 
+                        marginRight: 5,
+                        padding: 8,
+                        borderRadius: 20,
+                        backgroundColor: 'rgba(242, 242, 242, 0.6)'
+                    }}
+                    onPress={menuHandler}
+                >
+                    <MaterialIcons name="more-vert" size={22} color="#333" />
+                </TouchableOpacity> : <></>}
+            </View>
         </View>
     );
 };
