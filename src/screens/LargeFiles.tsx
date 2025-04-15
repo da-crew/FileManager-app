@@ -493,6 +493,7 @@ export default function LargeFiles() {
                     navigation={navigation}
                     containerName="Large Files"
                     sortByHandler={() => setSortByOptionVisible(true)}
+                    path={new Path('Large Files', '', [])}
                 />
             ) : (
                 <SelectionToolBar
