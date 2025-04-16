@@ -26,7 +26,7 @@ const ImageGrid = ({ images, isLoading, onImagePress, onImageLongPress, selected
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator size="large" color="#2196F3" />
-                <Text style={{ marginTop: 10, color: '#333' }}>กำลังโหลดรูปภาพ...</Text>
+                <Text style={{ marginTop: 10, color: '#333' }}>Loading image file...</Text>
             </View>
         );
     }
@@ -35,7 +35,7 @@ const ImageGrid = ({ images, isLoading, onImagePress, onImageLongPress, selected
     if (images.length === 0) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 16, color: '#333' }}>ไม่พบรูปภาพ</Text>
+                <Text style={{ fontSize: 16, color: '#333' }}>Image file not found</Text>
             </View>
         );
     }

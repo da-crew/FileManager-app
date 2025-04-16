@@ -85,7 +85,7 @@ const ImageViewer = () => {
                 
                 {error && (
                     <View style={styles.errorContainer}>
-                        <Text style={styles.errorText}>ไม่สามารถโหลดรูปภาพได้</Text>
+                        <Text style={styles.errorText}>Unable to load image.</Text>
                         <Text style={styles.errorSubtext}>{error}</Text>
                     </View>
                 )}

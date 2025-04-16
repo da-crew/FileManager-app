@@ -27,7 +27,7 @@ const VideoGrid = ({ videos, isLoading, onVideoPress, onVideoLongPress, selected
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator size="large" color="#2196F3" />
-                <Text style={{ marginTop: 10, color: '#333' }}>กำลังโหลดวิดีโอ...</Text>
+                <Text style={{ marginTop: 10, color: '#333' }}>Loading video file...</Text>
             </View>
         );
     }
@@ -36,7 +36,7 @@ const VideoGrid = ({ videos, isLoading, onVideoPress, onVideoLongPress, selected
     if (videos.length === 0) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 16, color: '#333' }}>ไม่พบวิดีโอ</Text>
+                <Text style={{ fontSize: 16, color: '#333' }}>Video file not found</Text>
             </View>
         );
     }

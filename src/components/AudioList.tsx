@@ -22,7 +22,7 @@ const AudioList = ({ audioFiles, isLoading, onAudioPress, onAudioLongPress, sele
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator size="large" color="#2196F3" />
-                <Text style={{ marginTop: 10, color: '#333' }}>กำลังโหลดไฟล์เสียง...</Text>
+                <Text style={{ marginTop: 10, color: '#333' }}>Loading audio file...</Text>
             </View>
         );
     }
@@ -31,7 +31,7 @@ const AudioList = ({ audioFiles, isLoading, onAudioPress, onAudioLongPress, sele
     if (audioFiles.length === 0) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 16, color: '#333' }}>ไม่พบไฟล์เสียง</Text>
+                <Text style={{ fontSize: 16, color: '#333' }}>Audio file not found</Text>
             </View>
         );
     }

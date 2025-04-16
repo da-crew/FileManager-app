@@ -31,7 +31,7 @@ const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: AlbumsGridProps) => {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator size="large" color="#2196F3" />
-                <Text style={{ marginTop: 10, color: '#333' }}>กำลังโหลดอัลบั้ม...</Text>
+                <Text style={{ marginTop: 10, color: '#333' }}>Loading album...</Text>
             </View>
         );
     }
@@ -40,7 +40,7 @@ const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: AlbumsGridProps) => {
     if (albums.length === 0) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 16, color: '#333' }}>ไม่พบอัลบั้ม</Text>
+                <Text style={{ fontSize: 16, color: '#333' }}>Album not found</Text>
             </View>
         );
     }
@@ -102,7 +102,7 @@ const AlbumsGrid = ({ albums, isLoading, onAlbumPress }: AlbumsGridProps) => {
                     {/* แสดงชื่ออัลบั้มและจำนวนไฟล์ด้านล่าง */}
                     <View style={{ padding: 10 }}>
                         <Text style={{ fontWeight: 'bold', fontSize: 14 }} numberOfLines={1}>{item.name}</Text>
-                        <Text style={{ fontSize: 12, color: '#666' }}>{item.count} รูป</Text>
+                        <Text style={{ fontSize: 12, color: '#666' }}>{item.count} Image</Text>
                     </View>
                 </TouchableOpacity>
             )}

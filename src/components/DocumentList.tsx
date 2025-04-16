@@ -22,7 +22,7 @@ const DocumentList = ({ documents, isLoading, onDocumentPress, onDocumentLongPre
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator size="large" color="#2196F3" />
-                <Text style={{ marginTop: 10, color: '#333' }}>กำลังโหลดเอกสาร...</Text>
+                <Text style={{ marginTop: 10, color: '#333' }}>Loading document file...</Text>
             </View>
         );
     }
@@ -31,7 +31,7 @@ const DocumentList = ({ documents, isLoading, onDocumentPress, onDocumentLongPre
     if (documents.length === 0) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 16, color: '#333' }}>ไม่พบเอกสาร</Text>
+                <Text style={{ fontSize: 16, color: '#333' }}>Document file not found</Text>
             </View>
         );
     }
