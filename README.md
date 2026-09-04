@@ -4,9 +4,7 @@
 FILEMANAGER_STORE_PASSWORD=<รหัส>  
 FILEMANAGER_KEY_PASSWORD=<รหัส>
 ```
-ส่วนรหัสสามารถขอได้ที่ @khemachat-sittiritkawin (กูนี้แหละ)   
-
-อีกอย่างที่ต้องใช้ก็คือไฟล์keystore`file-manager.keystore` ไปเอามาได้จากห้อง`#ลับ` แล้วก็เอาไปวางไว้ใน`./android/app/` **ห้ามวางที่อื่น*เด็ดขาด*** (ไฟล้นี้เอาไว้signแอปที่จะbuild)
+วาง`file-manager.keystore`ไว้ใน`./android/app/` **ห้ามวางที่อื่น*เด็ดขาด*** (ไฟล้นี้เอาไว้signแอปที่จะbuild)
 
 แล้วพอมีทุกอย่างครบแล้วก็รันคำสั้งนี้:
 ```
