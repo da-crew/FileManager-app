@@ -4,8 +4,12 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { RootStackParamList } from "../App";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useTheme } from "../components/ThemeContext";
 
 export default function SettingsScreen({ navigation }: NativeStackScreenProps<RootStackParamList>) {
+
+    const { theme, changeTheme, isDarkMode } = useTheme();
+
     const [imageViewer, setImageViewer] = useState(true);
     const [videoPlayer, setVideoPlayer] = useState(true);
     const [musicPlayer, setMusicPlayer] = useState(true);
@@ -17,34 +21,34 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
     const [detectUSB, setDetectUSB] = useState(false);
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle='default'/>
-            <View style={styles.header}>
+        <SafeAreaView style={[styles.container, {backgroundColor: theme.background}]}>
+            <StatusBar barStyle='default' backgroundColor={theme.background}/>
+            <View style={[styles.header, {backgroundColor: theme.toolbarColor}]}>
                 <TouchableOpacity 
                     onPress={() => navigation.goBack()}
                     style={styles.backButton}
                 >
-                    <AntDesign name="left" size={24} color="#333" />
+                    <AntDesign name="left" size={24} color={theme.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Settings</Text>
+                <Text style={[styles.headerTitle, {color: theme.text}]}>Settings</Text>
                 <View style={{ width: 40 }} />
             </View>
 
-            <ScrollView contentContainerStyle={styles.content}>
-                <Text style={styles.sectionHeader}>Built-in apps</Text>
-                <View style={styles.sectionContainer}>
+            <ScrollView contentContainerStyle={[styles.content, {backgroundColor: theme.background}]}>
+                <Text style={[styles.sectionHeader, {color: theme.textSecondary}]}>Built-in apps</Text>
+                <View style={[styles.sectionContainer, {backgroundColor: theme.toolbarColor}]}>
                     <TouchableOpacity
                         style={styles.row}
                         onPress={() => setImageViewer(!imageViewer)}
                     >
                         <View style={styles.rowContent}>
-                            <MaterialCommunityIcons name="image" size={24} color="#666" style={styles.rowIcon} />
-                            <Text style={styles.label}>Image viewer</Text>
+                            <MaterialCommunityIcons name="image" size={24} color={theme.text} style={styles.rowIcon} />
+                            <Text style={[styles.label, {color: theme.text}]}>Image viewer</Text>
                         </View>
                         <MaterialCommunityIcons
                             name={imageViewer ? "checkbox-marked" : "checkbox-blank-outline"}
                             size={24}
-                            color="#007AFF"
+                            color={theme.iconColor}
                         />
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -52,13 +56,13 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         onPress={() => setVideoPlayer(!videoPlayer)}
                     >
                         <View style={styles.rowContent}>
-                            <MaterialCommunityIcons name="video" size={24} color="#666" style={styles.rowIcon} />
-                            <Text style={styles.label}>Video player</Text>
+                            <MaterialCommunityIcons name="video" size={24} color={theme.text} style={styles.rowIcon} />
+                            <Text style={[styles.label, {color: theme.text}]}>Video player</Text>
                         </View>
                         <MaterialCommunityIcons
                             name={videoPlayer ? "checkbox-marked" : "checkbox-blank-outline"}
                             size={24}
-                            color="#007AFF"
+                            color={theme.iconColor}
                         />
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -66,61 +70,63 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         onPress={() => setMusicPlayer(!musicPlayer)}
                     >
                         <View style={styles.rowContent}>
-                            <MaterialCommunityIcons name="music" size={24} color="#666" style={styles.rowIcon} />
-                            <Text style={styles.label}>Music player</Text>
+                            <MaterialCommunityIcons name="music" size={24} color={theme.text} style={styles.rowIcon} />
+                            <Text style={[styles.label, {color: theme.text}]}>Music player</Text>
                         </View>
                         <MaterialCommunityIcons
                             name={musicPlayer ? "checkbox-marked" : "checkbox-blank-outline"}
                             size={24}
-                            color="#007AFF"
+                            color={theme.iconColor}
                         />
                     </TouchableOpacity>
                     <TouchableOpacity
-                        style={styles.row}
+                        style={[styles.row, { borderBottomWidth: undefined }]}
                         onPress={() => setTextEditor(!textEditor)}
                     >
                         <View style={styles.rowContent}>
-                            <MaterialCommunityIcons name="text-box" size={24} color="#666" style={styles.rowIcon} />
-                            <Text style={styles.label}>Text editor</Text>
+                            <MaterialCommunityIcons name="text-box" size={24} color={theme.text} style={styles.rowIcon} />
+                            <Text style={[styles.label, {color: theme.text}]}>Text editor</Text>
                         </View>
                         <MaterialCommunityIcons
                             name={textEditor ? "checkbox-marked" : "checkbox-blank-outline"}
                             size={24}
-                            color="#007AFF"
+                            color={theme.iconColor}
                         />
                     </TouchableOpacity>
                 </View>
 
                 <Text style={styles.sectionHeader}>Appearance</Text>
-                <View style={styles.sectionContainer}>
+                <View style={[styles.sectionContainer, {backgroundColor: theme.toolbarColor}]}>
                     <TouchableOpacity
-                        style={styles.row}
-                        onPress={() => setDarkMode(!darkMode)}
+                        style={[styles.row, { borderBottomWidth: undefined }]}
                     >
                         <View style={styles.rowContent}>
-                            <MaterialCommunityIcons name="theme-light-dark" size={24} color="#666" style={styles.rowIcon} />
-                            <Text style={styles.label}>Dark mode</Text>
+                            <MaterialCommunityIcons name="theme-light-dark" size={24} color={theme.text} style={styles.rowIcon} />
+                            <Text style={[styles.label, { color: theme.text }]}>Dark mode</Text>
                         </View>
                         <Switch
-                            value={darkMode}
-                            onValueChange={(value) => setDarkMode(value)}
-                            trackColor={{ false: "#767577", true: "#81b0ff" }}
-                            thumbColor={darkMode ? "#007AFF" : "#f4f3f4"}
+                            value={isDarkMode}
+                            onValueChange={(value) => {
+                                changeTheme(!isDarkMode);
+                                setDarkMode(value);
+                            }}
+                            trackColor={{ false: "#767577", true: theme.text }}
+                            thumbColor={isDarkMode ? theme.text : "#f4f3f4"}
                         />
                     </TouchableOpacity>
                 </View>
 
                 <Text style={styles.sectionHeader}>Notification Setting</Text>
-                <View style={styles.sectionContainer}>
+                <View style={[styles.sectionContainer, { backgroundColor: theme.toolbarColor }]}>
                     <TouchableOpacity
-                        style={styles.row}
+                        style={[styles.row, { borderBottomWidth: undefined }]}
                         onPress={() => setStorageFull(!storageFull)}
                     >
                         <View style={styles.rowContent}>
-                            <MaterialCommunityIcons name="harddisk" size={24} color="#666" style={styles.rowIcon} />
+                            <MaterialCommunityIcons name="harddisk" size={24} color={theme.text} style={styles.rowIcon} />
                             <View>
-                                <Text style={styles.label}>Storage is full</Text>
-                                <Text style={styles.subLabel}>
+                                <Text style={[styles.label, {color: theme.text}]}>Storage is full</Text>
+                                <Text style={[styles.subLabel, {color: theme.textSecondary}]}>
                                     Show when the storage is over 98% full
                                 </Text>
                             </View>
@@ -128,7 +134,7 @@ export default function SettingsScreen({ navigation }: NativeStackScreenProps<Ro
                         <MaterialCommunityIcons
                             name={storageFull ? "checkbox-marked" : "checkbox-blank-outline"}
                             size={24}
-                            color="#007AFF"
+                            color={theme.iconColor}
                         />
                     </TouchableOpacity>
                 </View>
@@ -199,8 +205,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 12,
         backgroundColor: "#fff",
-        borderBottomWidth: 1,
-        borderBottomColor: "#E5E5EA",
+        // borderBottomWidth: 1,
+        // borderBottomColor: "#E5E5EA",
     },
     backButton: {
         padding: 8
