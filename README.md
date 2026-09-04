@@ -1,5 +1,5 @@
 ### วิธี build เป็นไฟล์ aab
-ก่อนอื่น อย่าลืมกำหนดค่าของ`FILEMANAGER_KEY_PASSWORD`กับ`FILEMANAGER_STORE_PASSWORD`ในไฟล์`gradle.properties`(ถ้าไม่มีก็สร้างซะ) ที่อยู่ใน`C:\Users\<ชื่อuser>\.gradle\` แบบนี้:
+ก่อนอื่น อย่าลืมกำหนดค่าของ`FILEMANAGER_KEY_PASSWORD`กับ`FILEMANAGER_STORE_PASSWORD`ในไฟล์`gradle.properties`ที่อยู่ใน`C:\Users\<ชื่อuser>\.gradle\` แบบนี้:
 ```
 FILEMANAGER_STORE_PASSWORD=<รหัส>  
 FILEMANAGER_KEY_PASSWORD=<รหัส>
